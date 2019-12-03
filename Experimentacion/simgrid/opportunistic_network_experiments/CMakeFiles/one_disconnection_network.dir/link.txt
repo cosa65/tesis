@@ -1,0 +1,1 @@
+/usr/bin/c++   -std=c++11  -rdynamic CMakeFiles/one_disconnection_network.dir/one_disconnection_network/one_disconnection_network.cpp.o  -o one_disconnection_network/one_disconnection_network -lsimgrid 

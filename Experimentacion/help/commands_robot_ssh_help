@@ -1,0 +1,74 @@
+ssh fosco@strasbourg.iot-lab.info
+
+// Montar para mover archivos por ssh
+sshfs fosco@strasbourg.iot-lab.info:/senslab/users/fosco sshIotLabs
+
+ssh fosco@grenoble.iot-lab.info
+ssh root@node-a8-100.grenoble.iot-lab.info
+
+ssh fosco@strasbourg.iot-lab.info
+ssh root@node-a8-10.strasbourg.iot-lab.info
+
+scp receivingNodeArm fosco@grenoble.iot-lab.info:/senslab/users/fosco
+scp sendingNodeArm fosco@strasbourg.iot-lab.info:/senslab/users/fosco
+
+scp receivingNodeArm root@node-a8-100.grenoble.iot-lab.info:/home/root
+scp sendingNodeArm root@node-a8-10.strasbourg.iot-lab.info:/home/root
+
+// Cross compile
+arm-linux-gnueabi-g++ receivingNode.cpp -static -o receivingNodeArm
+arm-linux-gnueabi-g++ sendingNode.cpp -static -o sendingNodeArm
+
+
+// Devuelve todos los circuitos predefinidos separados por lugar, los  de strasbourg son los que importan poruqe el resto de los bots no andan
+iotlab-robot get -l
+
+// Circuitos de strasbourg en 28/08/2019:
+v_line_7,
+v_line_3,
+square_1,
+v_line_2,
+v_line_1,
+h_line_2,
+v_line_5,
+h_line_1,
+v_line_4,
+h_line_3,
+v_line_6
+
+
+iotlab-experiment submit -d 20 -n robot_mobility -l strasbourg,m3,96,mobility=<circuito>
+
+
+
+// Ejemplo para plotear recorrido de robot, aparte de esto antes hay que conectarse con ssh y copiar los .oml relevantes.
+// Se supone que se puede plotear ahi por ssh pero tira unos errores porque creo que hay que setupear algo ahi.
+python2 plot_oml_traj -i ../../iot-labs/.iot-lab/177989/robot/m3-96.oml
+
+
+
+
+
+// Para abrir puerto a grenoble
+socat tcp-listen:20000,fork,reuseaddr "exec:ssh fosco@grenoble.iot-lab.info 'serial_aggregator'"
+
+// Para recibir datos de un nodo
+python ./live_imu.py --port 20000 --sensor Gyr --nodeid m3-96
+
+
+////////////////////////////////////////////// IPv6 ////////////////////////////////////////////////
+ip -6 addr
+
+Lugares con IPv6 global:
+grenoble, strasbourg, (?)
+
+Lugares sin IPv6 global:
+paris, lyon, (?)
+
+IPs:
+grenoble 
+	100 - 2001:660:5307:3000::64
+
+strasbourg
+	10 - 2001:660:4701:f080::a
+////////////////////////////////////////////////////////////////////////////////////////////////////

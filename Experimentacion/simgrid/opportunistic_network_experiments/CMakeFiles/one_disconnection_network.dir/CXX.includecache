@@ -1,0 +1,12 @@
+#IncludeRegexLine: ^[ 	]*[#%][ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+/home/martin/Documents/Tesis/Experimentacion/simgrid/opportunistic_network_experiments/one_disconnection_network/one_disconnection_network.cpp
+simgrid/s4u.hpp
+-
+

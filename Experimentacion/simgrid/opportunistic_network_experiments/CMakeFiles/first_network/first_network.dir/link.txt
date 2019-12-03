@@ -1,0 +1,1 @@
+/usr/bin/c++   -std=c++11  -rdynamic CMakeFiles/first_network/first_network.dir/first_network/first_network.cpp.o  -o first_network/first_network -lsimgrid 

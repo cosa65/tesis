@@ -1,0 +1,9 @@
+//smpi
+gcc *.c -lsimgrid -o my_simulator
+
+
+//smpi
+//compilar
+smpicc -O3 roundtrip.c -o roundtrip
+//correr
+smpirun -np 16 -platform cluster_crossbar.xml -hostfile cluster_hostfile ./roundtrip

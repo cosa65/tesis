@@ -1,0 +1,21 @@
+<?xml version='1.0'?>
+<!DOCTYPE platform SYSTEM "http://simgrid.gforge.inria.fr/simgrid/simgrid.dtd">
+<platform version="4.1">
+  <zone id="zone0" routing="Full">
+    <host id="Node1" speed="98.095Mf"/>
+    <host id="Node2" speed="76.296Mf"/>
+
+    <link id="Node1ToNode2" bandwidth="41.279125MBps" latency="59.904us"/>
+    <link id="loopback" bandwidth="498MBps" latency="15us" sharing_policy="FATPIPE"/>
+
+    <route src="Node1" dst="Node1">
+      <link_ctn id="loopback"/>
+    </route>
+    <route src="Node2" dst="Node2">
+      <link_ctn id="loopback"/>
+    </route>
+    <route src="Node1" dst="Node2">
+      <link_ctn id="Node1ToNode2"/>
+    </route>
+  </zone>
+</platform>
