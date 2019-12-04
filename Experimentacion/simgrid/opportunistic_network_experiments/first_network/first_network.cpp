@@ -5,7 +5,7 @@
 XBT_LOG_NEW_DEFAULT_CATEGORY(first_netowrk, "Messages specific for this example");
 
 static void sender(std::vector<std::string> args) {
-  simgrid::s4u::Mailbox* mailbox = simgrid::s4u::Mailbox::by_name("Node2");
+  simgrid::s4u::Mailbox* mailbox = simgrid::s4u::Mailbox::by_name("MAilbox");
   // XBT_INFO("Sending task %d of %ld to mailbox '%s'", i, tasks_count, mailbox->get_cname());
 
   std::string message = "Sup mah dude";
@@ -18,7 +18,7 @@ static void sender(std::vector<std::string> args) {
 
 static void receiver(std::vector<std::string> args) {
   simgrid::s4u::Host* my_host = simgrid::s4u::this_actor::get_host();
-  simgrid::s4u::Mailbox* mailbox = simgrid::s4u::Mailbox::by_name(my_host->get_name());
+  simgrid::s4u::Mailbox* mailbox = simgrid::s4u::Mailbox::by_name("MAilbox");
 
   std::string* message_pointer = static_cast<std::string*>(mailbox->get());
 

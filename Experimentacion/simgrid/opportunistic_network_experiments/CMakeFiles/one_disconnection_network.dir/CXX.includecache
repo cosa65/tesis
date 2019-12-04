@@ -6,7 +6,33 @@
 
 #IncludeRegexTransform: 
 
-/home/martin/Documents/Tesis/Experimentacion/simgrid/opportunistic_network_experiments/one_disconnection_network/one_disconnection_network.cpp
+/home/martin/Documents/tesis/Experimentacion/simgrid/opportunistic_network_experiments/one_disconnection_network/one_disconnection_network.cpp
 simgrid/s4u.hpp
 -
+../utils/mailboxes_manager.cpp
+/home/martin/Documents/tesis/Experimentacion/simgrid/opportunistic_network_experiments/utils/mailboxes_manager.cpp
+../utils/map_reduce_coordinator.cpp
+/home/martin/Documents/tesis/Experimentacion/simgrid/opportunistic_network_experiments/utils/map_reduce_coordinator.cpp
+list
+-
+stdexcept
+-
+
+/home/martin/Documents/tesis/Experimentacion/simgrid/opportunistic_network_experiments/utils/mailboxes_manager.cpp
+mailboxes_manager.h
+/home/martin/Documents/tesis/Experimentacion/simgrid/opportunistic_network_experiments/utils/mailboxes_manager.h
+
+/home/martin/Documents/tesis/Experimentacion/simgrid/opportunistic_network_experiments/utils/mailboxes_manager.h
+iostream
+-
+map
+-
+set
+-
+
+/home/martin/Documents/tesis/Experimentacion/simgrid/opportunistic_network_experiments/utils/map_reduce_coordinator.cpp
+map_reduce_coordinator.h
+/home/martin/Documents/tesis/Experimentacion/simgrid/opportunistic_network_experiments/utils/map_reduce_coordinator.h
+
+/home/martin/Documents/tesis/Experimentacion/simgrid/opportunistic_network_experiments/utils/map_reduce_coordinator.h
 

@@ -1,0 +1,2 @@
+/usr/bin/ar qc libnetwork_organizer.a  CMakeFiles/network_organizer.dir/utils/network_organizer.cpp.o
+/usr/bin/ranlib libnetwork_organizer.a

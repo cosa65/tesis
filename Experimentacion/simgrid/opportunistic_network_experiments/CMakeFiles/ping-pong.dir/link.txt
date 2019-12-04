@@ -1,1 +1,1 @@
-/usr/bin/c++   -std=c++11  -rdynamic CMakeFiles/ping-pong.dir/ping-pong/ping-pong.cpp.o  -o ping-pong/ping-pong -lsimgrid 
+/usr/bin/c++   -std=c++11 -g  -rdynamic CMakeFiles/ping-pong.dir/ping-pong/ping-pong.cpp.o  -o ping-pong/ping-pong -lsimgrid 
