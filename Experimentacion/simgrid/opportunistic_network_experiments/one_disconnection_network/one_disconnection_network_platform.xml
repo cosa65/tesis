@@ -12,6 +12,8 @@
     <link id="link2_3" bandwidth="41.279125MBps" latency="59.904us"/>
     <link id="link1_3" bandwidth="41.279125MBps" latency="59.904us"/>
 
+    <link id="loopback" bandwidth="100.0MBps" latency="0us"/>
+
     <route src="Organizer" dst="Organizer">
       <link_ctn id="loopback"/>
     </route>

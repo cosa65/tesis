@@ -13,6 +13,8 @@ simgrid/s4u.hpp
 /home/martin/Documents/tesis/Experimentacion/simgrid/opportunistic_network_experiments/utils/mailboxes_manager.cpp
 ../utils/map_reduce_coordinator.cpp
 /home/martin/Documents/tesis/Experimentacion/simgrid/opportunistic_network_experiments/utils/map_reduce_coordinator.cpp
+sstream
+-
 list
 -
 stdexcept
