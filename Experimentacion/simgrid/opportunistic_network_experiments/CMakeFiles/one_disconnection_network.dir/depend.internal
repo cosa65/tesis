@@ -7,3 +7,4 @@ CMakeFiles/one_disconnection_network.dir/one_disconnection_network/one_disconnec
  /home/martin/Documents/tesis/Experimentacion/simgrid/opportunistic_network_experiments/utils/mailboxes_manager.h
  /home/martin/Documents/tesis/Experimentacion/simgrid/opportunistic_network_experiments/utils/map_reduce_coordinator.cpp
  /home/martin/Documents/tesis/Experimentacion/simgrid/opportunistic_network_experiments/utils/map_reduce_coordinator.h
+ /home/martin/Documents/tesis/Experimentacion/simgrid/opportunistic_network_experiments/utils/pending_map_task.h

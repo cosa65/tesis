@@ -9,15 +9,23 @@
 /home/martin/Documents/tesis/Experimentacion/simgrid/opportunistic_network_experiments/one_disconnection_network/one_disconnection_network.cpp
 simgrid/s4u.hpp
 -
+../utils/pending_map_task.h
+/home/martin/Documents/tesis/Experimentacion/simgrid/opportunistic_network_experiments/utils/pending_map_task.h
 ../utils/mailboxes_manager.cpp
 /home/martin/Documents/tesis/Experimentacion/simgrid/opportunistic_network_experiments/utils/mailboxes_manager.cpp
 ../utils/map_reduce_coordinator.cpp
 /home/martin/Documents/tesis/Experimentacion/simgrid/opportunistic_network_experiments/utils/map_reduce_coordinator.cpp
 sstream
 -
+stdexcept
+-
+tuple
+-
 list
 -
-stdexcept
+vector
+-
+map
 -
 
 /home/martin/Documents/tesis/Experimentacion/simgrid/opportunistic_network_experiments/utils/mailboxes_manager.cpp
@@ -37,4 +45,10 @@ map_reduce_coordinator.h
 /home/martin/Documents/tesis/Experimentacion/simgrid/opportunistic_network_experiments/utils/map_reduce_coordinator.h
 
 /home/martin/Documents/tesis/Experimentacion/simgrid/opportunistic_network_experiments/utils/map_reduce_coordinator.h
+
+/home/martin/Documents/tesis/Experimentacion/simgrid/opportunistic_network_experiments/utils/pending_map_task.h
+chrono
+-
+string
+-
 

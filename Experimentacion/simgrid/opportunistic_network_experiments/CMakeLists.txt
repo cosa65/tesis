@@ -5,6 +5,7 @@ project(SimGridTemplateProject) # TODO: give a real name to your project here
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/Modules/")
 set(CMAKE_BUILD_TYPE Debug)
+set(CMAKE_CXX_FLAGS_RELEASE "-O0")
 
 find_package(SimGrid 3.22 REQUIRED) # This template requires SimGrid v3.22
 
