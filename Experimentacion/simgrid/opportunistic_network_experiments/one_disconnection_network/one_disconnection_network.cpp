@@ -54,7 +54,7 @@ static void distribute_and_send_maps(std::list<int> map_tasks_in_flops, std::lis
 
     simgrid::s4u::Host* my_host = simgrid::s4u::this_actor::get_host();
     std::string *message_to_send = new std::string("from:" + my_host -> get_name() + ";payload:" + message);
-    simgrid::s4u::CommPtr pending_map_comm = (*workers_it) -> put_async(message_to_send, subarray_size);
+    simgrid::s4u::CommPtr pending_map_comm = (*workers_it)-> put_async(message_to_send, subarray_size);
 
     PendingMapTask *current_task_to_send = new PendingMapTask(current_task_index, (*workers_it) -> get_name());
     pending_maps[current_task_index].push_back(current_task_to_send);
@@ -95,9 +95,10 @@ static std::tuple<std::string, std::string> unpack_task_payload(std::string payl
 ////////////////////////////////////////////////////////////////////////////////
 /////////////////////////////Actors/////////////////////////////////////////////
 
-static void handle_execute_map_task(simgrid::s4u::Mailbox* receive_mailbox) {
+static void handle_execute_map_task(void *message_raw, simgrid::s4u::Mailbox* receive_mailbox) {
   simgrid::s4u::Host* my_host = simgrid::s4u::this_actor::get_host();
-  std::string* message = static_cast<std::string*>(receive_mailbox -> get());
+  // std::string* message = static_cast<std::string*>(receive_mailbox -> get());
+  std::string* message = static_cast<std::string*>(message_raw);
 
   auto message_tuple = unpack_message(*message);
   std::string sender = std::get<0>(message_tuple), payload = std::get<1>(message_tuple);
@@ -123,9 +124,12 @@ static void handle_execute_map_task(simgrid::s4u::Mailbox* receive_mailbox) {
   send_message(message_to_send, send_to_mailbox, 5) -> wait();
 }
 
-static void handle_reduce_mapped_elements_task(simgrid::s4u::Mailbox* receive_mailbox) {
+static void handle_reduce_mapped_elements_task(void *message_raw, simgrid::s4u::Mailbox* receive_mailbox) {
+  receive_mailbox -> set_receiver(simgrid::s4u::Actor::self());
+
   simgrid::s4u::Host* my_host = simgrid::s4u::this_actor::get_host();
-  std::string* message = static_cast<std::string*>(receive_mailbox -> get());
+  // std::string* message = static_cast<std::string*>(receive_mailbox -> get());
+  std::string* message = static_cast<std::string*>(message_raw);
 
   auto message_tuple = unpack_message(*message);
   std::string sender = std::get<0>(message_tuple), payload = std::get<1>(message_tuple);
@@ -167,7 +171,6 @@ static void map_reduce_worker_host_setup(std::vector<std::string> args) {
 }
 
 static void map_reduce_coordinator_host_setup(std::vector<std::string> args) {
-  setup_map_reduce_coordinator();
 
   std::list<simgrid::s4u::Mailbox*> workers;
   workers.push_back(simgrid::s4u::Mailbox::by_name("NodeCoordinator-worker"));
@@ -179,6 +182,7 @@ static void map_reduce_coordinator_host_setup(std::vector<std::string> args) {
   int array_size = 30;
 
   distribute_and_send_maps(map_tasks_in_flops, workers, array_size);
+  setup_map_reduce_coordinator();
 }
 ////////////////////////////End actors//////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
@@ -186,27 +190,38 @@ static void map_reduce_coordinator_host_setup(std::vector<std::string> args) {
 ////////////////////////////Binded actors setups////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 static void setup_map_worker() {
-  simgrid::s4u::Host* my_host = simgrid::s4u::this_actor::get_host();
-  std::string mailbox_name = my_host -> get_name() + "-worker";
-  simgrid::s4u::Mailbox* mailbox = simgrid::s4u::Mailbox::by_name(mailbox_name);
+  while (true) {
+    simgrid::s4u::Host* my_host = simgrid::s4u::this_actor::get_host();
+    std::string mailbox_name = my_host -> get_name() + "-worker";
+    simgrid::s4u::Mailbox* mailbox = simgrid::s4u::Mailbox::by_name(mailbox_name);
 
-  simgrid::s4u::ActorPtr actor; 
-  actor = simgrid::s4u::Actor::create("handle_execute_map_task", my_host, &handle_execute_map_task, mailbox);
+    auto message = mailbox -> get();
 
-  // TODO THIS MAKES ACTOR HAVE TO BE GARBAGE COLLECTED WITH set_receiver
-  mailbox -> set_receiver(actor);
+    simgrid::s4u::ActorPtr actor; 
+    actor = simgrid::s4u::Actor::create("handle_execute_map_task", my_host, &handle_execute_map_task, message, mailbox);
+
+    // actor = simgrid::s4u::Actor::create("handle_execute_map_task", my_host, &handle_execute_map_task, mailbox);
+    // // TODO THIS MAKES ACTOR HAVE TO BE GARBAGE COLLECTED WITH set_receiver
+    // mailbox -> set_receiver(actor);
+  }
 }
 
 static void setup_map_reduce_coordinator() {
-  simgrid::s4u::Host* my_host = simgrid::s4u::this_actor::get_host();
-  std::string mailbox_name = my_host -> get_name() + "-coordinator";
-  simgrid::s4u::Mailbox* mailbox = simgrid::s4u::Mailbox::by_name(mailbox_name);
+  while(true) {
+    simgrid::s4u::Host* my_host = simgrid::s4u::this_actor::get_host();
+    std::string mailbox_name = my_host -> get_name() + "-coordinator";
+    simgrid::s4u::Mailbox* mailbox = simgrid::s4u::Mailbox::by_name(mailbox_name);
 
-  simgrid::s4u::ActorPtr actor;
-  actor = simgrid::s4u::Actor::create("handle_reduce_mapped_elements_task", my_host, &handle_reduce_mapped_elements_task, mailbox);
+    auto message = mailbox -> get();
 
-  // TODO THIS MAKES ACTOR HAVE TO BE GARBAGE COLLECTED WITH set_receiver
-  mailbox -> set_receiver(actor); 
+    simgrid::s4u::ActorPtr actor;
+    actor = simgrid::s4u::Actor::create("handle_reduce_mapped_elements_task", my_host, &handle_reduce_mapped_elements_task, message, mailbox);
+
+    // actor = simgrid::s4u::Actor::create("handle_reduce_mapped_elements_task", my_host, &handle_reduce_mapped_elements_task, mailbox);
+    // // TODO THIS MAKES ACTOR HAVE TO BE GARBAGE COLLECTED WITH set_receiver
+    // mailbox -> set_receiver(actor); 
+  }
+  
 }
 ////////////////////////////End binded actors setups////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
