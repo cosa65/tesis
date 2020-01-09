@@ -21,9 +21,14 @@ XBT_LOG_NEW_DEFAULT_CATEGORY(one_disconnection_network, "Messages specific for t
 
 MailboxesManager mailboxes_manager;
 std::map<MapIndex, std::list<PendingMapTask*>> pending_maps;
+std::list<std::string> idle_workers;
+
+int total_maps;
+int threshold = 50;
 
 static void setup_map_worker();
 static void setup_map_reduce_coordinator();
+static void resend_pending_tasks();
 
 static simgrid::s4u::CommPtr send_message(std::string payload, simgrid::s4u::Mailbox* mailbox, int payload_size) {
   simgrid::s4u::Host* my_host = simgrid::s4u::this_actor::get_host();
@@ -37,6 +42,7 @@ static void distribute_and_send_maps(std::list<int> map_tasks_in_flops, std::lis
     throw std::runtime_error(error_message);
   }
 
+  total_maps = workers.size();
   int subarray_size = array_size / workers.size();
 
   auto maps_it = map_tasks_in_flops.begin();
@@ -56,7 +62,7 @@ static void distribute_and_send_maps(std::list<int> map_tasks_in_flops, std::lis
     std::string *message_to_send = new std::string("from:" + my_host -> get_name() + ";payload:" + message);
     simgrid::s4u::CommPtr pending_map_comm = (*workers_it)-> put_async(message_to_send, subarray_size);
 
-    PendingMapTask *current_task_to_send = new PendingMapTask(current_task_index, (*workers_it) -> get_name());
+    PendingMapTask *current_task_to_send = new PendingMapTask(current_task_index, (*workers_it) -> get_name(), message);
     pending_maps[current_task_index].push_back(current_task_to_send);
 
     pending_map_comms_to_send.push_back(pending_map_comm);
@@ -90,6 +96,39 @@ static std::tuple<std::string, std::string> unpack_task_payload(std::string payl
   std::string map_index = payload.substr(map_index_start, (payload.length()) - map_index_start);
 
   return std::make_tuple(flops, map_index); 
+}
+
+static void check_completion_threshold_and_resend_if_necessary() {
+  int percentage_pending = (float)pending_maps.size()/ (float)total_maps * 100;
+
+  XBT_INFO("Percentage of pending tasks is %i vs threshold to begin resending tasks of: %i", percentage_pending, threshold);
+
+  if (threshold >= percentage_pending) {
+    resend_pending_tasks();
+  }
+}
+
+static void resend_pending_tasks() {
+  auto pending_maps_it = pending_maps.begin();
+
+  std::vector<simgrid::s4u::CommPtr> resend_comms;
+
+  for (std::string const& idle_worker : idle_workers) {
+    if (pending_maps_it == pending_maps.end()) break;
+
+    std::string mailbox_name = idle_worker + "-worker";
+    simgrid::s4u::Mailbox* mailbox = simgrid::s4u::Mailbox::by_name(mailbox_name);
+
+    MapIndex map_index = std::get<0>(*pending_maps_it);
+    std::string task_data = std::get<1>(*pending_maps_it).front() -> task_data;
+
+    XBT_INFO("Resending task %i to idle worker %s",  map_index, idle_worker.c_str());
+    resend_comms.push_back(send_message(task_data, mailbox, 5));
+
+    pending_maps_it++;
+  }
+  
+  simgrid::s4u::Comm::wait_all(&resend_comms);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -147,19 +186,27 @@ static void handle_reduce_mapped_elements_task(void *message_raw, simgrid::s4u::
     return;
   }
 
-  XBT_INFO("Host %s received and will begin executing reduce of %i flops", (my_host -> get_name()).c_str(), flops);
-  simgrid::s4u::this_actor::execute(flops);
+  XBT_INFO("Host %s received map result from %s and will begin executing reduce of %i flops", sender.c_str(), (my_host -> get_name()).c_str(), flops);
   
+  idle_workers.push_back(sender);
+
+  simgrid::s4u::this_actor::execute(flops);
+
   XBT_INFO("Host %s finished reducing %i", (my_host -> get_name()).c_str(), flops);
   XBT_INFO("MapReduce pending tasks count is: %i", pending_maps.size());
 
   if (pending_maps.empty()) {
     XBT_INFO("MapReduce has finished successfully!!");    
+    return;
   }
+  
+  check_completion_threshold_and_resend_if_necessary();  
 }
 
 static void mailboxes_manager_actor(std::vector<std::string> args) {
   mailboxes_manager = MailboxesManager();
+
+  mailboxes_manager.set_disconnected("Node2-worker");
 
   // simgrid::s4u::Host* host = simgrid::s4u::Host::by_name_or_null("Node1");
   // host -> sleep_for(10000);
