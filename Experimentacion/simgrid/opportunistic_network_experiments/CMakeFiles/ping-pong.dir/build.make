@@ -81,17 +81,121 @@ CMakeFiles/ping-pong.dir/ping-pong/ping-pong.cpp.o.provides: CMakeFiles/ping-pon
 CMakeFiles/ping-pong.dir/ping-pong/ping-pong.cpp.o.provides.build: CMakeFiles/ping-pong.dir/ping-pong/ping-pong.cpp.o
 
 
+CMakeFiles/ping-pong.dir/utils/mailboxes_manager.cpp.o: CMakeFiles/ping-pong.dir/flags.make
+CMakeFiles/ping-pong.dir/utils/mailboxes_manager.cpp.o: utils/mailboxes_manager.cpp
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/martin/Documents/tesis/Experimentacion/simgrid/opportunistic_network_experiments/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Building CXX object CMakeFiles/ping-pong.dir/utils/mailboxes_manager.cpp.o"
+	/usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/ping-pong.dir/utils/mailboxes_manager.cpp.o -c /home/martin/Documents/tesis/Experimentacion/simgrid/opportunistic_network_experiments/utils/mailboxes_manager.cpp
+
+CMakeFiles/ping-pong.dir/utils/mailboxes_manager.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/ping-pong.dir/utils/mailboxes_manager.cpp.i"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/martin/Documents/tesis/Experimentacion/simgrid/opportunistic_network_experiments/utils/mailboxes_manager.cpp > CMakeFiles/ping-pong.dir/utils/mailboxes_manager.cpp.i
+
+CMakeFiles/ping-pong.dir/utils/mailboxes_manager.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/ping-pong.dir/utils/mailboxes_manager.cpp.s"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/martin/Documents/tesis/Experimentacion/simgrid/opportunistic_network_experiments/utils/mailboxes_manager.cpp -o CMakeFiles/ping-pong.dir/utils/mailboxes_manager.cpp.s
+
+CMakeFiles/ping-pong.dir/utils/mailboxes_manager.cpp.o.requires:
+
+.PHONY : CMakeFiles/ping-pong.dir/utils/mailboxes_manager.cpp.o.requires
+
+CMakeFiles/ping-pong.dir/utils/mailboxes_manager.cpp.o.provides: CMakeFiles/ping-pong.dir/utils/mailboxes_manager.cpp.o.requires
+	$(MAKE) -f CMakeFiles/ping-pong.dir/build.make CMakeFiles/ping-pong.dir/utils/mailboxes_manager.cpp.o.provides.build
+.PHONY : CMakeFiles/ping-pong.dir/utils/mailboxes_manager.cpp.o.provides
+
+CMakeFiles/ping-pong.dir/utils/mailboxes_manager.cpp.o.provides.build: CMakeFiles/ping-pong.dir/utils/mailboxes_manager.cpp.o
+
+
+CMakeFiles/ping-pong.dir/utils/map_reduce_coordinator.cpp.o: CMakeFiles/ping-pong.dir/flags.make
+CMakeFiles/ping-pong.dir/utils/map_reduce_coordinator.cpp.o: utils/map_reduce_coordinator.cpp
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/martin/Documents/tesis/Experimentacion/simgrid/opportunistic_network_experiments/CMakeFiles --progress-num=$(CMAKE_PROGRESS_3) "Building CXX object CMakeFiles/ping-pong.dir/utils/map_reduce_coordinator.cpp.o"
+	/usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/ping-pong.dir/utils/map_reduce_coordinator.cpp.o -c /home/martin/Documents/tesis/Experimentacion/simgrid/opportunistic_network_experiments/utils/map_reduce_coordinator.cpp
+
+CMakeFiles/ping-pong.dir/utils/map_reduce_coordinator.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/ping-pong.dir/utils/map_reduce_coordinator.cpp.i"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/martin/Documents/tesis/Experimentacion/simgrid/opportunistic_network_experiments/utils/map_reduce_coordinator.cpp > CMakeFiles/ping-pong.dir/utils/map_reduce_coordinator.cpp.i
+
+CMakeFiles/ping-pong.dir/utils/map_reduce_coordinator.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/ping-pong.dir/utils/map_reduce_coordinator.cpp.s"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/martin/Documents/tesis/Experimentacion/simgrid/opportunistic_network_experiments/utils/map_reduce_coordinator.cpp -o CMakeFiles/ping-pong.dir/utils/map_reduce_coordinator.cpp.s
+
+CMakeFiles/ping-pong.dir/utils/map_reduce_coordinator.cpp.o.requires:
+
+.PHONY : CMakeFiles/ping-pong.dir/utils/map_reduce_coordinator.cpp.o.requires
+
+CMakeFiles/ping-pong.dir/utils/map_reduce_coordinator.cpp.o.provides: CMakeFiles/ping-pong.dir/utils/map_reduce_coordinator.cpp.o.requires
+	$(MAKE) -f CMakeFiles/ping-pong.dir/build.make CMakeFiles/ping-pong.dir/utils/map_reduce_coordinator.cpp.o.provides.build
+.PHONY : CMakeFiles/ping-pong.dir/utils/map_reduce_coordinator.cpp.o.provides
+
+CMakeFiles/ping-pong.dir/utils/map_reduce_coordinator.cpp.o.provides.build: CMakeFiles/ping-pong.dir/utils/map_reduce_coordinator.cpp.o
+
+
+CMakeFiles/ping-pong.dir/utils/map_reduce_worker.cpp.o: CMakeFiles/ping-pong.dir/flags.make
+CMakeFiles/ping-pong.dir/utils/map_reduce_worker.cpp.o: utils/map_reduce_worker.cpp
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/martin/Documents/tesis/Experimentacion/simgrid/opportunistic_network_experiments/CMakeFiles --progress-num=$(CMAKE_PROGRESS_4) "Building CXX object CMakeFiles/ping-pong.dir/utils/map_reduce_worker.cpp.o"
+	/usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/ping-pong.dir/utils/map_reduce_worker.cpp.o -c /home/martin/Documents/tesis/Experimentacion/simgrid/opportunistic_network_experiments/utils/map_reduce_worker.cpp
+
+CMakeFiles/ping-pong.dir/utils/map_reduce_worker.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/ping-pong.dir/utils/map_reduce_worker.cpp.i"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/martin/Documents/tesis/Experimentacion/simgrid/opportunistic_network_experiments/utils/map_reduce_worker.cpp > CMakeFiles/ping-pong.dir/utils/map_reduce_worker.cpp.i
+
+CMakeFiles/ping-pong.dir/utils/map_reduce_worker.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/ping-pong.dir/utils/map_reduce_worker.cpp.s"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/martin/Documents/tesis/Experimentacion/simgrid/opportunistic_network_experiments/utils/map_reduce_worker.cpp -o CMakeFiles/ping-pong.dir/utils/map_reduce_worker.cpp.s
+
+CMakeFiles/ping-pong.dir/utils/map_reduce_worker.cpp.o.requires:
+
+.PHONY : CMakeFiles/ping-pong.dir/utils/map_reduce_worker.cpp.o.requires
+
+CMakeFiles/ping-pong.dir/utils/map_reduce_worker.cpp.o.provides: CMakeFiles/ping-pong.dir/utils/map_reduce_worker.cpp.o.requires
+	$(MAKE) -f CMakeFiles/ping-pong.dir/build.make CMakeFiles/ping-pong.dir/utils/map_reduce_worker.cpp.o.provides.build
+.PHONY : CMakeFiles/ping-pong.dir/utils/map_reduce_worker.cpp.o.provides
+
+CMakeFiles/ping-pong.dir/utils/map_reduce_worker.cpp.o.provides.build: CMakeFiles/ping-pong.dir/utils/map_reduce_worker.cpp.o
+
+
+CMakeFiles/ping-pong.dir/utils/message_helper.cpp.o: CMakeFiles/ping-pong.dir/flags.make
+CMakeFiles/ping-pong.dir/utils/message_helper.cpp.o: utils/message_helper.cpp
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/martin/Documents/tesis/Experimentacion/simgrid/opportunistic_network_experiments/CMakeFiles --progress-num=$(CMAKE_PROGRESS_5) "Building CXX object CMakeFiles/ping-pong.dir/utils/message_helper.cpp.o"
+	/usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/ping-pong.dir/utils/message_helper.cpp.o -c /home/martin/Documents/tesis/Experimentacion/simgrid/opportunistic_network_experiments/utils/message_helper.cpp
+
+CMakeFiles/ping-pong.dir/utils/message_helper.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/ping-pong.dir/utils/message_helper.cpp.i"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/martin/Documents/tesis/Experimentacion/simgrid/opportunistic_network_experiments/utils/message_helper.cpp > CMakeFiles/ping-pong.dir/utils/message_helper.cpp.i
+
+CMakeFiles/ping-pong.dir/utils/message_helper.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/ping-pong.dir/utils/message_helper.cpp.s"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/martin/Documents/tesis/Experimentacion/simgrid/opportunistic_network_experiments/utils/message_helper.cpp -o CMakeFiles/ping-pong.dir/utils/message_helper.cpp.s
+
+CMakeFiles/ping-pong.dir/utils/message_helper.cpp.o.requires:
+
+.PHONY : CMakeFiles/ping-pong.dir/utils/message_helper.cpp.o.requires
+
+CMakeFiles/ping-pong.dir/utils/message_helper.cpp.o.provides: CMakeFiles/ping-pong.dir/utils/message_helper.cpp.o.requires
+	$(MAKE) -f CMakeFiles/ping-pong.dir/build.make CMakeFiles/ping-pong.dir/utils/message_helper.cpp.o.provides.build
+.PHONY : CMakeFiles/ping-pong.dir/utils/message_helper.cpp.o.provides
+
+CMakeFiles/ping-pong.dir/utils/message_helper.cpp.o.provides.build: CMakeFiles/ping-pong.dir/utils/message_helper.cpp.o
+
+
 # Object files for target ping-pong
 ping__pong_OBJECTS = \
-"CMakeFiles/ping-pong.dir/ping-pong/ping-pong.cpp.o"
+"CMakeFiles/ping-pong.dir/ping-pong/ping-pong.cpp.o" \
+"CMakeFiles/ping-pong.dir/utils/mailboxes_manager.cpp.o" \
+"CMakeFiles/ping-pong.dir/utils/map_reduce_coordinator.cpp.o" \
+"CMakeFiles/ping-pong.dir/utils/map_reduce_worker.cpp.o" \
+"CMakeFiles/ping-pong.dir/utils/message_helper.cpp.o"
 
 # External object files for target ping-pong
 ping__pong_EXTERNAL_OBJECTS =
 
 ping-pong/ping-pong: CMakeFiles/ping-pong.dir/ping-pong/ping-pong.cpp.o
+ping-pong/ping-pong: CMakeFiles/ping-pong.dir/utils/mailboxes_manager.cpp.o
+ping-pong/ping-pong: CMakeFiles/ping-pong.dir/utils/map_reduce_coordinator.cpp.o
+ping-pong/ping-pong: CMakeFiles/ping-pong.dir/utils/map_reduce_worker.cpp.o
+ping-pong/ping-pong: CMakeFiles/ping-pong.dir/utils/message_helper.cpp.o
 ping-pong/ping-pong: CMakeFiles/ping-pong.dir/build.make
 ping-pong/ping-pong: CMakeFiles/ping-pong.dir/link.txt
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --bold --progress-dir=/home/martin/Documents/tesis/Experimentacion/simgrid/opportunistic_network_experiments/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Linking CXX executable ping-pong/ping-pong"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --bold --progress-dir=/home/martin/Documents/tesis/Experimentacion/simgrid/opportunistic_network_experiments/CMakeFiles --progress-num=$(CMAKE_PROGRESS_6) "Linking CXX executable ping-pong/ping-pong"
 	$(CMAKE_COMMAND) -E cmake_link_script CMakeFiles/ping-pong.dir/link.txt --verbose=$(VERBOSE)
 
 # Rule to build all files generated by this target.
@@ -100,6 +204,10 @@ CMakeFiles/ping-pong.dir/build: ping-pong/ping-pong
 .PHONY : CMakeFiles/ping-pong.dir/build
 
 CMakeFiles/ping-pong.dir/requires: CMakeFiles/ping-pong.dir/ping-pong/ping-pong.cpp.o.requires
+CMakeFiles/ping-pong.dir/requires: CMakeFiles/ping-pong.dir/utils/mailboxes_manager.cpp.o.requires
+CMakeFiles/ping-pong.dir/requires: CMakeFiles/ping-pong.dir/utils/map_reduce_coordinator.cpp.o.requires
+CMakeFiles/ping-pong.dir/requires: CMakeFiles/ping-pong.dir/utils/map_reduce_worker.cpp.o.requires
+CMakeFiles/ping-pong.dir/requires: CMakeFiles/ping-pong.dir/utils/message_helper.cpp.o.requires
 
 .PHONY : CMakeFiles/ping-pong.dir/requires
 

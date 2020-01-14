@@ -1,5 +1,9 @@
 file(REMOVE_RECURSE
   "CMakeFiles/one_disconnection_network.dir/one_disconnection_network/one_disconnection_network.cpp.o"
+  "CMakeFiles/one_disconnection_network.dir/utils/mailboxes_manager.cpp.o"
+  "CMakeFiles/one_disconnection_network.dir/utils/map_reduce_coordinator.cpp.o"
+  "CMakeFiles/one_disconnection_network.dir/utils/map_reduce_worker.cpp.o"
+  "CMakeFiles/one_disconnection_network.dir/utils/message_helper.cpp.o"
   "one_disconnection_network/one_disconnection_network.pdb"
   "one_disconnection_network/one_disconnection_network"
 )

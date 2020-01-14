@@ -14,6 +14,18 @@
 # EXTERNAL cache entries
 ########################
 
+//Dependencies for target
+/home/martin/Documents/tesis/Experimentacion/simgrid/opportunistic_network_experiments/utils/mailboxes_manager.h_LIB_DEPENDS:STATIC=
+
+//Dependencies for target
+/home/martin/Documents/tesis/Experimentacion/simgrid/opportunistic_network_experiments/utils/map_reduce_coordinator.h_LIB_DEPENDS:STATIC=
+
+//Dependencies for target
+/home/martin/Documents/tesis/Experimentacion/simgrid/opportunistic_network_experiments/utils/map_reduce_worker.h_LIB_DEPENDS:STATIC=
+
+//Dependencies for target
+/home/martin/Documents/tesis/Experimentacion/simgrid/opportunistic_network_experiments/utils/pending_map_task.h_LIB_DEPENDS:STATIC=
+
 //Path to a program.
 CMAKE_AR:FILEPATH=/usr/bin/ar
 
@@ -181,6 +193,9 @@ CMAKE_STRIP:FILEPATH=/usr/bin/strip
 // Studio IDE projects all commands are done without /nologo.
 CMAKE_VERBOSE_MAKEFILE:BOOL=FALSE
 
+//Dependencies for target
+SHARED_LIB_DEPENDS:STATIC=
+
 //Value Computed by CMake
 SimGridTemplateProject_BINARY_DIR:STATIC=/home/martin/Documents/tesis/Experimentacion/simgrid/opportunistic_network_experiments
 
@@ -194,7 +209,13 @@ SimGrid_INCLUDE_DIR:PATH=/usr/include
 SimGrid_LIBRARY:FILEPATH=/usr/lib/libsimgrid.so
 
 //Dependencies for target
+native-lib_LIB_DEPENDS:STATIC=
+
+//Dependencies for target
 network_organizer_LIB_DEPENDS:STATIC=
+
+//Dependencies for target
+source_LIB_DEPENDS:STATIC=
 
 
 ########################

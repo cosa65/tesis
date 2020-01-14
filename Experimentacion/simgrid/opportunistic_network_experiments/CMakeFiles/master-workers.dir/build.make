@@ -81,17 +81,121 @@ CMakeFiles/master-workers.dir/master-workers/master-workers.cpp.o.provides: CMak
 CMakeFiles/master-workers.dir/master-workers/master-workers.cpp.o.provides.build: CMakeFiles/master-workers.dir/master-workers/master-workers.cpp.o
 
 
+CMakeFiles/master-workers.dir/utils/mailboxes_manager.cpp.o: CMakeFiles/master-workers.dir/flags.make
+CMakeFiles/master-workers.dir/utils/mailboxes_manager.cpp.o: utils/mailboxes_manager.cpp
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/martin/Documents/tesis/Experimentacion/simgrid/opportunistic_network_experiments/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Building CXX object CMakeFiles/master-workers.dir/utils/mailboxes_manager.cpp.o"
+	/usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/master-workers.dir/utils/mailboxes_manager.cpp.o -c /home/martin/Documents/tesis/Experimentacion/simgrid/opportunistic_network_experiments/utils/mailboxes_manager.cpp
+
+CMakeFiles/master-workers.dir/utils/mailboxes_manager.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/master-workers.dir/utils/mailboxes_manager.cpp.i"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/martin/Documents/tesis/Experimentacion/simgrid/opportunistic_network_experiments/utils/mailboxes_manager.cpp > CMakeFiles/master-workers.dir/utils/mailboxes_manager.cpp.i
+
+CMakeFiles/master-workers.dir/utils/mailboxes_manager.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/master-workers.dir/utils/mailboxes_manager.cpp.s"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/martin/Documents/tesis/Experimentacion/simgrid/opportunistic_network_experiments/utils/mailboxes_manager.cpp -o CMakeFiles/master-workers.dir/utils/mailboxes_manager.cpp.s
+
+CMakeFiles/master-workers.dir/utils/mailboxes_manager.cpp.o.requires:
+
+.PHONY : CMakeFiles/master-workers.dir/utils/mailboxes_manager.cpp.o.requires
+
+CMakeFiles/master-workers.dir/utils/mailboxes_manager.cpp.o.provides: CMakeFiles/master-workers.dir/utils/mailboxes_manager.cpp.o.requires
+	$(MAKE) -f CMakeFiles/master-workers.dir/build.make CMakeFiles/master-workers.dir/utils/mailboxes_manager.cpp.o.provides.build
+.PHONY : CMakeFiles/master-workers.dir/utils/mailboxes_manager.cpp.o.provides
+
+CMakeFiles/master-workers.dir/utils/mailboxes_manager.cpp.o.provides.build: CMakeFiles/master-workers.dir/utils/mailboxes_manager.cpp.o
+
+
+CMakeFiles/master-workers.dir/utils/map_reduce_coordinator.cpp.o: CMakeFiles/master-workers.dir/flags.make
+CMakeFiles/master-workers.dir/utils/map_reduce_coordinator.cpp.o: utils/map_reduce_coordinator.cpp
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/martin/Documents/tesis/Experimentacion/simgrid/opportunistic_network_experiments/CMakeFiles --progress-num=$(CMAKE_PROGRESS_3) "Building CXX object CMakeFiles/master-workers.dir/utils/map_reduce_coordinator.cpp.o"
+	/usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/master-workers.dir/utils/map_reduce_coordinator.cpp.o -c /home/martin/Documents/tesis/Experimentacion/simgrid/opportunistic_network_experiments/utils/map_reduce_coordinator.cpp
+
+CMakeFiles/master-workers.dir/utils/map_reduce_coordinator.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/master-workers.dir/utils/map_reduce_coordinator.cpp.i"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/martin/Documents/tesis/Experimentacion/simgrid/opportunistic_network_experiments/utils/map_reduce_coordinator.cpp > CMakeFiles/master-workers.dir/utils/map_reduce_coordinator.cpp.i
+
+CMakeFiles/master-workers.dir/utils/map_reduce_coordinator.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/master-workers.dir/utils/map_reduce_coordinator.cpp.s"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/martin/Documents/tesis/Experimentacion/simgrid/opportunistic_network_experiments/utils/map_reduce_coordinator.cpp -o CMakeFiles/master-workers.dir/utils/map_reduce_coordinator.cpp.s
+
+CMakeFiles/master-workers.dir/utils/map_reduce_coordinator.cpp.o.requires:
+
+.PHONY : CMakeFiles/master-workers.dir/utils/map_reduce_coordinator.cpp.o.requires
+
+CMakeFiles/master-workers.dir/utils/map_reduce_coordinator.cpp.o.provides: CMakeFiles/master-workers.dir/utils/map_reduce_coordinator.cpp.o.requires
+	$(MAKE) -f CMakeFiles/master-workers.dir/build.make CMakeFiles/master-workers.dir/utils/map_reduce_coordinator.cpp.o.provides.build
+.PHONY : CMakeFiles/master-workers.dir/utils/map_reduce_coordinator.cpp.o.provides
+
+CMakeFiles/master-workers.dir/utils/map_reduce_coordinator.cpp.o.provides.build: CMakeFiles/master-workers.dir/utils/map_reduce_coordinator.cpp.o
+
+
+CMakeFiles/master-workers.dir/utils/map_reduce_worker.cpp.o: CMakeFiles/master-workers.dir/flags.make
+CMakeFiles/master-workers.dir/utils/map_reduce_worker.cpp.o: utils/map_reduce_worker.cpp
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/martin/Documents/tesis/Experimentacion/simgrid/opportunistic_network_experiments/CMakeFiles --progress-num=$(CMAKE_PROGRESS_4) "Building CXX object CMakeFiles/master-workers.dir/utils/map_reduce_worker.cpp.o"
+	/usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/master-workers.dir/utils/map_reduce_worker.cpp.o -c /home/martin/Documents/tesis/Experimentacion/simgrid/opportunistic_network_experiments/utils/map_reduce_worker.cpp
+
+CMakeFiles/master-workers.dir/utils/map_reduce_worker.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/master-workers.dir/utils/map_reduce_worker.cpp.i"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/martin/Documents/tesis/Experimentacion/simgrid/opportunistic_network_experiments/utils/map_reduce_worker.cpp > CMakeFiles/master-workers.dir/utils/map_reduce_worker.cpp.i
+
+CMakeFiles/master-workers.dir/utils/map_reduce_worker.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/master-workers.dir/utils/map_reduce_worker.cpp.s"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/martin/Documents/tesis/Experimentacion/simgrid/opportunistic_network_experiments/utils/map_reduce_worker.cpp -o CMakeFiles/master-workers.dir/utils/map_reduce_worker.cpp.s
+
+CMakeFiles/master-workers.dir/utils/map_reduce_worker.cpp.o.requires:
+
+.PHONY : CMakeFiles/master-workers.dir/utils/map_reduce_worker.cpp.o.requires
+
+CMakeFiles/master-workers.dir/utils/map_reduce_worker.cpp.o.provides: CMakeFiles/master-workers.dir/utils/map_reduce_worker.cpp.o.requires
+	$(MAKE) -f CMakeFiles/master-workers.dir/build.make CMakeFiles/master-workers.dir/utils/map_reduce_worker.cpp.o.provides.build
+.PHONY : CMakeFiles/master-workers.dir/utils/map_reduce_worker.cpp.o.provides
+
+CMakeFiles/master-workers.dir/utils/map_reduce_worker.cpp.o.provides.build: CMakeFiles/master-workers.dir/utils/map_reduce_worker.cpp.o
+
+
+CMakeFiles/master-workers.dir/utils/message_helper.cpp.o: CMakeFiles/master-workers.dir/flags.make
+CMakeFiles/master-workers.dir/utils/message_helper.cpp.o: utils/message_helper.cpp
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/martin/Documents/tesis/Experimentacion/simgrid/opportunistic_network_experiments/CMakeFiles --progress-num=$(CMAKE_PROGRESS_5) "Building CXX object CMakeFiles/master-workers.dir/utils/message_helper.cpp.o"
+	/usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/master-workers.dir/utils/message_helper.cpp.o -c /home/martin/Documents/tesis/Experimentacion/simgrid/opportunistic_network_experiments/utils/message_helper.cpp
+
+CMakeFiles/master-workers.dir/utils/message_helper.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/master-workers.dir/utils/message_helper.cpp.i"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/martin/Documents/tesis/Experimentacion/simgrid/opportunistic_network_experiments/utils/message_helper.cpp > CMakeFiles/master-workers.dir/utils/message_helper.cpp.i
+
+CMakeFiles/master-workers.dir/utils/message_helper.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/master-workers.dir/utils/message_helper.cpp.s"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/martin/Documents/tesis/Experimentacion/simgrid/opportunistic_network_experiments/utils/message_helper.cpp -o CMakeFiles/master-workers.dir/utils/message_helper.cpp.s
+
+CMakeFiles/master-workers.dir/utils/message_helper.cpp.o.requires:
+
+.PHONY : CMakeFiles/master-workers.dir/utils/message_helper.cpp.o.requires
+
+CMakeFiles/master-workers.dir/utils/message_helper.cpp.o.provides: CMakeFiles/master-workers.dir/utils/message_helper.cpp.o.requires
+	$(MAKE) -f CMakeFiles/master-workers.dir/build.make CMakeFiles/master-workers.dir/utils/message_helper.cpp.o.provides.build
+.PHONY : CMakeFiles/master-workers.dir/utils/message_helper.cpp.o.provides
+
+CMakeFiles/master-workers.dir/utils/message_helper.cpp.o.provides.build: CMakeFiles/master-workers.dir/utils/message_helper.cpp.o
+
+
 # Object files for target master-workers
 master__workers_OBJECTS = \
-"CMakeFiles/master-workers.dir/master-workers/master-workers.cpp.o"
+"CMakeFiles/master-workers.dir/master-workers/master-workers.cpp.o" \
+"CMakeFiles/master-workers.dir/utils/mailboxes_manager.cpp.o" \
+"CMakeFiles/master-workers.dir/utils/map_reduce_coordinator.cpp.o" \
+"CMakeFiles/master-workers.dir/utils/map_reduce_worker.cpp.o" \
+"CMakeFiles/master-workers.dir/utils/message_helper.cpp.o"
 
 # External object files for target master-workers
 master__workers_EXTERNAL_OBJECTS =
 
 master-workers/master-workers: CMakeFiles/master-workers.dir/master-workers/master-workers.cpp.o
+master-workers/master-workers: CMakeFiles/master-workers.dir/utils/mailboxes_manager.cpp.o
+master-workers/master-workers: CMakeFiles/master-workers.dir/utils/map_reduce_coordinator.cpp.o
+master-workers/master-workers: CMakeFiles/master-workers.dir/utils/map_reduce_worker.cpp.o
+master-workers/master-workers: CMakeFiles/master-workers.dir/utils/message_helper.cpp.o
 master-workers/master-workers: CMakeFiles/master-workers.dir/build.make
 master-workers/master-workers: CMakeFiles/master-workers.dir/link.txt
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --bold --progress-dir=/home/martin/Documents/tesis/Experimentacion/simgrid/opportunistic_network_experiments/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Linking CXX executable master-workers/master-workers"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --bold --progress-dir=/home/martin/Documents/tesis/Experimentacion/simgrid/opportunistic_network_experiments/CMakeFiles --progress-num=$(CMAKE_PROGRESS_6) "Linking CXX executable master-workers/master-workers"
 	$(CMAKE_COMMAND) -E cmake_link_script CMakeFiles/master-workers.dir/link.txt --verbose=$(VERBOSE)
 
 # Rule to build all files generated by this target.
@@ -100,6 +204,10 @@ CMakeFiles/master-workers.dir/build: master-workers/master-workers
 .PHONY : CMakeFiles/master-workers.dir/build
 
 CMakeFiles/master-workers.dir/requires: CMakeFiles/master-workers.dir/master-workers/master-workers.cpp.o.requires
+CMakeFiles/master-workers.dir/requires: CMakeFiles/master-workers.dir/utils/mailboxes_manager.cpp.o.requires
+CMakeFiles/master-workers.dir/requires: CMakeFiles/master-workers.dir/utils/map_reduce_coordinator.cpp.o.requires
+CMakeFiles/master-workers.dir/requires: CMakeFiles/master-workers.dir/utils/map_reduce_worker.cpp.o.requires
+CMakeFiles/master-workers.dir/requires: CMakeFiles/master-workers.dir/utils/message_helper.cpp.o.requires
 
 .PHONY : CMakeFiles/master-workers.dir/requires
 

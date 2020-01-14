@@ -270,6 +270,150 @@ ping-pong/ping-pong.cpp.s:
 	$(MAKE) -f CMakeFiles/ping-pong.dir/build.make CMakeFiles/ping-pong.dir/ping-pong/ping-pong.cpp.s
 .PHONY : ping-pong/ping-pong.cpp.s
 
+utils/mailboxes_manager.o: utils/mailboxes_manager.cpp.o
+
+.PHONY : utils/mailboxes_manager.o
+
+# target to build an object file
+utils/mailboxes_manager.cpp.o:
+	$(MAKE) -f CMakeFiles/first_network.dir/build.make CMakeFiles/first_network.dir/utils/mailboxes_manager.cpp.o
+	$(MAKE) -f CMakeFiles/ping-pong.dir/build.make CMakeFiles/ping-pong.dir/utils/mailboxes_manager.cpp.o
+	$(MAKE) -f CMakeFiles/one_disconnection_network.dir/build.make CMakeFiles/one_disconnection_network.dir/utils/mailboxes_manager.cpp.o
+	$(MAKE) -f CMakeFiles/master-workers.dir/build.make CMakeFiles/master-workers.dir/utils/mailboxes_manager.cpp.o
+.PHONY : utils/mailboxes_manager.cpp.o
+
+utils/mailboxes_manager.i: utils/mailboxes_manager.cpp.i
+
+.PHONY : utils/mailboxes_manager.i
+
+# target to preprocess a source file
+utils/mailboxes_manager.cpp.i:
+	$(MAKE) -f CMakeFiles/first_network.dir/build.make CMakeFiles/first_network.dir/utils/mailboxes_manager.cpp.i
+	$(MAKE) -f CMakeFiles/ping-pong.dir/build.make CMakeFiles/ping-pong.dir/utils/mailboxes_manager.cpp.i
+	$(MAKE) -f CMakeFiles/one_disconnection_network.dir/build.make CMakeFiles/one_disconnection_network.dir/utils/mailboxes_manager.cpp.i
+	$(MAKE) -f CMakeFiles/master-workers.dir/build.make CMakeFiles/master-workers.dir/utils/mailboxes_manager.cpp.i
+.PHONY : utils/mailboxes_manager.cpp.i
+
+utils/mailboxes_manager.s: utils/mailboxes_manager.cpp.s
+
+.PHONY : utils/mailboxes_manager.s
+
+# target to generate assembly for a file
+utils/mailboxes_manager.cpp.s:
+	$(MAKE) -f CMakeFiles/first_network.dir/build.make CMakeFiles/first_network.dir/utils/mailboxes_manager.cpp.s
+	$(MAKE) -f CMakeFiles/ping-pong.dir/build.make CMakeFiles/ping-pong.dir/utils/mailboxes_manager.cpp.s
+	$(MAKE) -f CMakeFiles/one_disconnection_network.dir/build.make CMakeFiles/one_disconnection_network.dir/utils/mailboxes_manager.cpp.s
+	$(MAKE) -f CMakeFiles/master-workers.dir/build.make CMakeFiles/master-workers.dir/utils/mailboxes_manager.cpp.s
+.PHONY : utils/mailboxes_manager.cpp.s
+
+utils/map_reduce_coordinator.o: utils/map_reduce_coordinator.cpp.o
+
+.PHONY : utils/map_reduce_coordinator.o
+
+# target to build an object file
+utils/map_reduce_coordinator.cpp.o:
+	$(MAKE) -f CMakeFiles/first_network.dir/build.make CMakeFiles/first_network.dir/utils/map_reduce_coordinator.cpp.o
+	$(MAKE) -f CMakeFiles/ping-pong.dir/build.make CMakeFiles/ping-pong.dir/utils/map_reduce_coordinator.cpp.o
+	$(MAKE) -f CMakeFiles/one_disconnection_network.dir/build.make CMakeFiles/one_disconnection_network.dir/utils/map_reduce_coordinator.cpp.o
+	$(MAKE) -f CMakeFiles/master-workers.dir/build.make CMakeFiles/master-workers.dir/utils/map_reduce_coordinator.cpp.o
+.PHONY : utils/map_reduce_coordinator.cpp.o
+
+utils/map_reduce_coordinator.i: utils/map_reduce_coordinator.cpp.i
+
+.PHONY : utils/map_reduce_coordinator.i
+
+# target to preprocess a source file
+utils/map_reduce_coordinator.cpp.i:
+	$(MAKE) -f CMakeFiles/first_network.dir/build.make CMakeFiles/first_network.dir/utils/map_reduce_coordinator.cpp.i
+	$(MAKE) -f CMakeFiles/ping-pong.dir/build.make CMakeFiles/ping-pong.dir/utils/map_reduce_coordinator.cpp.i
+	$(MAKE) -f CMakeFiles/one_disconnection_network.dir/build.make CMakeFiles/one_disconnection_network.dir/utils/map_reduce_coordinator.cpp.i
+	$(MAKE) -f CMakeFiles/master-workers.dir/build.make CMakeFiles/master-workers.dir/utils/map_reduce_coordinator.cpp.i
+.PHONY : utils/map_reduce_coordinator.cpp.i
+
+utils/map_reduce_coordinator.s: utils/map_reduce_coordinator.cpp.s
+
+.PHONY : utils/map_reduce_coordinator.s
+
+# target to generate assembly for a file
+utils/map_reduce_coordinator.cpp.s:
+	$(MAKE) -f CMakeFiles/first_network.dir/build.make CMakeFiles/first_network.dir/utils/map_reduce_coordinator.cpp.s
+	$(MAKE) -f CMakeFiles/ping-pong.dir/build.make CMakeFiles/ping-pong.dir/utils/map_reduce_coordinator.cpp.s
+	$(MAKE) -f CMakeFiles/one_disconnection_network.dir/build.make CMakeFiles/one_disconnection_network.dir/utils/map_reduce_coordinator.cpp.s
+	$(MAKE) -f CMakeFiles/master-workers.dir/build.make CMakeFiles/master-workers.dir/utils/map_reduce_coordinator.cpp.s
+.PHONY : utils/map_reduce_coordinator.cpp.s
+
+utils/map_reduce_worker.o: utils/map_reduce_worker.cpp.o
+
+.PHONY : utils/map_reduce_worker.o
+
+# target to build an object file
+utils/map_reduce_worker.cpp.o:
+	$(MAKE) -f CMakeFiles/first_network.dir/build.make CMakeFiles/first_network.dir/utils/map_reduce_worker.cpp.o
+	$(MAKE) -f CMakeFiles/ping-pong.dir/build.make CMakeFiles/ping-pong.dir/utils/map_reduce_worker.cpp.o
+	$(MAKE) -f CMakeFiles/one_disconnection_network.dir/build.make CMakeFiles/one_disconnection_network.dir/utils/map_reduce_worker.cpp.o
+	$(MAKE) -f CMakeFiles/master-workers.dir/build.make CMakeFiles/master-workers.dir/utils/map_reduce_worker.cpp.o
+.PHONY : utils/map_reduce_worker.cpp.o
+
+utils/map_reduce_worker.i: utils/map_reduce_worker.cpp.i
+
+.PHONY : utils/map_reduce_worker.i
+
+# target to preprocess a source file
+utils/map_reduce_worker.cpp.i:
+	$(MAKE) -f CMakeFiles/first_network.dir/build.make CMakeFiles/first_network.dir/utils/map_reduce_worker.cpp.i
+	$(MAKE) -f CMakeFiles/ping-pong.dir/build.make CMakeFiles/ping-pong.dir/utils/map_reduce_worker.cpp.i
+	$(MAKE) -f CMakeFiles/one_disconnection_network.dir/build.make CMakeFiles/one_disconnection_network.dir/utils/map_reduce_worker.cpp.i
+	$(MAKE) -f CMakeFiles/master-workers.dir/build.make CMakeFiles/master-workers.dir/utils/map_reduce_worker.cpp.i
+.PHONY : utils/map_reduce_worker.cpp.i
+
+utils/map_reduce_worker.s: utils/map_reduce_worker.cpp.s
+
+.PHONY : utils/map_reduce_worker.s
+
+# target to generate assembly for a file
+utils/map_reduce_worker.cpp.s:
+	$(MAKE) -f CMakeFiles/first_network.dir/build.make CMakeFiles/first_network.dir/utils/map_reduce_worker.cpp.s
+	$(MAKE) -f CMakeFiles/ping-pong.dir/build.make CMakeFiles/ping-pong.dir/utils/map_reduce_worker.cpp.s
+	$(MAKE) -f CMakeFiles/one_disconnection_network.dir/build.make CMakeFiles/one_disconnection_network.dir/utils/map_reduce_worker.cpp.s
+	$(MAKE) -f CMakeFiles/master-workers.dir/build.make CMakeFiles/master-workers.dir/utils/map_reduce_worker.cpp.s
+.PHONY : utils/map_reduce_worker.cpp.s
+
+utils/message_helper.o: utils/message_helper.cpp.o
+
+.PHONY : utils/message_helper.o
+
+# target to build an object file
+utils/message_helper.cpp.o:
+	$(MAKE) -f CMakeFiles/first_network.dir/build.make CMakeFiles/first_network.dir/utils/message_helper.cpp.o
+	$(MAKE) -f CMakeFiles/ping-pong.dir/build.make CMakeFiles/ping-pong.dir/utils/message_helper.cpp.o
+	$(MAKE) -f CMakeFiles/one_disconnection_network.dir/build.make CMakeFiles/one_disconnection_network.dir/utils/message_helper.cpp.o
+	$(MAKE) -f CMakeFiles/master-workers.dir/build.make CMakeFiles/master-workers.dir/utils/message_helper.cpp.o
+.PHONY : utils/message_helper.cpp.o
+
+utils/message_helper.i: utils/message_helper.cpp.i
+
+.PHONY : utils/message_helper.i
+
+# target to preprocess a source file
+utils/message_helper.cpp.i:
+	$(MAKE) -f CMakeFiles/first_network.dir/build.make CMakeFiles/first_network.dir/utils/message_helper.cpp.i
+	$(MAKE) -f CMakeFiles/ping-pong.dir/build.make CMakeFiles/ping-pong.dir/utils/message_helper.cpp.i
+	$(MAKE) -f CMakeFiles/one_disconnection_network.dir/build.make CMakeFiles/one_disconnection_network.dir/utils/message_helper.cpp.i
+	$(MAKE) -f CMakeFiles/master-workers.dir/build.make CMakeFiles/master-workers.dir/utils/message_helper.cpp.i
+.PHONY : utils/message_helper.cpp.i
+
+utils/message_helper.s: utils/message_helper.cpp.s
+
+.PHONY : utils/message_helper.s
+
+# target to generate assembly for a file
+utils/message_helper.cpp.s:
+	$(MAKE) -f CMakeFiles/first_network.dir/build.make CMakeFiles/first_network.dir/utils/message_helper.cpp.s
+	$(MAKE) -f CMakeFiles/ping-pong.dir/build.make CMakeFiles/ping-pong.dir/utils/message_helper.cpp.s
+	$(MAKE) -f CMakeFiles/one_disconnection_network.dir/build.make CMakeFiles/one_disconnection_network.dir/utils/message_helper.cpp.s
+	$(MAKE) -f CMakeFiles/master-workers.dir/build.make CMakeFiles/master-workers.dir/utils/message_helper.cpp.s
+.PHONY : utils/message_helper.cpp.s
+
 # Help Target
 help:
 	@echo "The following are some of the valid targets for this Makefile:"
@@ -294,6 +438,18 @@ help:
 	@echo "... ping-pong/ping-pong.o"
 	@echo "... ping-pong/ping-pong.i"
 	@echo "... ping-pong/ping-pong.s"
+	@echo "... utils/mailboxes_manager.o"
+	@echo "... utils/mailboxes_manager.i"
+	@echo "... utils/mailboxes_manager.s"
+	@echo "... utils/map_reduce_coordinator.o"
+	@echo "... utils/map_reduce_coordinator.i"
+	@echo "... utils/map_reduce_coordinator.s"
+	@echo "... utils/map_reduce_worker.o"
+	@echo "... utils/map_reduce_worker.i"
+	@echo "... utils/map_reduce_worker.s"
+	@echo "... utils/message_helper.o"
+	@echo "... utils/message_helper.i"
+	@echo "... utils/message_helper.s"
 .PHONY : help
 
 

@@ -9,11 +9,11 @@ set(CMAKE_CXX_FLAGS_RELEASE "-O0")
 
 find_package(SimGrid 3.22 REQUIRED) # This template requires SimGrid v3.22
 
-include_directories(${SimGrid_INCLUDE_DIR})
-
 foreach (experiment ping-pong master-workers first_network one_disconnection_network)
-  add_executable       (${experiment} EXCLUDE_FROM_ALL ${experiment}/${experiment}.cpp)	
-  target_link_libraries(${experiment} simgrid)
-  set_target_properties(${experiment} PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/${experiment})
+	file(GLOB SOURCES utils/*.cpp)
+
+	add_executable(${experiment} EXCLUDE_FROM_ALL ${experiment}/${experiment}.cpp ${SOURCES})
+	target_link_libraries(${experiment} simgrid)
+	set_target_properties(${experiment} PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/${experiment})
   
 endforeach()

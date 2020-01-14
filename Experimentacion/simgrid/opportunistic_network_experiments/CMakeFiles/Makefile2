@@ -66,12 +66,12 @@ CMAKE_BINARY_DIR = /home/martin/Documents/tesis/Experimentacion/simgrid/opportun
 CMakeFiles/first_network.dir/all:
 	$(MAKE) -f CMakeFiles/first_network.dir/build.make CMakeFiles/first_network.dir/depend
 	$(MAKE) -f CMakeFiles/first_network.dir/build.make CMakeFiles/first_network.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/home/martin/Documents/tesis/Experimentacion/simgrid/opportunistic_network_experiments/CMakeFiles --progress-num=1,2 "Built target first_network"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/home/martin/Documents/tesis/Experimentacion/simgrid/opportunistic_network_experiments/CMakeFiles --progress-num=1,2,3,4,5,6 "Built target first_network"
 .PHONY : CMakeFiles/first_network.dir/all
 
 # Build rule for subdir invocation for target.
 CMakeFiles/first_network.dir/rule: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/martin/Documents/tesis/Experimentacion/simgrid/opportunistic_network_experiments/CMakeFiles 2
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/martin/Documents/tesis/Experimentacion/simgrid/opportunistic_network_experiments/CMakeFiles 6
 	$(MAKE) -f CMakeFiles/Makefile2 CMakeFiles/first_network.dir/all
 	$(CMAKE_COMMAND) -E cmake_progress_start /home/martin/Documents/tesis/Experimentacion/simgrid/opportunistic_network_experiments/CMakeFiles 0
 .PHONY : CMakeFiles/first_network.dir/rule
@@ -98,12 +98,12 @@ clean: CMakeFiles/first_network.dir/clean
 CMakeFiles/ping-pong.dir/all:
 	$(MAKE) -f CMakeFiles/ping-pong.dir/build.make CMakeFiles/ping-pong.dir/depend
 	$(MAKE) -f CMakeFiles/ping-pong.dir/build.make CMakeFiles/ping-pong.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/home/martin/Documents/tesis/Experimentacion/simgrid/opportunistic_network_experiments/CMakeFiles --progress-num=7,8 "Built target ping-pong"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/home/martin/Documents/tesis/Experimentacion/simgrid/opportunistic_network_experiments/CMakeFiles --progress-num=19,20,21,22,23,24 "Built target ping-pong"
 .PHONY : CMakeFiles/ping-pong.dir/all
 
 # Build rule for subdir invocation for target.
 CMakeFiles/ping-pong.dir/rule: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/martin/Documents/tesis/Experimentacion/simgrid/opportunistic_network_experiments/CMakeFiles 2
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/martin/Documents/tesis/Experimentacion/simgrid/opportunistic_network_experiments/CMakeFiles 6
 	$(MAKE) -f CMakeFiles/Makefile2 CMakeFiles/ping-pong.dir/all
 	$(CMAKE_COMMAND) -E cmake_progress_start /home/martin/Documents/tesis/Experimentacion/simgrid/opportunistic_network_experiments/CMakeFiles 0
 .PHONY : CMakeFiles/ping-pong.dir/rule
@@ -130,12 +130,12 @@ clean: CMakeFiles/ping-pong.dir/clean
 CMakeFiles/one_disconnection_network.dir/all:
 	$(MAKE) -f CMakeFiles/one_disconnection_network.dir/build.make CMakeFiles/one_disconnection_network.dir/depend
 	$(MAKE) -f CMakeFiles/one_disconnection_network.dir/build.make CMakeFiles/one_disconnection_network.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/home/martin/Documents/tesis/Experimentacion/simgrid/opportunistic_network_experiments/CMakeFiles --progress-num=5,6 "Built target one_disconnection_network"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/home/martin/Documents/tesis/Experimentacion/simgrid/opportunistic_network_experiments/CMakeFiles --progress-num=13,14,15,16,17,18 "Built target one_disconnection_network"
 .PHONY : CMakeFiles/one_disconnection_network.dir/all
 
 # Build rule for subdir invocation for target.
 CMakeFiles/one_disconnection_network.dir/rule: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/martin/Documents/tesis/Experimentacion/simgrid/opportunistic_network_experiments/CMakeFiles 2
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/martin/Documents/tesis/Experimentacion/simgrid/opportunistic_network_experiments/CMakeFiles 6
 	$(MAKE) -f CMakeFiles/Makefile2 CMakeFiles/one_disconnection_network.dir/all
 	$(CMAKE_COMMAND) -E cmake_progress_start /home/martin/Documents/tesis/Experimentacion/simgrid/opportunistic_network_experiments/CMakeFiles 0
 .PHONY : CMakeFiles/one_disconnection_network.dir/rule
@@ -162,12 +162,12 @@ clean: CMakeFiles/one_disconnection_network.dir/clean
 CMakeFiles/master-workers.dir/all:
 	$(MAKE) -f CMakeFiles/master-workers.dir/build.make CMakeFiles/master-workers.dir/depend
 	$(MAKE) -f CMakeFiles/master-workers.dir/build.make CMakeFiles/master-workers.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/home/martin/Documents/tesis/Experimentacion/simgrid/opportunistic_network_experiments/CMakeFiles --progress-num=3,4 "Built target master-workers"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/home/martin/Documents/tesis/Experimentacion/simgrid/opportunistic_network_experiments/CMakeFiles --progress-num=7,8,9,10,11,12 "Built target master-workers"
 .PHONY : CMakeFiles/master-workers.dir/all
 
 # Build rule for subdir invocation for target.
 CMakeFiles/master-workers.dir/rule: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/martin/Documents/tesis/Experimentacion/simgrid/opportunistic_network_experiments/CMakeFiles 2
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/martin/Documents/tesis/Experimentacion/simgrid/opportunistic_network_experiments/CMakeFiles 6
 	$(MAKE) -f CMakeFiles/Makefile2 CMakeFiles/master-workers.dir/all
 	$(CMAKE_COMMAND) -E cmake_progress_start /home/martin/Documents/tesis/Experimentacion/simgrid/opportunistic_network_experiments/CMakeFiles 0
 .PHONY : CMakeFiles/master-workers.dir/rule

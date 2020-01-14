@@ -1,6 +1,8 @@
-#include<iostream>
-#include<map>
-#include<set>
+#pragma once
+
+#include <iostream>
+#include <map>
+#include <set>
 
 class MailboxesManager {
 public:
