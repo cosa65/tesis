@@ -6,11 +6,14 @@
 
 class MapReduceWorker {
 public:
-	MapReduceWorker(void *message_raw, simgrid::s4u::Mailbox* receive_mailbox, MailboxesManager *mailboxes_manager);
+	static void setup_map_worker_in_this_host(MailboxesManager *mailboxes_manager);
+
+	static MailboxesManager *mailboxes_manager;
+
+	MapReduceWorker(void *message_raw, simgrid::s4u::Mailbox* receive_mailbox);
 	void operator()();
 
 private:
 	void *message_raw;
 	simgrid::s4u::Mailbox* receive_mailbox;
-	MailboxesManager *mailboxes_manager;
 };

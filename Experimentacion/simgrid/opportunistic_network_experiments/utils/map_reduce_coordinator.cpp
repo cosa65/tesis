@@ -3,10 +3,53 @@
 XBT_LOG_EXTERNAL_DEFAULT_CATEGORY(logging);
 
 
+MailboxesManager *MapReduceCoordinator::mailboxes_manager;
 std::map<MapIndex, std::list<PendingMapTask*>> MapReduceCoordinator::pending_maps;
 std::list<std::string> MapReduceCoordinator::idle_workers;
 int MapReduceCoordinator::total_maps;
 int MapReduceCoordinator::threshold;
+bool MapReduceCoordinator::partitioned_redundancy_mode_enabled;
+
+void MapReduceCoordinator::setup_map_reduce_coordinator_in_this_host(std::list<int> map_tasks_in_flops, std::list<simgrid::s4u::Mailbox*> workers, int array_size, int initial_threshold, MailboxesManager *mailboxes_manager, bool partitioned_redundancy_mode_enabled) {
+	MapReduceCoordinator::mailboxes_manager = mailboxes_manager;
+	MapReduceCoordinator::partitioned_redundancy_mode_enabled = partitioned_redundancy_mode_enabled;
+
+	int partitions = workers.size();
+
+	if (partitioned_redundancy_mode_enabled) {
+		int added_flops = 0;
+
+		for(auto maps_it = map_tasks_in_flops.begin(); maps_it != map_tasks_in_flops.end(); ++maps_it) {
+			added_flops += *maps_it / partitions;
+		}
+
+		for(auto maps_it = map_tasks_in_flops.begin(); maps_it != map_tasks_in_flops.end(); ++maps_it) {
+			*maps_it += added_flops - (*maps_it / partitions);
+		}
+
+		array_size = 2 * array_size;
+	}
+
+	simgrid::s4u::Host* my_host = simgrid::s4u::this_actor::get_host();
+
+	simgrid::s4u::Actor::create("distribute_and_send_maps", my_host, MapReduceCoordinator::distribute_and_send_maps, map_tasks_in_flops, workers, array_size, initial_threshold);
+
+	while(true) {
+		std::string mailbox_name = my_host -> get_name() + "-coordinator";
+		simgrid::s4u::Mailbox* mailbox = simgrid::s4u::Mailbox::by_name(mailbox_name);
+
+		// Blocking get, actor is blocked until it receives message
+		auto message = mailbox -> get();
+
+		simgrid::s4u::ActorPtr actor;
+		MapReduceCoordinator map_reduce_coordinator_actor(message, mailbox);
+		actor = simgrid::s4u::Actor::create("map_reduce_coordinator_actor", my_host, map_reduce_coordinator_actor);
+
+		// actor = simgrid::s4u::Actor::create("handle_reduce_mapped_elements_task", my_host, &handle_reduce_mapped_elements_task, mailbox);
+		// THIS MAKES ACTOR HAVE TO BE MANUALLY ENABLED TO BE GARBAGE COLLECTED WITH set_receiver(null)
+		// mailbox -> set_receiver(actor); 
+	}
+}
 
 void MapReduceCoordinator::distribute_and_send_maps(std::list<int> map_tasks_in_flops, std::list<simgrid::s4u::Mailbox*> workers, int array_size, int initial_threshold) {
 	if (map_tasks_in_flops.size() != workers.size()) {
@@ -47,17 +90,15 @@ void MapReduceCoordinator::distribute_and_send_maps(std::list<int> map_tasks_in_
 	simgrid::s4u::Comm::wait_all(&pending_map_comms_to_send);
 }
 
-MapReduceCoordinator::MapReduceCoordinator(void *message_raw, simgrid::s4u::Mailbox* receive_mailbox, MailboxesManager *mailboxes_manager) {
+MapReduceCoordinator::MapReduceCoordinator(void *message_raw, simgrid::s4u::Mailbox* receive_mailbox) {
 	this -> message_raw = message_raw;
 	this -> receive_mailbox = receive_mailbox;
-	this -> mailboxes_manager = mailboxes_manager;
 }
 
 void MapReduceCoordinator::operator()() {
 	receive_mailbox -> set_receiver(simgrid::s4u::Actor::self());
 
 	simgrid::s4u::Host* my_host = simgrid::s4u::this_actor::get_host();
-	// std::string* message = static_cast<std::string*>(receive_mailbox -> get());
 	std::string* message = static_cast<std::string*>(message_raw);
 
 	auto message_tuple = MessageHelper::unpack_message(*message);
@@ -71,7 +112,7 @@ void MapReduceCoordinator::operator()() {
 
 	MapReduceCoordinator::pending_maps.erase(index);
 
-	if(mailboxes_manager -> is_disconnected(receive_mailbox -> get_name())) {
+	if(MapReduceCoordinator::mailboxes_manager -> is_disconnected(receive_mailbox -> get_name())) {
 		XBT_INFO("Reducer in host %s couldn't receive mapped subarray \"%s\" because it is disconnected", (my_host -> get_name()).c_str(), flops);
 		return;
 	}
@@ -85,7 +126,9 @@ void MapReduceCoordinator::operator()() {
 	XBT_INFO("Host %s finished reducing %i", (my_host -> get_name()).c_str(), flops);
 	XBT_INFO("MapReduce pending tasks count is: %i", MapReduceCoordinator::pending_maps.size());
 
-	if (MapReduceCoordinator::pending_maps.empty()) {
+	if (MapReduceCoordinator::pending_maps.empty() ||
+		MapReduceCoordinator::pending_maps.size() == 1 && MapReduceCoordinator::partitioned_redundancy_mode_enabled)
+	{
 		XBT_INFO("MapReduce has finished successfully!!");    
 		return;
 	}

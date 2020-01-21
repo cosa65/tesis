@@ -19,7 +19,6 @@ MailboxesManager mailboxes_manager;
 
 XBT_LOG_EXTERNAL_DEFAULT_CATEGORY(logging);
 
-static void setup_map_worker();
 static void setup_map_reduce_coordinator(std::list<int> map_tasks_in_flops, std::list<simgrid::s4u::Mailbox*> workers, int array_size);
 static void resend_pending_tasks();
 
@@ -37,7 +36,7 @@ static void mailboxes_manager_actor(std::vector<std::string> args) {
 }
 
 static void map_reduce_worker_host_setup(std::vector<std::string> args) {
-	setup_map_worker();
+	MapReduceWorker::setup_map_worker_in_this_host(&mailboxes_manager);
 }
 
 static void map_reduce_coordinator_host_setup(std::vector<std::string> args) {
@@ -49,55 +48,12 @@ static void map_reduce_coordinator_host_setup(std::vector<std::string> args) {
 	std::list<int> map_tasks_in_flops = {11, 10, 5};
 
 	int array_size = 30;
+	int initial_threshold = 50;
+	bool partition_redundancy_mode_enabled = true;
 
-	setup_map_reduce_coordinator(map_tasks_in_flops, workers, array_size);
+	MapReduceCoordinator::setup_map_reduce_coordinator_in_this_host(map_tasks_in_flops, workers, array_size, initial_threshold, &mailboxes_manager, partition_redundancy_mode_enabled);
 }
 ////////////////////////////End actors//////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
-
-////////////////////////////Binded actors setups////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
-static void setup_map_worker() {
-	while (true) {
-		simgrid::s4u::Host* my_host = simgrid::s4u::this_actor::get_host();
-		std::string mailbox_name = my_host -> get_name() + "-worker";
-		simgrid::s4u::Mailbox* mailbox = simgrid::s4u::Mailbox::by_name(mailbox_name);
-
-		auto message = mailbox -> get();
-
-		simgrid::s4u::ActorPtr actor;
-		MapReduceWorker map_worker_actor(message, mailbox, &mailboxes_manager);
-		actor = simgrid::s4u::Actor::create("map_worker_actor", my_host, map_worker_actor);
-
-		// actor = simgrid::s4u::Actor::create("handle_execute_map_task", my_host, &handle_execute_map_task, mailbox);
-		// // TODO THIS MAKES ACTOR HAVE TO BE GARBAGE COLLECTED WITH set_receiver
-		// mailbox -> set_receiver(actor);
-	}
-}
-
-static void setup_map_reduce_coordinator(std::list<int> map_tasks_in_flops, std::list<simgrid::s4u::Mailbox*> workers, int array_size) {
-	simgrid::s4u::Host* my_host = simgrid::s4u::this_actor::get_host();
-
-	simgrid::s4u::Actor::create("distribute_and_send_maps", my_host, MapReduceCoordinator::distribute_and_send_maps, map_tasks_in_flops, workers, array_size, 50);
-
-	while(true) {
-		std::string mailbox_name = my_host -> get_name() + "-coordinator";
-		simgrid::s4u::Mailbox* mailbox = simgrid::s4u::Mailbox::by_name(mailbox_name);
-
-		// Blocking get, actor is blocked until it receives message
-		auto message = mailbox -> get();
-
-		simgrid::s4u::ActorPtr actor;
-		MapReduceCoordinator map_reduce_coordinator_actor(message, mailbox, &mailboxes_manager);
-		actor = simgrid::s4u::Actor::create("map_reduce_coordinator_actor", my_host, map_reduce_coordinator_actor);
-
-		// actor = simgrid::s4u::Actor::create("handle_reduce_mapped_elements_task", my_host, &handle_reduce_mapped_elements_task, mailbox);
-		// // TODO THIS MAKES ACTOR HAVE TO BE GARBAGE COLLECTED WITH set_receiver
-		// mailbox -> set_receiver(actor); 
-	}
-
-}
-////////////////////////////End binded actors setups////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
 int main(int argc, char* argv[]) {
