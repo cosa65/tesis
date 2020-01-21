@@ -1,0 +1,33 @@
+<?xml version='1.0'?>
+<!DOCTYPE platform SYSTEM "http://simgrid.gforge.inria.fr/simgrid/simgrid.dtd">
+<platform version="4.1">
+  <zone id="zone0" routing="Full">
+    <host id="NodeCoordinator" speed="76.296Mf"/>
+    <host id="Node1" speed="76.296Mf"/>
+    <host id="Node2" speed="76.296Mf"/>
+
+    <host id="Organizer" speed="76.296Mf"/>
+
+    <link id="link_coord_1" bandwidth="41.279125MBps" latency="59.904us"/>
+    <link id="link_1_2" bandwidth="41.279125MBps" latency="59.904us"/>
+    <link id="link_coord_2" bandwidth="41.279125MBps" latency="59.904us"/>
+
+    <link id="loopback" bandwidth="100.0MBps" latency="0us"/>
+
+    <route src="Organizer" dst="Organizer">
+      <link_ctn id="loopback"/>
+    </route>
+
+    <route src="NodeCoordinator" dst="Node1">
+      <link_ctn id="link_coord_1"/>
+    </route>
+
+    <route src="Node2" dst="Node2">
+      <link_ctn id="link_1_2"/>
+    </route>
+
+    <route src="NodeCoordinator" dst="Node2">
+      <link_ctn id="link_coord_2"/>
+    </route>
+  </zone>
+</platform>

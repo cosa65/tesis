@@ -1,0 +1,10 @@
+<?xml version='1.0'?>
+<!DOCTYPE platform SYSTEM "http://simgrid.gforge.inria.fr/simgrid/simgrid.dtd">
+<platform version="4.1">
+  <actor host="NodeCoordinator" function="map_reduce_coordinator_host_setup" />
+  <actor host="NodeCoordinator" function="map_reduce_worker_host_setup" />
+  <actor host="Node1" function="map_reduce_worker_host_setup" />
+  <actor host="Node2" function="map_reduce_worker_host_setup" />
+  
+  <actor host="Organizer" function="mailboxes_manager_actor" />
+</platform>

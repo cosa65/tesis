@@ -9,7 +9,7 @@ set(CMAKE_CXX_FLAGS_RELEASE "-O0")
 
 find_package(SimGrid 3.22 REQUIRED) # This template requires SimGrid v3.22
 
-foreach (experiment ping-pong master-workers first_network one_disconnection_network)
+foreach (experiment ping-pong master-workers first_network no_disconnection_network one_disconnection_network)
 	file(GLOB SOURCES utils/*.cpp)
 
 	add_executable(${experiment} EXCLUDE_FROM_ALL ${experiment}/${experiment}.cpp ${SOURCES})

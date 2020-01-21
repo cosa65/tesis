@@ -111,30 +111,17 @@ depend:
 .PHONY : depend
 
 #=============================================================================
-# Target rules for targets named first_network
+# Target rules for targets named master-workers
 
 # Build rule for target.
-first_network: cmake_check_build_system
-	$(MAKE) -f CMakeFiles/Makefile2 first_network
-.PHONY : first_network
+master-workers: cmake_check_build_system
+	$(MAKE) -f CMakeFiles/Makefile2 master-workers
+.PHONY : master-workers
 
 # fast build rule for target.
-first_network/fast:
-	$(MAKE) -f CMakeFiles/first_network.dir/build.make CMakeFiles/first_network.dir/build
-.PHONY : first_network/fast
-
-#=============================================================================
-# Target rules for targets named ping-pong
-
-# Build rule for target.
-ping-pong: cmake_check_build_system
-	$(MAKE) -f CMakeFiles/Makefile2 ping-pong
-.PHONY : ping-pong
-
-# fast build rule for target.
-ping-pong/fast:
-	$(MAKE) -f CMakeFiles/ping-pong.dir/build.make CMakeFiles/ping-pong.dir/build
-.PHONY : ping-pong/fast
+master-workers/fast:
+	$(MAKE) -f CMakeFiles/master-workers.dir/build.make CMakeFiles/master-workers.dir/build
+.PHONY : master-workers/fast
 
 #=============================================================================
 # Target rules for targets named one_disconnection_network
@@ -150,17 +137,43 @@ one_disconnection_network/fast:
 .PHONY : one_disconnection_network/fast
 
 #=============================================================================
-# Target rules for targets named master-workers
+# Target rules for targets named ping-pong
 
 # Build rule for target.
-master-workers: cmake_check_build_system
-	$(MAKE) -f CMakeFiles/Makefile2 master-workers
-.PHONY : master-workers
+ping-pong: cmake_check_build_system
+	$(MAKE) -f CMakeFiles/Makefile2 ping-pong
+.PHONY : ping-pong
 
 # fast build rule for target.
-master-workers/fast:
-	$(MAKE) -f CMakeFiles/master-workers.dir/build.make CMakeFiles/master-workers.dir/build
-.PHONY : master-workers/fast
+ping-pong/fast:
+	$(MAKE) -f CMakeFiles/ping-pong.dir/build.make CMakeFiles/ping-pong.dir/build
+.PHONY : ping-pong/fast
+
+#=============================================================================
+# Target rules for targets named first_network
+
+# Build rule for target.
+first_network: cmake_check_build_system
+	$(MAKE) -f CMakeFiles/Makefile2 first_network
+.PHONY : first_network
+
+# fast build rule for target.
+first_network/fast:
+	$(MAKE) -f CMakeFiles/first_network.dir/build.make CMakeFiles/first_network.dir/build
+.PHONY : first_network/fast
+
+#=============================================================================
+# Target rules for targets named no_disconnection_network
+
+# Build rule for target.
+no_disconnection_network: cmake_check_build_system
+	$(MAKE) -f CMakeFiles/Makefile2 no_disconnection_network
+.PHONY : no_disconnection_network
+
+# fast build rule for target.
+no_disconnection_network/fast:
+	$(MAKE) -f CMakeFiles/no_disconnection_network.dir/build.make CMakeFiles/no_disconnection_network.dir/build
+.PHONY : no_disconnection_network/fast
 
 first_network/first_network.o: first_network/first_network.cpp.o
 
@@ -215,6 +228,33 @@ master-workers/master-workers.s: master-workers/master-workers.cpp.s
 master-workers/master-workers.cpp.s:
 	$(MAKE) -f CMakeFiles/master-workers.dir/build.make CMakeFiles/master-workers.dir/master-workers/master-workers.cpp.s
 .PHONY : master-workers/master-workers.cpp.s
+
+no_disconnection_network/no_disconnection_network.o: no_disconnection_network/no_disconnection_network.cpp.o
+
+.PHONY : no_disconnection_network/no_disconnection_network.o
+
+# target to build an object file
+no_disconnection_network/no_disconnection_network.cpp.o:
+	$(MAKE) -f CMakeFiles/no_disconnection_network.dir/build.make CMakeFiles/no_disconnection_network.dir/no_disconnection_network/no_disconnection_network.cpp.o
+.PHONY : no_disconnection_network/no_disconnection_network.cpp.o
+
+no_disconnection_network/no_disconnection_network.i: no_disconnection_network/no_disconnection_network.cpp.i
+
+.PHONY : no_disconnection_network/no_disconnection_network.i
+
+# target to preprocess a source file
+no_disconnection_network/no_disconnection_network.cpp.i:
+	$(MAKE) -f CMakeFiles/no_disconnection_network.dir/build.make CMakeFiles/no_disconnection_network.dir/no_disconnection_network/no_disconnection_network.cpp.i
+.PHONY : no_disconnection_network/no_disconnection_network.cpp.i
+
+no_disconnection_network/no_disconnection_network.s: no_disconnection_network/no_disconnection_network.cpp.s
+
+.PHONY : no_disconnection_network/no_disconnection_network.s
+
+# target to generate assembly for a file
+no_disconnection_network/no_disconnection_network.cpp.s:
+	$(MAKE) -f CMakeFiles/no_disconnection_network.dir/build.make CMakeFiles/no_disconnection_network.dir/no_disconnection_network/no_disconnection_network.cpp.s
+.PHONY : no_disconnection_network/no_disconnection_network.cpp.s
 
 one_disconnection_network/one_disconnection_network.o: one_disconnection_network/one_disconnection_network.cpp.o
 
@@ -276,10 +316,11 @@ utils/mailboxes_manager.o: utils/mailboxes_manager.cpp.o
 
 # target to build an object file
 utils/mailboxes_manager.cpp.o:
-	$(MAKE) -f CMakeFiles/first_network.dir/build.make CMakeFiles/first_network.dir/utils/mailboxes_manager.cpp.o
-	$(MAKE) -f CMakeFiles/ping-pong.dir/build.make CMakeFiles/ping-pong.dir/utils/mailboxes_manager.cpp.o
-	$(MAKE) -f CMakeFiles/one_disconnection_network.dir/build.make CMakeFiles/one_disconnection_network.dir/utils/mailboxes_manager.cpp.o
 	$(MAKE) -f CMakeFiles/master-workers.dir/build.make CMakeFiles/master-workers.dir/utils/mailboxes_manager.cpp.o
+	$(MAKE) -f CMakeFiles/one_disconnection_network.dir/build.make CMakeFiles/one_disconnection_network.dir/utils/mailboxes_manager.cpp.o
+	$(MAKE) -f CMakeFiles/ping-pong.dir/build.make CMakeFiles/ping-pong.dir/utils/mailboxes_manager.cpp.o
+	$(MAKE) -f CMakeFiles/first_network.dir/build.make CMakeFiles/first_network.dir/utils/mailboxes_manager.cpp.o
+	$(MAKE) -f CMakeFiles/no_disconnection_network.dir/build.make CMakeFiles/no_disconnection_network.dir/utils/mailboxes_manager.cpp.o
 .PHONY : utils/mailboxes_manager.cpp.o
 
 utils/mailboxes_manager.i: utils/mailboxes_manager.cpp.i
@@ -288,10 +329,11 @@ utils/mailboxes_manager.i: utils/mailboxes_manager.cpp.i
 
 # target to preprocess a source file
 utils/mailboxes_manager.cpp.i:
-	$(MAKE) -f CMakeFiles/first_network.dir/build.make CMakeFiles/first_network.dir/utils/mailboxes_manager.cpp.i
-	$(MAKE) -f CMakeFiles/ping-pong.dir/build.make CMakeFiles/ping-pong.dir/utils/mailboxes_manager.cpp.i
-	$(MAKE) -f CMakeFiles/one_disconnection_network.dir/build.make CMakeFiles/one_disconnection_network.dir/utils/mailboxes_manager.cpp.i
 	$(MAKE) -f CMakeFiles/master-workers.dir/build.make CMakeFiles/master-workers.dir/utils/mailboxes_manager.cpp.i
+	$(MAKE) -f CMakeFiles/one_disconnection_network.dir/build.make CMakeFiles/one_disconnection_network.dir/utils/mailboxes_manager.cpp.i
+	$(MAKE) -f CMakeFiles/ping-pong.dir/build.make CMakeFiles/ping-pong.dir/utils/mailboxes_manager.cpp.i
+	$(MAKE) -f CMakeFiles/first_network.dir/build.make CMakeFiles/first_network.dir/utils/mailboxes_manager.cpp.i
+	$(MAKE) -f CMakeFiles/no_disconnection_network.dir/build.make CMakeFiles/no_disconnection_network.dir/utils/mailboxes_manager.cpp.i
 .PHONY : utils/mailboxes_manager.cpp.i
 
 utils/mailboxes_manager.s: utils/mailboxes_manager.cpp.s
@@ -300,10 +342,11 @@ utils/mailboxes_manager.s: utils/mailboxes_manager.cpp.s
 
 # target to generate assembly for a file
 utils/mailboxes_manager.cpp.s:
-	$(MAKE) -f CMakeFiles/first_network.dir/build.make CMakeFiles/first_network.dir/utils/mailboxes_manager.cpp.s
-	$(MAKE) -f CMakeFiles/ping-pong.dir/build.make CMakeFiles/ping-pong.dir/utils/mailboxes_manager.cpp.s
-	$(MAKE) -f CMakeFiles/one_disconnection_network.dir/build.make CMakeFiles/one_disconnection_network.dir/utils/mailboxes_manager.cpp.s
 	$(MAKE) -f CMakeFiles/master-workers.dir/build.make CMakeFiles/master-workers.dir/utils/mailboxes_manager.cpp.s
+	$(MAKE) -f CMakeFiles/one_disconnection_network.dir/build.make CMakeFiles/one_disconnection_network.dir/utils/mailboxes_manager.cpp.s
+	$(MAKE) -f CMakeFiles/ping-pong.dir/build.make CMakeFiles/ping-pong.dir/utils/mailboxes_manager.cpp.s
+	$(MAKE) -f CMakeFiles/first_network.dir/build.make CMakeFiles/first_network.dir/utils/mailboxes_manager.cpp.s
+	$(MAKE) -f CMakeFiles/no_disconnection_network.dir/build.make CMakeFiles/no_disconnection_network.dir/utils/mailboxes_manager.cpp.s
 .PHONY : utils/mailboxes_manager.cpp.s
 
 utils/map_reduce_coordinator.o: utils/map_reduce_coordinator.cpp.o
@@ -312,10 +355,11 @@ utils/map_reduce_coordinator.o: utils/map_reduce_coordinator.cpp.o
 
 # target to build an object file
 utils/map_reduce_coordinator.cpp.o:
-	$(MAKE) -f CMakeFiles/first_network.dir/build.make CMakeFiles/first_network.dir/utils/map_reduce_coordinator.cpp.o
-	$(MAKE) -f CMakeFiles/ping-pong.dir/build.make CMakeFiles/ping-pong.dir/utils/map_reduce_coordinator.cpp.o
-	$(MAKE) -f CMakeFiles/one_disconnection_network.dir/build.make CMakeFiles/one_disconnection_network.dir/utils/map_reduce_coordinator.cpp.o
 	$(MAKE) -f CMakeFiles/master-workers.dir/build.make CMakeFiles/master-workers.dir/utils/map_reduce_coordinator.cpp.o
+	$(MAKE) -f CMakeFiles/one_disconnection_network.dir/build.make CMakeFiles/one_disconnection_network.dir/utils/map_reduce_coordinator.cpp.o
+	$(MAKE) -f CMakeFiles/ping-pong.dir/build.make CMakeFiles/ping-pong.dir/utils/map_reduce_coordinator.cpp.o
+	$(MAKE) -f CMakeFiles/first_network.dir/build.make CMakeFiles/first_network.dir/utils/map_reduce_coordinator.cpp.o
+	$(MAKE) -f CMakeFiles/no_disconnection_network.dir/build.make CMakeFiles/no_disconnection_network.dir/utils/map_reduce_coordinator.cpp.o
 .PHONY : utils/map_reduce_coordinator.cpp.o
 
 utils/map_reduce_coordinator.i: utils/map_reduce_coordinator.cpp.i
@@ -324,10 +368,11 @@ utils/map_reduce_coordinator.i: utils/map_reduce_coordinator.cpp.i
 
 # target to preprocess a source file
 utils/map_reduce_coordinator.cpp.i:
-	$(MAKE) -f CMakeFiles/first_network.dir/build.make CMakeFiles/first_network.dir/utils/map_reduce_coordinator.cpp.i
-	$(MAKE) -f CMakeFiles/ping-pong.dir/build.make CMakeFiles/ping-pong.dir/utils/map_reduce_coordinator.cpp.i
-	$(MAKE) -f CMakeFiles/one_disconnection_network.dir/build.make CMakeFiles/one_disconnection_network.dir/utils/map_reduce_coordinator.cpp.i
 	$(MAKE) -f CMakeFiles/master-workers.dir/build.make CMakeFiles/master-workers.dir/utils/map_reduce_coordinator.cpp.i
+	$(MAKE) -f CMakeFiles/one_disconnection_network.dir/build.make CMakeFiles/one_disconnection_network.dir/utils/map_reduce_coordinator.cpp.i
+	$(MAKE) -f CMakeFiles/ping-pong.dir/build.make CMakeFiles/ping-pong.dir/utils/map_reduce_coordinator.cpp.i
+	$(MAKE) -f CMakeFiles/first_network.dir/build.make CMakeFiles/first_network.dir/utils/map_reduce_coordinator.cpp.i
+	$(MAKE) -f CMakeFiles/no_disconnection_network.dir/build.make CMakeFiles/no_disconnection_network.dir/utils/map_reduce_coordinator.cpp.i
 .PHONY : utils/map_reduce_coordinator.cpp.i
 
 utils/map_reduce_coordinator.s: utils/map_reduce_coordinator.cpp.s
@@ -336,10 +381,11 @@ utils/map_reduce_coordinator.s: utils/map_reduce_coordinator.cpp.s
 
 # target to generate assembly for a file
 utils/map_reduce_coordinator.cpp.s:
-	$(MAKE) -f CMakeFiles/first_network.dir/build.make CMakeFiles/first_network.dir/utils/map_reduce_coordinator.cpp.s
-	$(MAKE) -f CMakeFiles/ping-pong.dir/build.make CMakeFiles/ping-pong.dir/utils/map_reduce_coordinator.cpp.s
-	$(MAKE) -f CMakeFiles/one_disconnection_network.dir/build.make CMakeFiles/one_disconnection_network.dir/utils/map_reduce_coordinator.cpp.s
 	$(MAKE) -f CMakeFiles/master-workers.dir/build.make CMakeFiles/master-workers.dir/utils/map_reduce_coordinator.cpp.s
+	$(MAKE) -f CMakeFiles/one_disconnection_network.dir/build.make CMakeFiles/one_disconnection_network.dir/utils/map_reduce_coordinator.cpp.s
+	$(MAKE) -f CMakeFiles/ping-pong.dir/build.make CMakeFiles/ping-pong.dir/utils/map_reduce_coordinator.cpp.s
+	$(MAKE) -f CMakeFiles/first_network.dir/build.make CMakeFiles/first_network.dir/utils/map_reduce_coordinator.cpp.s
+	$(MAKE) -f CMakeFiles/no_disconnection_network.dir/build.make CMakeFiles/no_disconnection_network.dir/utils/map_reduce_coordinator.cpp.s
 .PHONY : utils/map_reduce_coordinator.cpp.s
 
 utils/map_reduce_worker.o: utils/map_reduce_worker.cpp.o
@@ -348,10 +394,11 @@ utils/map_reduce_worker.o: utils/map_reduce_worker.cpp.o
 
 # target to build an object file
 utils/map_reduce_worker.cpp.o:
-	$(MAKE) -f CMakeFiles/first_network.dir/build.make CMakeFiles/first_network.dir/utils/map_reduce_worker.cpp.o
-	$(MAKE) -f CMakeFiles/ping-pong.dir/build.make CMakeFiles/ping-pong.dir/utils/map_reduce_worker.cpp.o
-	$(MAKE) -f CMakeFiles/one_disconnection_network.dir/build.make CMakeFiles/one_disconnection_network.dir/utils/map_reduce_worker.cpp.o
 	$(MAKE) -f CMakeFiles/master-workers.dir/build.make CMakeFiles/master-workers.dir/utils/map_reduce_worker.cpp.o
+	$(MAKE) -f CMakeFiles/one_disconnection_network.dir/build.make CMakeFiles/one_disconnection_network.dir/utils/map_reduce_worker.cpp.o
+	$(MAKE) -f CMakeFiles/ping-pong.dir/build.make CMakeFiles/ping-pong.dir/utils/map_reduce_worker.cpp.o
+	$(MAKE) -f CMakeFiles/first_network.dir/build.make CMakeFiles/first_network.dir/utils/map_reduce_worker.cpp.o
+	$(MAKE) -f CMakeFiles/no_disconnection_network.dir/build.make CMakeFiles/no_disconnection_network.dir/utils/map_reduce_worker.cpp.o
 .PHONY : utils/map_reduce_worker.cpp.o
 
 utils/map_reduce_worker.i: utils/map_reduce_worker.cpp.i
@@ -360,10 +407,11 @@ utils/map_reduce_worker.i: utils/map_reduce_worker.cpp.i
 
 # target to preprocess a source file
 utils/map_reduce_worker.cpp.i:
-	$(MAKE) -f CMakeFiles/first_network.dir/build.make CMakeFiles/first_network.dir/utils/map_reduce_worker.cpp.i
-	$(MAKE) -f CMakeFiles/ping-pong.dir/build.make CMakeFiles/ping-pong.dir/utils/map_reduce_worker.cpp.i
-	$(MAKE) -f CMakeFiles/one_disconnection_network.dir/build.make CMakeFiles/one_disconnection_network.dir/utils/map_reduce_worker.cpp.i
 	$(MAKE) -f CMakeFiles/master-workers.dir/build.make CMakeFiles/master-workers.dir/utils/map_reduce_worker.cpp.i
+	$(MAKE) -f CMakeFiles/one_disconnection_network.dir/build.make CMakeFiles/one_disconnection_network.dir/utils/map_reduce_worker.cpp.i
+	$(MAKE) -f CMakeFiles/ping-pong.dir/build.make CMakeFiles/ping-pong.dir/utils/map_reduce_worker.cpp.i
+	$(MAKE) -f CMakeFiles/first_network.dir/build.make CMakeFiles/first_network.dir/utils/map_reduce_worker.cpp.i
+	$(MAKE) -f CMakeFiles/no_disconnection_network.dir/build.make CMakeFiles/no_disconnection_network.dir/utils/map_reduce_worker.cpp.i
 .PHONY : utils/map_reduce_worker.cpp.i
 
 utils/map_reduce_worker.s: utils/map_reduce_worker.cpp.s
@@ -372,10 +420,11 @@ utils/map_reduce_worker.s: utils/map_reduce_worker.cpp.s
 
 # target to generate assembly for a file
 utils/map_reduce_worker.cpp.s:
-	$(MAKE) -f CMakeFiles/first_network.dir/build.make CMakeFiles/first_network.dir/utils/map_reduce_worker.cpp.s
-	$(MAKE) -f CMakeFiles/ping-pong.dir/build.make CMakeFiles/ping-pong.dir/utils/map_reduce_worker.cpp.s
-	$(MAKE) -f CMakeFiles/one_disconnection_network.dir/build.make CMakeFiles/one_disconnection_network.dir/utils/map_reduce_worker.cpp.s
 	$(MAKE) -f CMakeFiles/master-workers.dir/build.make CMakeFiles/master-workers.dir/utils/map_reduce_worker.cpp.s
+	$(MAKE) -f CMakeFiles/one_disconnection_network.dir/build.make CMakeFiles/one_disconnection_network.dir/utils/map_reduce_worker.cpp.s
+	$(MAKE) -f CMakeFiles/ping-pong.dir/build.make CMakeFiles/ping-pong.dir/utils/map_reduce_worker.cpp.s
+	$(MAKE) -f CMakeFiles/first_network.dir/build.make CMakeFiles/first_network.dir/utils/map_reduce_worker.cpp.s
+	$(MAKE) -f CMakeFiles/no_disconnection_network.dir/build.make CMakeFiles/no_disconnection_network.dir/utils/map_reduce_worker.cpp.s
 .PHONY : utils/map_reduce_worker.cpp.s
 
 utils/message_helper.o: utils/message_helper.cpp.o
@@ -384,10 +433,11 @@ utils/message_helper.o: utils/message_helper.cpp.o
 
 # target to build an object file
 utils/message_helper.cpp.o:
-	$(MAKE) -f CMakeFiles/first_network.dir/build.make CMakeFiles/first_network.dir/utils/message_helper.cpp.o
-	$(MAKE) -f CMakeFiles/ping-pong.dir/build.make CMakeFiles/ping-pong.dir/utils/message_helper.cpp.o
-	$(MAKE) -f CMakeFiles/one_disconnection_network.dir/build.make CMakeFiles/one_disconnection_network.dir/utils/message_helper.cpp.o
 	$(MAKE) -f CMakeFiles/master-workers.dir/build.make CMakeFiles/master-workers.dir/utils/message_helper.cpp.o
+	$(MAKE) -f CMakeFiles/one_disconnection_network.dir/build.make CMakeFiles/one_disconnection_network.dir/utils/message_helper.cpp.o
+	$(MAKE) -f CMakeFiles/ping-pong.dir/build.make CMakeFiles/ping-pong.dir/utils/message_helper.cpp.o
+	$(MAKE) -f CMakeFiles/first_network.dir/build.make CMakeFiles/first_network.dir/utils/message_helper.cpp.o
+	$(MAKE) -f CMakeFiles/no_disconnection_network.dir/build.make CMakeFiles/no_disconnection_network.dir/utils/message_helper.cpp.o
 .PHONY : utils/message_helper.cpp.o
 
 utils/message_helper.i: utils/message_helper.cpp.i
@@ -396,10 +446,11 @@ utils/message_helper.i: utils/message_helper.cpp.i
 
 # target to preprocess a source file
 utils/message_helper.cpp.i:
-	$(MAKE) -f CMakeFiles/first_network.dir/build.make CMakeFiles/first_network.dir/utils/message_helper.cpp.i
-	$(MAKE) -f CMakeFiles/ping-pong.dir/build.make CMakeFiles/ping-pong.dir/utils/message_helper.cpp.i
-	$(MAKE) -f CMakeFiles/one_disconnection_network.dir/build.make CMakeFiles/one_disconnection_network.dir/utils/message_helper.cpp.i
 	$(MAKE) -f CMakeFiles/master-workers.dir/build.make CMakeFiles/master-workers.dir/utils/message_helper.cpp.i
+	$(MAKE) -f CMakeFiles/one_disconnection_network.dir/build.make CMakeFiles/one_disconnection_network.dir/utils/message_helper.cpp.i
+	$(MAKE) -f CMakeFiles/ping-pong.dir/build.make CMakeFiles/ping-pong.dir/utils/message_helper.cpp.i
+	$(MAKE) -f CMakeFiles/first_network.dir/build.make CMakeFiles/first_network.dir/utils/message_helper.cpp.i
+	$(MAKE) -f CMakeFiles/no_disconnection_network.dir/build.make CMakeFiles/no_disconnection_network.dir/utils/message_helper.cpp.i
 .PHONY : utils/message_helper.cpp.i
 
 utils/message_helper.s: utils/message_helper.cpp.s
@@ -408,10 +459,11 @@ utils/message_helper.s: utils/message_helper.cpp.s
 
 # target to generate assembly for a file
 utils/message_helper.cpp.s:
-	$(MAKE) -f CMakeFiles/first_network.dir/build.make CMakeFiles/first_network.dir/utils/message_helper.cpp.s
-	$(MAKE) -f CMakeFiles/ping-pong.dir/build.make CMakeFiles/ping-pong.dir/utils/message_helper.cpp.s
-	$(MAKE) -f CMakeFiles/one_disconnection_network.dir/build.make CMakeFiles/one_disconnection_network.dir/utils/message_helper.cpp.s
 	$(MAKE) -f CMakeFiles/master-workers.dir/build.make CMakeFiles/master-workers.dir/utils/message_helper.cpp.s
+	$(MAKE) -f CMakeFiles/one_disconnection_network.dir/build.make CMakeFiles/one_disconnection_network.dir/utils/message_helper.cpp.s
+	$(MAKE) -f CMakeFiles/ping-pong.dir/build.make CMakeFiles/ping-pong.dir/utils/message_helper.cpp.s
+	$(MAKE) -f CMakeFiles/first_network.dir/build.make CMakeFiles/first_network.dir/utils/message_helper.cpp.s
+	$(MAKE) -f CMakeFiles/no_disconnection_network.dir/build.make CMakeFiles/no_disconnection_network.dir/utils/message_helper.cpp.s
 .PHONY : utils/message_helper.cpp.s
 
 # Help Target
@@ -421,17 +473,21 @@ help:
 	@echo "... clean"
 	@echo "... depend"
 	@echo "... rebuild_cache"
-	@echo "... edit_cache"
-	@echo "... first_network"
-	@echo "... ping-pong"
-	@echo "... one_disconnection_network"
 	@echo "... master-workers"
+	@echo "... one_disconnection_network"
+	@echo "... ping-pong"
+	@echo "... first_network"
+	@echo "... edit_cache"
+	@echo "... no_disconnection_network"
 	@echo "... first_network/first_network.o"
 	@echo "... first_network/first_network.i"
 	@echo "... first_network/first_network.s"
 	@echo "... master-workers/master-workers.o"
 	@echo "... master-workers/master-workers.i"
 	@echo "... master-workers/master-workers.s"
+	@echo "... no_disconnection_network/no_disconnection_network.o"
+	@echo "... no_disconnection_network/no_disconnection_network.i"
+	@echo "... no_disconnection_network/no_disconnection_network.s"
 	@echo "... one_disconnection_network/one_disconnection_network.o"
 	@echo "... one_disconnection_network/one_disconnection_network.i"
 	@echo "... one_disconnection_network/one_disconnection_network.s"

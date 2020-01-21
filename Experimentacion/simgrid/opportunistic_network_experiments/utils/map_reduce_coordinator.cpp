@@ -20,11 +20,13 @@ void MapReduceCoordinator::setup_map_reduce_coordinator_in_this_host(std::list<i
 		int added_flops = 0;
 
 		for(auto maps_it = map_tasks_in_flops.begin(); maps_it != map_tasks_in_flops.end(); ++maps_it) {
-			added_flops += *maps_it / partitions;
+			int division_rounding_up = *maps_it / partitions + (*maps_it % partitions != 0);
+			added_flops += division_rounding_up;
 		}
 
 		for(auto maps_it = map_tasks_in_flops.begin(); maps_it != map_tasks_in_flops.end(); ++maps_it) {
-			*maps_it += added_flops - (*maps_it / partitions);
+			int division_rounding_up = *maps_it / partitions + (*maps_it % partitions != 0);
+			*maps_it += added_flops - division_rounding_up;
 		}
 
 		array_size = 2 * array_size;

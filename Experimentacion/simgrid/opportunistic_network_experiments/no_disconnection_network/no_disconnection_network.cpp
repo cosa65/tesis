@@ -29,9 +29,6 @@ static void resend_pending_tasks();
 
 static void mailboxes_manager_actor(std::vector<std::string> args) {
 	mailboxes_manager = MailboxesManager();
-
-	mailboxes_manager.set_disconnected("Node2-worker");
-
 	// simgrid::s4u::Host* host = simgrid::s4u::Host::by_name_or_null("Node1");
 	// host -> sleep_for(10000);
 	// simgrid::s4u::this_actor::sleep_for(10000);
