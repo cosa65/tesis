@@ -138,7 +138,6 @@ void MapReduceCoordinator::operator()() {
 	check_completion_threshold_and_resend_if_necessary();  
 }
 
-
 void MapReduceCoordinator::check_completion_threshold_and_resend_if_necessary() {
 	int percentage_pending = (float)MapReduceCoordinator::pending_maps.size()/ (float)MapReduceCoordinator::total_maps * 100;
 
@@ -151,23 +150,32 @@ void MapReduceCoordinator::check_completion_threshold_and_resend_if_necessary() 
 
 void MapReduceCoordinator::resend_pending_tasks() {
 	auto pending_maps_it = MapReduceCoordinator::pending_maps.begin();
+	auto idle_worker_it = MapReduceCoordinator::idle_workers.begin();
 
 	std::vector<simgrid::s4u::CommPtr> resend_comms;
 
-	for (std::string const& idle_worker : MapReduceCoordinator::idle_workers) {
-		if (pending_maps_it == MapReduceCoordinator::pending_maps.end()) break;
-
+	while(pending_maps_it != MapReduceCoordinator::pending_maps.end() && idle_worker_it != MapReduceCoordinator::idle_workers.end()) {
+		std::string idle_worker = *idle_worker_it;
 		std::string mailbox_name = idle_worker + "-worker";
 		simgrid::s4u::Mailbox* mailbox = simgrid::s4u::Mailbox::by_name(mailbox_name);
 
 		MapIndex map_index = std::get<0>(*pending_maps_it);
-		std::string task_data = std::get<1>(*pending_maps_it).front() -> task_data;
+		std::list<PendingMapTask*> map_tasks = std::get<1>(*pending_maps_it);
 
 		XBT_INFO("Resending task %i to idle worker %s",  map_index, idle_worker.c_str());
-		resend_comms.push_back(MessageHelper::send_message(task_data, mailbox, 5));
+		
+		PendingMapTask *new_resent_task = map_tasks.front() -> copy_task(idle_worker);
+
+		resend_comms.push_back(MessageHelper::send_message(new_resent_task -> task_data, mailbox, 5));
+
+		map_tasks.push_front(new_resent_task);
 
 		pending_maps_it++;
+		idle_worker_it++;
 	}
+
+	// Remove workers that are no longer idle
+	MapReduceCoordinator::idle_workers.erase(MapReduceCoordinator::idle_workers.begin(), idle_worker_it);
 	
 	simgrid::s4u::Comm::wait_all(&resend_comms);
 }

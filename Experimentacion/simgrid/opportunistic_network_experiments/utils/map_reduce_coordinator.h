@@ -38,5 +38,4 @@ private:
 
 	void *message_raw;
 	simgrid::s4u::Mailbox* receive_mailbox;
-
 };
