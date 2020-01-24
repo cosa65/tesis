@@ -20,6 +20,7 @@ MailboxesManager mailboxes_manager;
 XBT_LOG_EXTERNAL_DEFAULT_CATEGORY(logging);
 
 bool partition_redundancy_mode_enabled = false;
+bool threshold_of_execution_mode_enabled = false;
 
 static void setup_map_reduce_coordinator(std::list<int> map_tasks_in_flops, std::list<simgrid::s4u::Mailbox*> workers, int array_size);
 static void resend_pending_tasks();
@@ -47,12 +48,19 @@ static void map_reduce_coordinator_host_setup(std::vector<std::string> args) {
 	workers.push_back(simgrid::s4u::Mailbox::by_name("Node1-worker"));
 	workers.push_back(simgrid::s4u::Mailbox::by_name("Node2-worker"));
 
-	std::list<int> map_tasks_in_flops = {11, 10, 5};
-
+	// Real array size
 	int array_size = 30;
+
+	// How much each portion of the original array will cost in computation units, sending each portion to one of the nodes (the actual size is array_size)
+	std::list<int> map_tasks_in_flops = {110, 100, 50};
+
+	// Threshold of array execution completed to begin resending tasks
 	int initial_threshold = 50;
 
-	MapReduceCoordinator::setup_map_reduce_coordinator_in_this_host(map_tasks_in_flops, workers, array_size, initial_threshold, &mailboxes_manager, partition_redundancy_mode_enabled);
+	// Timeout in seconds before beginning to resend tasks
+	int timeout = 5;
+
+	MapReduceCoordinator::setup_map_reduce_coordinator_in_this_host(map_tasks_in_flops, workers, array_size, initial_threshold, timeout, &mailboxes_manager, partition_redundancy_mode_enabled, threshold_of_execution_mode_enabled);
 }
 ////////////////////////////End actors//////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
@@ -61,7 +69,14 @@ int main(int argc, char* argv[]) {
 	simgrid::s4u::Engine e(&argc, argv);
 	// xbt_assert(argc > 2, "Usage: %s platform_file deployment_file\n", argv[0]);
 
-	partition_redundancy_mode_enabled = argv[1] != NULL && strcmp(argv[1], "redundancy") == 0;
+	if (argv[1] == NULL || argv[2] == NULL) {
+		XBT_INFO("Error, execution arguments should be: '<redundancy/no_redundancy> <threshold/no_threshold>'");
+	}
+
+	partition_redundancy_mode_enabled = strcmp(argv[1], "redundancy") == 0;
+	threshold_of_execution_mode_enabled = strcmp(argv[2], "threshold") == 0;
+
+	XBT_INFO("Running with redundancy %i, threshold %i", partition_redundancy_mode_enabled, threshold_of_execution_mode_enabled);
 
 	/* Register the functions representing the actors */
 	e.register_function("map_reduce_coordinator_host_setup", &map_reduce_coordinator_host_setup);

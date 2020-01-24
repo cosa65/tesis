@@ -47,6 +47,10 @@ map_reduce_coordinator.h
 /home/martin/Documents/tesis/Experimentacion/simgrid/opportunistic_network_experiments/utils/map_reduce_coordinator.h
 simgrid/s4u.hpp
 -
+algorithm
+-
+atomic
+-
 pending_map_task.h
 /home/martin/Documents/tesis/Experimentacion/simgrid/opportunistic_network_experiments/utils/pending_map_task.h
 message_helper.h

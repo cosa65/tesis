@@ -2,17 +2,25 @@
 
 XBT_LOG_EXTERNAL_DEFAULT_CATEGORY(logging);
 
-
 MailboxesManager *MapReduceCoordinator::mailboxes_manager;
-std::map<MapIndex, std::list<PendingMapTask*>> MapReduceCoordinator::pending_maps;
+// pending_maps holds all maps that have been sent to be executed and haven't finished yet, each map has the workers it was sent to
+std::list<std::list<PendingMapTask*>> MapReduceCoordinator::pending_maps;
 std::list<std::string> MapReduceCoordinator::idle_workers;
 int MapReduceCoordinator::total_maps;
 int MapReduceCoordinator::threshold;
+int MapReduceCoordinator::timeout;
 bool MapReduceCoordinator::partitioned_redundancy_mode_enabled;
+bool MapReduceCoordinator::threshold_of_execution_mode_enabled;
 
-void MapReduceCoordinator::setup_map_reduce_coordinator_in_this_host(std::list<int> map_tasks_in_flops, std::list<simgrid::s4u::Mailbox*> workers, int array_size, int initial_threshold, MailboxesManager *mailboxes_manager, bool partitioned_redundancy_mode_enabled) {
+simgrid::s4u::ActorPtr MapReduceCoordinator::resend_on_timeout_actor;
+std::atomic_flag MapReduceCoordinator::resending_map_lock;
+
+void MapReduceCoordinator::setup_map_reduce_coordinator_in_this_host(std::list<int> map_tasks_in_flops, std::list<simgrid::s4u::Mailbox*> workers, int array_size, int initial_threshold, int timeout, MailboxesManager *mailboxes_manager, bool partitioned_redundancy_mode_enabled, bool threshold_of_execution_mode_enabled) {
 	MapReduceCoordinator::mailboxes_manager = mailboxes_manager;
+	MapReduceCoordinator::timeout = timeout; 
 	MapReduceCoordinator::partitioned_redundancy_mode_enabled = partitioned_redundancy_mode_enabled;
+	MapReduceCoordinator::threshold_of_execution_mode_enabled = threshold_of_execution_mode_enabled;
+	MapReduceCoordinator::resending_map_lock.clear();
 
 	int partitions = workers.size();
 
@@ -35,6 +43,7 @@ void MapReduceCoordinator::setup_map_reduce_coordinator_in_this_host(std::list<i
 	simgrid::s4u::Host* my_host = simgrid::s4u::this_actor::get_host();
 
 	simgrid::s4u::Actor::create("distribute_and_send_maps", my_host, MapReduceCoordinator::distribute_and_send_maps, map_tasks_in_flops, workers, array_size, initial_threshold);
+	MapReduceCoordinator::resend_on_timeout_actor = simgrid::s4u::Actor::create("resend_pending_tasks_on_timeout", my_host, MapReduceCoordinator::resend_pending_tasks_on_timeout);
 
 	while(true) {
 		std::string mailbox_name = my_host -> get_name() + "-coordinator";
@@ -82,7 +91,9 @@ void MapReduceCoordinator::distribute_and_send_maps(std::list<int> map_tasks_in_
 		simgrid::s4u::CommPtr pending_map_comm = (*workers_it)-> put_async(message_to_send, subarray_size);
 
 		PendingMapTask *current_task_to_send = new PendingMapTask(current_task_index, (*workers_it) -> get_name(), message);
-		MapReduceCoordinator::pending_maps[current_task_index].push_back(current_task_to_send);
+
+		std::list<PendingMapTask*> pending_map_list({current_task_to_send});
+		MapReduceCoordinator::pending_maps.push_back(pending_map_list);
 
 		pending_map_comms_to_send.push_back(pending_map_comm);
 		current_task_index++;
@@ -112,7 +123,8 @@ void MapReduceCoordinator::operator()() {
 	int flops = std::stoi(flops_str);
 	int index = std::stoi(index_str);
 
-	MapReduceCoordinator::pending_maps.erase(index);
+	// TODO CHEQUEA QUE ESTO ANDE
+	MapReduceCoordinator::pending_maps.remove_if([index](std::list<PendingMapTask*> pending_task_list) { return pending_task_list.front() -> map_index == index; });
 
 	if(MapReduceCoordinator::mailboxes_manager -> is_disconnected(receive_mailbox -> get_name())) {
 		XBT_INFO("Reducer in host %s couldn't receive mapped subarray \"%s\" because it is disconnected", (my_host -> get_name()).c_str(), flops);
@@ -132,10 +144,13 @@ void MapReduceCoordinator::operator()() {
 		MapReduceCoordinator::pending_maps.size() == 1 && MapReduceCoordinator::partitioned_redundancy_mode_enabled)
 	{
 		XBT_INFO("MapReduce has finished successfully!!");    
+		simgrid::s4u::Engine::get_instance() -> shutdown();
 		return;
 	}
   
-	check_completion_threshold_and_resend_if_necessary();  
+  	if (threshold_of_execution_mode_enabled) {
+		check_completion_threshold_and_resend_if_necessary();
+  	}
 }
 
 void MapReduceCoordinator::check_completion_threshold_and_resend_if_necessary() {
@@ -144,11 +159,36 @@ void MapReduceCoordinator::check_completion_threshold_and_resend_if_necessary() 
 	XBT_INFO("Percentage of pending tasks is %i vs threshold to begin resending tasks of: %i", percentage_pending, MapReduceCoordinator::threshold);
 
 	if (MapReduceCoordinator::threshold >= percentage_pending) {
-		resend_pending_tasks();
+		XBT_INFO("Threshold on map tasks reached! Checking and resending tasks that haven't been received yet");
+		MapReduceCoordinator::resend_pending_tasks();
+
+		// Timeout counter for resending tasks needs to be reset because pending tasks have just been resent
+		MapReduceCoordinator::reset_timeout_resend_actor();
+	}
+}
+
+void MapReduceCoordinator::reset_timeout_resend_actor() {
+	MapReduceCoordinator::resend_on_timeout_actor -> restart();
+	// MapReduceCoordinator::resend_on_timeout_actor -> kill();
+	// simgrid::s4u::Host* my_host = simgrid::s4u::this_actor::get_host();
+	// MapReduceCoordinator::resend_on_timeout_actor = simgrid::s4u::Actor::create("resend_pending_tasks_on_timeout", my_host, MapReduceCoordinator::resend_pending_tasks_on_timeout);		
+}
+
+void MapReduceCoordinator::resend_pending_tasks_on_timeout() {
+	while (true) {
+		simgrid::s4u::this_actor::sleep_for(MapReduceCoordinator::timeout);
+		XBT_INFO("Timeout on map tasks reached! Checking and resending tasks that haven't been received yet");
+		MapReduceCoordinator::resend_pending_tasks();
 	}
 }
 
 void MapReduceCoordinator::resend_pending_tasks() {
+	// If we failed to capture the lock, then that means a resend operation is already taking place, so we don't need to perform the resend_pending_task
+	if (MapReduceCoordinator::resending_map_lock.test_and_set(std::memory_order_acquire)) {
+		XBT_INFO("Another actor is sending pending tasks, so this resend execution will be cancelled");
+		return;
+	}
+
 	auto pending_maps_it = MapReduceCoordinator::pending_maps.begin();
 	auto idle_worker_it = MapReduceCoordinator::idle_workers.begin();
 
@@ -159,12 +199,12 @@ void MapReduceCoordinator::resend_pending_tasks() {
 		std::string mailbox_name = idle_worker + "-worker";
 		simgrid::s4u::Mailbox* mailbox = simgrid::s4u::Mailbox::by_name(mailbox_name);
 
-		MapIndex map_index = std::get<0>(*pending_maps_it);
-		std::list<PendingMapTask*> map_tasks = std::get<1>(*pending_maps_it);
-
-		XBT_INFO("Resending task %i to idle worker %s",  map_index, idle_worker.c_str());
-		
+		std::list<PendingMapTask*> map_tasks = *pending_maps_it;
 		PendingMapTask *new_resent_task = map_tasks.front() -> copy_task(idle_worker);
+
+		MapIndex map_index = new_resent_task -> map_index;
+
+		XBT_INFO("Resending task %i to idle worker %s", map_index, idle_worker.c_str());
 
 		resend_comms.push_back(MessageHelper::send_message(new_resent_task -> task_data, mailbox, 5));
 
@@ -176,6 +216,12 @@ void MapReduceCoordinator::resend_pending_tasks() {
 
 	// Remove workers that are no longer idle
 	MapReduceCoordinator::idle_workers.erase(MapReduceCoordinator::idle_workers.begin(), idle_worker_it);
-	
+
+	// Move all maps that have just been resent to the back so that the next time tasks are resent, it doesn't always resend the same ones
+	MapReduceCoordinator::pending_maps.insert(pending_maps.end(), pending_maps.begin(), pending_maps_it);
+	MapReduceCoordinator::pending_maps.erase(pending_maps.begin(), pending_maps_it);
+
 	simgrid::s4u::Comm::wait_all(&resend_comms);
+
+	MapReduceCoordinator::resending_map_lock.clear(std::memory_order_release);
 }
