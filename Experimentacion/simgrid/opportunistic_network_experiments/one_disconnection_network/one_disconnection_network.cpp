@@ -13,8 +13,6 @@
 #include <vector>
 #include <map>
 
-#define KILOBYTE 1000
-
 MailboxesManager mailboxes_manager;
 
 XBT_LOG_EXTERNAL_DEFAULT_CATEGORY(logging);

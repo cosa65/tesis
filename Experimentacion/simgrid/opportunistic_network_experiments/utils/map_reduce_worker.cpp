@@ -53,6 +53,6 @@ void MapReduceWorker::operator()() {
 	// XBT_INFO((send_to_mailbox -> get_name()).c_str());
 	XBT_INFO("Host %s finished executing map of %i flops, it is sending results back to %s", (my_host -> get_name()).c_str(), flops, (send_to_mailbox -> get_name()).c_str());
 
-	std::string message_to_send = std::string("flops:") + "5" + ";map_index:" + std::string(index);
+	std::string message_to_send = std::string("flops:") + "10000" + ";map_index:" + std::string(index);
 	MessageHelper::send_message(message_to_send, send_to_mailbox, 5) -> wait();
 }

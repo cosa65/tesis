@@ -4,4 +4,5 @@
 /home/martin/Documents/tesis/Experimentacion/simgrid/opportunistic_network_experiments/CMakeFiles/ping-pong.dir
 /home/martin/Documents/tesis/Experimentacion/simgrid/opportunistic_network_experiments/CMakeFiles/first_network.dir
 /home/martin/Documents/tesis/Experimentacion/simgrid/opportunistic_network_experiments/CMakeFiles/edit_cache.dir
+/home/martin/Documents/tesis/Experimentacion/simgrid/opportunistic_network_experiments/CMakeFiles/big_network_no_disconnections.dir
 /home/martin/Documents/tesis/Experimentacion/simgrid/opportunistic_network_experiments/CMakeFiles/no_disconnection_network.dir

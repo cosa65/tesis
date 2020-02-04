@@ -49,14 +49,14 @@ simgrid/s4u.hpp
 -
 algorithm
 -
-atomic
--
 pending_map_task.h
 /home/martin/Documents/tesis/Experimentacion/simgrid/opportunistic_network_experiments/utils/pending_map_task.h
 message_helper.h
 /home/martin/Documents/tesis/Experimentacion/simgrid/opportunistic_network_experiments/utils/message_helper.h
 mailboxes_manager.h
 /home/martin/Documents/tesis/Experimentacion/simgrid/opportunistic_network_experiments/utils/mailboxes_manager.h
+utils.h
+/home/martin/Documents/tesis/Experimentacion/simgrid/opportunistic_network_experiments/utils/utils.h
 
 /home/martin/Documents/tesis/Experimentacion/simgrid/opportunistic_network_experiments/utils/map_reduce_worker.cpp
 map_reduce_worker.h
@@ -84,5 +84,13 @@ chrono
 string
 -
 list
+-
+
+/home/martin/Documents/tesis/Experimentacion/simgrid/opportunistic_network_experiments/utils/utils.h
+simgrid/s4u.hpp
+-
+list
+-
+iterator
 -
 
