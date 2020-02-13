@@ -1,9 +1,14 @@
 #pragma once
 
+#include <iostream>
+#include <fstream>
+
 #include <simgrid/s4u.hpp>
 #include <algorithm>
 #include <numeric>
 #include <vector>
+
+#include "map_reduce_worker.h"
 
 #include "pending_map_task.h"
 #include "message_helper.h"
@@ -28,6 +33,8 @@ public:
 	static void resend_pending_tasks_on_timeout();
 	static void resend_pending_tasks();
 
+	static void save_logs();
+
 	static MailboxesManager *mailboxes_manager;
 
 	MapReduceCoordinator(void *message_raw, simgrid::s4u::Mailbox* receive_mailbox);
@@ -37,6 +44,8 @@ private:
 	// To keep track of which maps can be resent to idle workers
 	// Is reordered so that maps that have already been resent have less priority in next resend
 	static std::list<std::list<PendingMapTask*>> pending_maps;
+
+	static std::list<simgrid::s4u::Mailbox*> workers;
 
 	// To keep track of whether the execution of the MapReduce is finished or not
 	static int pending_reduces_count;

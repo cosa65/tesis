@@ -45,6 +45,10 @@ map_reduce_coordinator.h
 /home/martin/Documents/tesis/Experimentacion/simgrid/opportunistic_network_experiments/utils/map_reduce_coordinator.h
 
 /home/martin/Documents/tesis/Experimentacion/simgrid/opportunistic_network_experiments/utils/map_reduce_coordinator.h
+iostream
+-
+fstream
+-
 simgrid/s4u.hpp
 -
 algorithm
@@ -53,6 +57,8 @@ numeric
 -
 vector
 -
+map_reduce_worker.h
+/home/martin/Documents/tesis/Experimentacion/simgrid/opportunistic_network_experiments/utils/map_reduce_worker.h
 pending_map_task.h
 /home/martin/Documents/tesis/Experimentacion/simgrid/opportunistic_network_experiments/utils/pending_map_task.h
 message_helper.h
@@ -68,6 +74,14 @@ map_reduce_worker.h
 
 /home/martin/Documents/tesis/Experimentacion/simgrid/opportunistic_network_experiments/utils/map_reduce_worker.h
 simgrid/s4u.hpp
+-
+list
+-
+ctime
+-
+ratio
+-
+chrono
 -
 message_helper.h
 /home/martin/Documents/tesis/Experimentacion/simgrid/opportunistic_network_experiments/utils/message_helper.h

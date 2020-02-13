@@ -7,7 +7,9 @@ MailboxesManager *MapReduceCoordinator::mailboxes_manager;
 std::list<std::list<PendingMapTask*>> MapReduceCoordinator::pending_maps;
 int MapReduceCoordinator::pending_reduces_count;
 
+std::list<simgrid::s4u::Mailbox*> MapReduceCoordinator::workers;
 std::list<std::string> MapReduceCoordinator::idle_workers;
+
 int MapReduceCoordinator::total_maps;
 int MapReduceCoordinator::threshold;
 int MapReduceCoordinator::timeout;
@@ -28,6 +30,7 @@ void MapReduceCoordinator::setup_map_reduce_coordinator_in_this_host(std::list<i
 	MapReduceCoordinator::timeout = timeout; 
 	MapReduceCoordinator::partitioned_redundancy_mode_enabled = partitioned_redundancy_mode_enabled;
 	MapReduceCoordinator::threshold_of_execution_mode_enabled = threshold_of_execution_mode_enabled;
+	MapReduceCoordinator::workers = workers;
 
 	MapReduceCoordinator::resending_map_lock = simgrid::s4u::Mutex::create();
 	MapReduceCoordinator::reduce_lock = simgrid::s4u::Mutex::create();
@@ -63,7 +66,7 @@ void MapReduceCoordinator::distribute_and_send_maps(std::list<int> map_tasks_in_
 		// This index is used to know where to insert the empty list that matches the current partition 
 		// (we don't want redundancy of a task list in its own list)
 		int amount_of_redundancy_partitions = amount_of_partitions - 1;
-		int index = 0;
+		int index_of_current_partition = 0;
 
 		// Each list in this list corresponds to one partition
 		std::list<std::list<int>*> redundancy_tasks_to_distribute = Utils::generate_list_with_empty_lists(amount_of_partitions);
@@ -111,7 +114,7 @@ void MapReduceCoordinator::distribute_and_send_maps(std::list<int> map_tasks_in_
 
 			// XBT_INFO("partition_to_make_redundant_separated PRE SPLICE");
 			// XBT_INFO("[");
-			// 	for (auto partition : partition_to_make_redundant_separated) {
+			// for (auto partition : partition_to_make_redundant_separated) {
 			// 	// XBT_INFO("size: %i", partition -> size());
 			// 	// XBT_INFO("first_elem: %i", partition -> front());
 			// 	XBT_INFO("	[");
@@ -119,6 +122,13 @@ void MapReduceCoordinator::distribute_and_send_maps(std::list<int> map_tasks_in_
 			// 		XBT_INFO("	%i, ", elem);
 			// 	}
 			// 	XBT_INFO("	], ");
+			// }
+			// XBT_INFO("]");
+
+			// XBT_INFO("partition_to_make_redundant_separated PRE SPLICE");
+			// XBT_INFO("[");
+			// for (auto partition : partition_to_make_redundant_separated) {
+			//  	XBT_INFO("%i, ", partition -> size());
 			// }
 			// XBT_INFO("]");
 
@@ -140,36 +150,31 @@ void MapReduceCoordinator::distribute_and_send_maps(std::list<int> map_tasks_in_
 			// This splice had to be done in two steps with a temp variable because in one in the same list it doesn't have expected behaviour
 			partition_to_make_redundant_separated = partition_to_make_redundant_separated_temp;
 
-			// XBT_INFO("partition_to_make_redundant_separated POST SPLICE");
-			// XBT_INFO("[");
-			// 	for (auto partition : partition_to_make_redundant_separated) {
-			// 	// XBT_INFO("size: %i", partition -> size());
-			// 	// XBT_INFO("first_elem: %i", partition -> front());
-			// 	XBT_INFO("	[");
-			// 	for (auto elem : *partition) {
-			// 		XBT_INFO("	%i, ", elem);
-			// 	}
-			// 	XBT_INFO("	], ");
-			// }
-			// XBT_INFO("]");
-
 
 			// Insert empty subpartition at current partition to make list sizes match when calling join_lists()
-			partition_to_make_redundant_separated.insert(std::next(partition_to_make_redundant_separated.begin(), index), new std::list<int>());
-
+			partition_to_make_redundant_separated.insert(std::next(partition_to_make_redundant_separated.begin(), index_of_current_partition), new std::list<int>());
 
 			Utils::join_lists(redundancy_tasks_to_distribute, partition_to_make_redundant_separated);
 
-			index++;
+			index_of_current_partition++;
 
 			int nonempty_amount_of_redundancy_subpartitions = std::max((partition_to_make_redundant_size / amount_of_redundancy_partitions), 1);
 			
+			// Sizes may not be perfectly split due to redundancy distribution of partitions that weren't perfectly divided
 			index_redundancy_splice += nonempty_amount_of_redundancy_subpartitions;
 			index_redundancy_splice = index_redundancy_splice % amount_of_redundancy_partitions;
 		}
+			
+		XBT_INFO("redundancy_tasks_to_distribute in iteration %i", index_of_current_partition);
+		XBT_INFO("[");
+		for (auto partition : redundancy_tasks_to_distribute) {
+			XBT_INFO("%i, ", partition -> size());
+		}
+		XBT_INFO("]");
 
 		// Now each list in redundancy_tasks_to_distribute should be joined with its corresponding list in partitioned_tasks_in_flops
 		Utils::join_lists(partitioned_tasks_in_flops, redundancy_tasks_to_distribute);
+
 	}
 
 	// create bundled version of map_tasks_in_flops, with each element corresponding with the summed up and distributed workload of tasks for each worker
@@ -177,6 +182,8 @@ void MapReduceCoordinator::distribute_and_send_maps(std::list<int> map_tasks_in_
 
 	bundled_up_map_tasks_in_flops.resize(amount_of_partitions);
 
+	// We don't need to know how much each task takes any longer now that they have been separated by node
+	// Convert each list<int>* into an int (sum of all ints in the list)
 	transform(partitioned_tasks_in_flops.begin(), partitioned_tasks_in_flops.end(), bundled_up_map_tasks_in_flops.begin(), [](std::list<int>* partition){ return std::accumulate(partition -> begin(), partition -> end(), 0); });
 
 	if (bundled_up_map_tasks_in_flops.size() != workers.size()) {
@@ -194,9 +201,9 @@ void MapReduceCoordinator::distribute_and_send_maps(std::list<int> map_tasks_in_
 	std::vector<simgrid::s4u::CommPtr> pending_map_comms_to_send;
 	MapIndex current_task_index = 0;
 
-
 	for(; maps_it != bundled_up_map_tasks_in_flops.end() && workers_it != workers.end(); ++maps_it, ++workers_it) {
-		
+
+		// Filter out partitions that are empty (this takes place only when there are more workers than maps to execute)
 		if (*maps_it == 0) { continue; }
 
 		std::string message = "flops:" + std::to_string(*maps_it) + ";map_index:" + std::to_string(current_task_index);
@@ -272,6 +279,9 @@ void MapReduceCoordinator::operator()() {
 		XBT_INFO("MapReduce has finished successfully!! Ending simulation");
 
 		simgrid::s4u::Actor::kill_all();
+
+		MapReduceCoordinator::save_logs();
+
 		simgrid::s4u::this_actor::exit();
 		
 		// simgrid::s4u::Engine::get_instance() -> shutdown();
@@ -367,4 +377,20 @@ void MapReduceCoordinator::resend_pending_tasks() {
 	MapReduceCoordinator::resending_map_lock -> unlock();
 	
 	XBT_INFO("Finished resending tasks, pending maps size is: %i", MapReduceCoordinator::pending_maps.size());
+}
+
+void MapReduceCoordinator::save_logs() {
+	auto workers_idle_times = MapReduceWorker::get_workers_idle_times();
+	std::ofstream file("workers_idle_times.txt");
+
+	for (simgrid::s4u::Mailbox *worker_mailbox : MapReduceCoordinator::workers) {
+		std::string worker_name = worker_mailbox -> get_name();
+		std::string worker_host_name = worker_name.substr(0, worker_name.size() - std::strlen("-worker"));
+
+		std::string idle_time = workers_idle_times[worker_host_name];
+
+		file << "host: \t" << worker_host_name << "\t\t idle_time: \t\t" << idle_time << std::endl;
+	}
+
+	file.close();
 }
