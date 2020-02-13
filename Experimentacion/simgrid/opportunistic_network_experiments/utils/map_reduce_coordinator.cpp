@@ -196,6 +196,9 @@ void MapReduceCoordinator::distribute_and_send_maps(std::list<int> map_tasks_in_
 
 
 	for(; maps_it != bundled_up_map_tasks_in_flops.end() && workers_it != workers.end(); ++maps_it, ++workers_it) {
+		
+		if (*maps_it == 0) { continue; }
+
 		std::string message = "flops:" + std::to_string(*maps_it) + ";map_index:" + std::to_string(current_task_index);
 
 		XBT_INFO("Preparing to send map task: %s", message.c_str());
@@ -266,8 +269,12 @@ void MapReduceCoordinator::operator()() {
 	if (MapReduceCoordinator::pending_reduces_count == 0 ||
 		MapReduceCoordinator::pending_reduces_count == 1 && MapReduceCoordinator::partitioned_redundancy_mode_enabled)
 	{
-		XBT_INFO("MapReduce has finished successfully!!");
-		simgrid::s4u::Engine::get_instance() -> shutdown();
+		XBT_INFO("MapReduce has finished successfully!! Ending simulation");
+
+		simgrid::s4u::Actor::kill_all();
+		simgrid::s4u::this_actor::exit();
+		
+		// simgrid::s4u::Engine::get_instance() -> shutdown();
 		return;
 	}
 

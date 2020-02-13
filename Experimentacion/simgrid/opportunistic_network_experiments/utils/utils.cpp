@@ -45,29 +45,6 @@ namespace Utils {
 
 	// Takes two partitions and concatenates each list of list1 with its corresponding (same index) list in list2
 	void join_lists(std::list<std::list<int>*> list1, std::list<std::list<int>*> list2) {
-
-		XBT_INFO("list1");
-		XBT_INFO("[");
-			for (auto partition : list1) {
-				XBT_INFO("	[");
-				for (auto elem : *partition) {
-					XBT_INFO("	%i, ", elem);
-				}
-				XBT_INFO("	], ");
-			}
-		XBT_INFO("]");
-
-		XBT_INFO("list2");
-		XBT_INFO("[");
-			for (auto partition : list2) {
-				XBT_INFO("	[");
-				for (auto elem : *partition) {
-					XBT_INFO("	%i, ", elem);
-				}
-				XBT_INFO("	], ");
-			}
-		XBT_INFO("]");
-
 		if (list1.size() != list2.size()) {
 			XBT_INFO("At join_lists(), list sizes should be the same, list1: %i and list2: %i", list1.size(), list2.size());
 			throw "At join_lists(), list sizes should be the same";
@@ -82,16 +59,5 @@ namespace Utils {
 			list1_it++;
 			list2_it++;
 		}
-
-		XBT_INFO("RESULT list");
-		XBT_INFO("[");
-			for (auto partition : list1) {
-			XBT_INFO("	[");
-			for (auto elem : *partition) {
-				XBT_INFO("	%i, ", elem);
-			}
-			XBT_INFO("	], ");
-		}
-		XBT_INFO("]");
 	}
 }
