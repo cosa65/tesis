@@ -8,35 +8,31 @@ std::map<std::string, std::string> MapReduceWorker::workers_idle_times;
 void MapReduceWorker::setup_map_worker_in_this_host(MailboxesManager *mailboxes_manager) {
 	MapReduceWorker::mailboxes_manager = mailboxes_manager;
 	
-	auto lifetime_start_point = std::chrono::high_resolution_clock::now();
+	PointInTime lifetime_start_point = simgrid::s4u::Engine::get_instance() -> get_clock();
 
-	std::chrono::nanoseconds *total_execution_time = new std::chrono::nanoseconds();
-	*total_execution_time = std::chrono::nanoseconds{0};
+	TimeSpan *total_execution_time = new TimeSpan();
+	*total_execution_time = 0;
 
 	int *executing = new int(0);
-	std::chrono::time_point<std::chrono::high_resolution_clock> *running_tasks_start_point = new std::chrono::time_point<std::chrono::high_resolution_clock>();
+	PointInTime *running_tasks_start_point = new PointInTime();
 
 	simgrid::s4u::MutexPtr concurrent_executions_mutex = simgrid::s4u::Mutex::create();
 
 	simgrid::s4u::this_actor::on_exit([executing, total_execution_time, running_tasks_start_point, lifetime_start_point](bool finish) {
 
-		auto end_point = std::chrono::high_resolution_clock::now();
-
-	 	std::chrono::nanoseconds real_total_execution = std::chrono::nanoseconds{0};
+		PointInTime end_point = simgrid::s4u::Engine::get_instance() -> get_clock();
 
 		// If a worker was executing when killed
 		// Then we should add the execution time to the total in this actor instead of in the worker intance that was handling the current execution
 		if (*executing > 0) {
-			std::chrono::nanoseconds interrupted_elapsed_time = std::chrono::duration_cast<std::chrono::nanoseconds>(end_point - *running_tasks_start_point);
+			TimeSpan interrupted_elapsed_time = end_point - *running_tasks_start_point;
 
-			real_total_execution = *total_execution_time + interrupted_elapsed_time;
-		} else {
-			real_total_execution = *total_execution_time;
+			*total_execution_time += interrupted_elapsed_time;
 		}
 
-		auto total_life_time = end_point - lifetime_start_point;
+		TimeSpan total_life_time = end_point - lifetime_start_point;
 
-		double execution_time_percentage = (real_total_execution.count() / (double)total_life_time.count()) * 100.0;
+		double execution_time_percentage = (*total_execution_time / total_life_time) * 100.0;
 		double idle_time_percentage = 100.0 - execution_time_percentage;
 
 		std::string my_host_name = simgrid::s4u::this_actor::get_host() -> get_name();
@@ -67,8 +63,8 @@ MapReduceWorker::MapReduceWorker(
 	void *message_raw, 
 	simgrid::s4u::Mailbox* receive_mailbox, 
 	int *executing, 
-	std::chrono::time_point<std::chrono::high_resolution_clock> *running_tasks_start_point, 
-	std::chrono::nanoseconds *total_execution_time,
+	PointInTime *running_tasks_start_point, 
+	TimeSpan *total_execution_time,
 	simgrid::s4u::MutexPtr concurrent_executions_mutex
 ) {
 	this -> message_raw = message_raw;
@@ -80,7 +76,7 @@ MapReduceWorker::MapReduceWorker(
 }
 
 void MapReduceWorker::operator()() {
-	auto start_point = std::chrono::high_resolution_clock::now();
+	PointInTime start_point = simgrid::s4u::Engine::get_instance() -> get_clock();
 
 	this -> concurrent_executions_mutex -> lock();
 	if (*(this -> executing) == 0) {
@@ -111,6 +107,19 @@ void MapReduceWorker::operator()() {
 
 	simgrid::s4u::this_actor::execute(flops);
 
+	
+	PointInTime end_point = simgrid::s4u::Engine::get_instance() -> get_clock();
+
+	this -> concurrent_executions_mutex -> lock();
+	*executing -= 1;
+
+	if (*executing == 0) {
+		auto elapsed_time = end_point - *(this -> running_tasks_start_point);
+
+		*total_execution_time += elapsed_time;
+	}
+	this -> concurrent_executions_mutex -> unlock();
+	
 	simgrid::s4u::Mailbox* send_to_mailbox = simgrid::s4u::Mailbox::by_name(std::string(sender) + "-coordinator"); 
 	// XBT_INFO((send_to_mailbox -> get_name()).c_str());
 	XBT_INFO(
@@ -121,18 +130,7 @@ void MapReduceWorker::operator()() {
 	);
 
 	std::string message_to_send = std::string("flops:") + "10000" + ";map_index:" + std::string(index);
-	
+
 	MessageHelper::send_message(message_to_send, send_to_mailbox, 5) -> wait();
 
-	std::chrono::high_resolution_clock::time_point end_point = std::chrono::high_resolution_clock::now();
-
-	this -> concurrent_executions_mutex -> lock();
-	*executing -= 1;
-
-	if (*executing == 0) {
-		auto elapsed_time = std::chrono::duration_cast<std::chrono::nanoseconds>(end_point - *(this -> running_tasks_start_point));
-
-		*total_execution_time += elapsed_time;
-	}
-	this -> concurrent_executions_mutex -> unlock();
 }

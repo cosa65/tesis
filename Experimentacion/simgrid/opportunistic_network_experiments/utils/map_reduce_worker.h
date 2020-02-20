@@ -4,10 +4,12 @@
 #include <list>
 #include <ctime>
 #include <ratio>
-#include <chrono>
 
 #include "message_helper.h"
 #include "mailboxes_manager.h"
+
+typedef double TimeSpan;
+typedef double PointInTime;
 
 class MapReduceWorker {
 public:
@@ -21,8 +23,8 @@ public:
 		void *message_raw, 
 		simgrid::s4u::Mailbox* receive_mailbox, 
 		int *executing, 
-		std::chrono::time_point<std::chrono::high_resolution_clock> *running_tasks_start_point, 
-		std::chrono::nanoseconds *total_execution_time,
+		PointInTime *running_tasks_start_point, 
+		TimeSpan *total_execution_time,
 		simgrid::s4u::MutexPtr concurrent_executions_mutex
 	);
 
@@ -32,7 +34,7 @@ private:
 	void *message_raw;
 	simgrid::s4u::Mailbox* receive_mailbox;
 	int *executing;
-	std::chrono::time_point<std::chrono::high_resolution_clock> *running_tasks_start_point;
-	std::chrono::nanoseconds *total_execution_time;
+	PointInTime *running_tasks_start_point;
+	TimeSpan *total_execution_time;
 	simgrid::s4u::MutexPtr concurrent_executions_mutex;
 };

@@ -26,7 +26,7 @@ simgrid::s4u::MutexPtr MapReduceCoordinator::resending_map_lock;
 simgrid::s4u::MutexPtr MapReduceCoordinator::reduce_lock;
 
 // To measure performance
-std::chrono::time_point<std::chrono::high_resolution_clock> *MapReduceCoordinator::map_reduce_start_point;
+PointInTime *MapReduceCoordinator::map_reduce_start_point;
 
 void MapReduceCoordinator::setup_map_reduce_coordinator_in_this_host(std::list<int> map_tasks_in_flops, std::list<simgrid::s4u::Mailbox*> workers, int initial_threshold, int timeout, MailboxesManager *mailboxes_manager, bool partitioned_redundancy_mode_enabled, bool threshold_of_execution_mode_enabled) {
 	MapReduceCoordinator::mailboxes_manager = mailboxes_manager;
@@ -43,8 +43,8 @@ void MapReduceCoordinator::setup_map_reduce_coordinator_in_this_host(std::list<i
 	simgrid::s4u::Actor::create("distribute_and_send_maps", my_host, MapReduceCoordinator::distribute_and_send_maps, map_tasks_in_flops, workers, initial_threshold);
 	MapReduceCoordinator::resend_on_timeout_actor = simgrid::s4u::Actor::create("resend_pending_tasks_on_timeout", my_host, MapReduceCoordinator::resend_pending_tasks_on_timeout);
 
-	MapReduceCoordinator::map_reduce_start_point = new std::chrono::time_point<std::chrono::high_resolution_clock>();
-	*MapReduceCoordinator::map_reduce_start_point = std::chrono::high_resolution_clock::now();
+	MapReduceCoordinator::map_reduce_start_point = new PointInTime();
+	*MapReduceCoordinator::map_reduce_start_point = simgrid::s4u::Engine::get_instance() -> get_clock();
 
 	while(true) {
 		std::string mailbox_name = my_host -> get_name() + "-coordinator";
@@ -337,8 +337,8 @@ void MapReduceCoordinator::resend_pending_tasks() {
 }
 
 void MapReduceCoordinator::save_logs() {
-	auto map_reduce_end_point = std::chrono::high_resolution_clock::now();
-	auto map_reduce_execution_time = map_reduce_end_point - *MapReduceCoordinator::map_reduce_start_point;
+	PointInTime map_reduce_end_point = simgrid::s4u::Engine::get_instance() -> get_clock();
+	TimeSpan map_reduce_execution_time = map_reduce_end_point - *MapReduceCoordinator::map_reduce_start_point;
 
 	auto workers_idle_times = MapReduceWorker::get_workers_idle_times();
 	std::ofstream file("simulation_logs.txt", std::fstream::app);
@@ -347,9 +347,9 @@ void MapReduceCoordinator::save_logs() {
 		<< ", threshold: " << MapReduceCoordinator::threshold_of_execution_mode_enabled 
 		<< std::endl;
 
-	simgrid::s4u::Engine::get_instance() -> shutdown();
+	
 
-	file << "Map reduce execution time: " << map_reduce_execution_time.count() << std::endl << std::endl;
+	file << "Map reduce execution time: " << map_reduce_execution_time << std::endl << std::endl;
 
 	for (simgrid::s4u::Mailbox *worker_mailbox : MapReduceCoordinator::workers) {
 		std::string worker_name = worker_mailbox -> get_name();

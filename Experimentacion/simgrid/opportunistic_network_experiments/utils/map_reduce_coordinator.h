@@ -7,7 +7,6 @@
 #include <algorithm>
 #include <numeric>
 #include <vector>
-#include <chrono>
 
 #include "map_reduce_worker.h"
 
@@ -17,6 +16,8 @@
 #include "utils.h"
 
 typedef int MapIndex;
+typedef double PointInTime;
+typedef double TimeSpan;
 
 class MapReduceCoordinator {
 public:
@@ -63,7 +64,7 @@ private:
 
 	static simgrid::s4u::ActorPtr resend_on_timeout_actor;
 
-	static std::chrono::time_point<std::chrono::high_resolution_clock> *map_reduce_start_point;
+	static double *map_reduce_start_point;
 
 	void check_completion_threshold_and_resend_if_necessary();
 	void reset_timeout_resend_actor();
