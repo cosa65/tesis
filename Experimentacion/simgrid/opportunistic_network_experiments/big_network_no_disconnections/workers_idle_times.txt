@@ -1,4 +1,0 @@
-host: 	NodeCoordinator		 idle_time: 		96.558666
-host: 	Node0		 idle_time: 		83.862489
-host: 	Node1		 idle_time: 		89.073884
-host: 	Node2		 idle_time: 		90.153351

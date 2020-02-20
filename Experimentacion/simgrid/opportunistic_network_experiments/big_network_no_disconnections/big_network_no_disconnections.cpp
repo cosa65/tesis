@@ -19,8 +19,10 @@ MailboxesManager mailboxes_manager;
 
 XBT_LOG_EXTERNAL_DEFAULT_CATEGORY(logging);
 
-bool partition_redundancy_mode_enabled = false;
-bool threshold_of_execution_mode_enabled = false;
+bool partition_redundancy_mode_enabled_global = false;
+bool threshold_of_execution_mode_enabled_global = false;
+
+std::list<int> map_tasks_in_flops;
 
 static void setup_map_reduce_coordinator(std::list<int> map_tasks_in_flops, std::list<simgrid::s4u::Mailbox*> workers, int array_size);
 static void resend_pending_tasks();
@@ -71,128 +73,81 @@ static void map_reduce_coordinator_host_setup(std::vector<std::string> args) {
 	workers.push_back(simgrid::s4u::Mailbox::by_name("Node0-worker"));
 	workers.push_back(simgrid::s4u::Mailbox::by_name("Node1-worker"));
 	workers.push_back(simgrid::s4u::Mailbox::by_name("Node2-worker"));
-	// workers.push_back(simgrid::s4u::Mailbox::by_name("Node3-worker"));
-	// workers.push_back(simgrid::s4u::Mailbox::by_name("Node4-worker"));
-	// workers.push_back(simgrid::s4u::Mailbox::by_name("Node5-worker"));
-	// workers.push_back(simgrid::s4u::Mailbox::by_name("Node6-worker"));
-	// workers.push_back(simgrid::s4u::Mailbox::by_name("Node7-worker"));
-	// workers.push_back(simgrid::s4u::Mailbox::by_name("Node8-worker"));
-	// workers.push_back(simgrid::s4u::Mailbox::by_name("Node9-worker"));
-	// workers.push_back(simgrid::s4u::Mailbox::by_name("Node10-worker"));
-	// workers.push_back(simgrid::s4u::Mailbox::by_name("Node11-worker"));
-	// workers.push_back(simgrid::s4u::Mailbox::by_name("Node12-worker"));
-	// workers.push_back(simgrid::s4u::Mailbox::by_name("Node13-worker"));
-	// workers.push_back(simgrid::s4u::Mailbox::by_name("Node14-worker"));
-	// workers.push_back(simgrid::s4u::Mailbox::by_name("Node15-worker"));
-	// workers.push_back(simgrid::s4u::Mailbox::by_name("Node16-worker"));
-	// workers.push_back(simgrid::s4u::Mailbox::by_name("Node17-worker"));
-	// workers.push_back(simgrid::s4u::Mailbox::by_name("Node18-worker"));
-	// workers.push_back(simgrid::s4u::Mailbox::by_name("Node19-worker"));
-	// workers.push_back(simgrid::s4u::Mailbox::by_name("Node20-worker"));
-	// workers.push_back(simgrid::s4u::Mailbox::by_name("Node21-worker"));
-	// workers.push_back(simgrid::s4u::Mailbox::by_name("Node22-worker"));
-	// workers.push_back(simgrid::s4u::Mailbox::by_name("Node23-worker"));
-	// workers.push_back(simgrid::s4u::Mailbox::by_name("Node24-worker"));
-	// workers.push_back(simgrid::s4u::Mailbox::by_name("Node25-worker"));
-	// workers.push_back(simgrid::s4u::Mailbox::by_name("Node26-worker"));
-	// workers.push_back(simgrid::s4u::Mailbox::by_name("Node27-worker"));
-	// workers.push_back(simgrid::s4u::Mailbox::by_name("Node28-worker"));
-	// workers.push_back(simgrid::s4u::Mailbox::by_name("Node29-worker"));
-	// workers.push_back(simgrid::s4u::Mailbox::by_name("Node30-worker"));
-	// workers.push_back(simgrid::s4u::Mailbox::by_name("Node31-worker"));
-	// workers.push_back(simgrid::s4u::Mailbox::by_name("Node32-worker"));
-	// workers.push_back(simgrid::s4u::Mailbox::by_name("Node33-worker"));
-	// workers.push_back(simgrid::s4u::Mailbox::by_name("Node34-worker"));
-	// workers.push_back(simgrid::s4u::Mailbox::by_name("Node35-worker"));
-	// workers.push_back(simgrid::s4u::Mailbox::by_name("Node36-worker"));
-	// workers.push_back(simgrid::s4u::Mailbox::by_name("Node37-worker"));
-	// workers.push_back(simgrid::s4u::Mailbox::by_name("Node38-worker"));
-	// workers.push_back(simgrid::s4u::Mailbox::by_name("Node39-worker"));
-	// workers.push_back(simgrid::s4u::Mailbox::by_name("Node40-worker"));
-	// workers.push_back(simgrid::s4u::Mailbox::by_name("Node41-worker"));
-	// workers.push_back(simgrid::s4u::Mailbox::by_name("Node42-worker"));
-	// workers.push_back(simgrid::s4u::Mailbox::by_name("Node43-worker"));
-	// workers.push_back(simgrid::s4u::Mailbox::by_name("Node44-worker"));
-	// workers.push_back(simgrid::s4u::Mailbox::by_name("Node45-worker"));
-	// workers.push_back(simgrid::s4u::Mailbox::by_name("Node46-worker"));
-	// workers.push_back(simgrid::s4u::Mailbox::by_name("Node47-worker"));
-	// workers.push_back(simgrid::s4u::Mailbox::by_name("Node48-worker"));
-	// workers.push_back(simgrid::s4u::Mailbox::by_name("Node49-worker"));
-	// workers.push_back(simgrid::s4u::Mailbox::by_name("Node50-worker"));
-	// workers.push_back(simgrid::s4u::Mailbox::by_name("Node51-worker"));
-	// workers.push_back(simgrid::s4u::Mailbox::by_name("Node52-worker"));
-	// workers.push_back(simgrid::s4u::Mailbox::by_name("Node53-worker"));
-	// workers.push_back(simgrid::s4u::Mailbox::by_name("Node54-worker"));
-	// workers.push_back(simgrid::s4u::Mailbox::by_name("Node55-worker"));
-	// workers.push_back(simgrid::s4u::Mailbox::by_name("Node56-worker"));
-	// workers.push_back(simgrid::s4u::Mailbox::by_name("Node57-worker"));
-	// workers.push_back(simgrid::s4u::Mailbox::by_name("Node58-worker"));
-	// workers.push_back(simgrid::s4u::Mailbox::by_name("Node59-worker"));
-	// workers.push_back(simgrid::s4u::Mailbox::by_name("Node60-worker"));
-	// workers.push_back(simgrid::s4u::Mailbox::by_name("Node61-worker"));
-	// workers.push_back(simgrid::s4u::Mailbox::by_name("Node62-worker"));
-	// workers.push_back(simgrid::s4u::Mailbox::by_name("Node63-worker"));
-	// workers.push_back(simgrid::s4u::Mailbox::by_name("Node64-worker"));
-	// workers.push_back(simgrid::s4u::Mailbox::by_name("Node65-worker"));
-	// workers.push_back(simgrid::s4u::Mailbox::by_name("Node66-worker"));
-	// workers.push_back(simgrid::s4u::Mailbox::by_name("Node67-worker"));
-	// workers.push_back(simgrid::s4u::Mailbox::by_name("Node68-worker"));
-	// workers.push_back(simgrid::s4u::Mailbox::by_name("Node69-worker"));
-	// workers.push_back(simgrid::s4u::Mailbox::by_name("Node70-worker"));
-	// workers.push_back(simgrid::s4u::Mailbox::by_name("Node71-worker"));
-	// workers.push_back(simgrid::s4u::Mailbox::by_name("Node72-worker"));
-	// workers.push_back(simgrid::s4u::Mailbox::by_name("Node73-worker"));
-	// workers.push_back(simgrid::s4u::Mailbox::by_name("Node74-worker"));
-	// workers.push_back(simgrid::s4u::Mailbox::by_name("Node75-worker"));
-	// workers.push_back(simgrid::s4u::Mailbox::by_name("Node76-worker"));
-	// workers.push_back(simgrid::s4u::Mailbox::by_name("Node77-worker"));
-	// workers.push_back(simgrid::s4u::Mailbox::by_name("Node78-worker"));
-	// workers.push_back(simgrid::s4u::Mailbox::by_name("Node79-worker"));
-	// workers.push_back(simgrid::s4u::Mailbox::by_name("Node80-worker"));
-	// workers.push_back(simgrid::s4u::Mailbox::by_name("Node81-worker"));
-	// workers.push_back(simgrid::s4u::Mailbox::by_name("Node82-worker"));
-	// workers.push_back(simgrid::s4u::Mailbox::by_name("Node83-worker"));
-	// workers.push_back(simgrid::s4u::Mailbox::by_name("Node84-worker"));
-	// workers.push_back(simgrid::s4u::Mailbox::by_name("Node85-worker"));
-	// workers.push_back(simgrid::s4u::Mailbox::by_name("Node86-worker"));
-	// workers.push_back(simgrid::s4u::Mailbox::by_name("Node87-worker"));
-	// workers.push_back(simgrid::s4u::Mailbox::by_name("Node88-worker"));
-	// workers.push_back(simgrid::s4u::Mailbox::by_name("Node89-worker"));
-	// workers.push_back(simgrid::s4u::Mailbox::by_name("Node90-worker"));
-	// workers.push_back(simgrid::s4u::Mailbox::by_name("Node91-worker"));
-	// workers.push_back(simgrid::s4u::Mailbox::by_name("Node92-worker"));
-	// workers.push_back(simgrid::s4u::Mailbox::by_name("Node93-worker"));
-	// workers.push_back(simgrid::s4u::Mailbox::by_name("Node94-worker"));
-	// workers.push_back(simgrid::s4u::Mailbox::by_name("Node95-worker"));
-	// workers.push_back(simgrid::s4u::Mailbox::by_name("Node96-worker"));
-	// workers.push_back(simgrid::s4u::Mailbox::by_name("Node97-worker"));
-	// workers.push_back(simgrid::s4u::Mailbox::by_name("Node98-worker"));
-
-	std::list<int> map_tasks_in_flops = {1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000};
+	workers.push_back(simgrid::s4u::Mailbox::by_name("Node3-worker"));
+	workers.push_back(simgrid::s4u::Mailbox::by_name("Node4-worker"));
+	workers.push_back(simgrid::s4u::Mailbox::by_name("Node5-worker"));
+	workers.push_back(simgrid::s4u::Mailbox::by_name("Node6-worker"));
+	workers.push_back(simgrid::s4u::Mailbox::by_name("Node7-worker"));
+	workers.push_back(simgrid::s4u::Mailbox::by_name("Node8-worker"));
+	workers.push_back(simgrid::s4u::Mailbox::by_name("Node9-worker"));
+	workers.push_back(simgrid::s4u::Mailbox::by_name("Node10-worker"));
+	workers.push_back(simgrid::s4u::Mailbox::by_name("Node11-worker"));
+	workers.push_back(simgrid::s4u::Mailbox::by_name("Node12-worker"));
+	workers.push_back(simgrid::s4u::Mailbox::by_name("Node13-worker"));
+	workers.push_back(simgrid::s4u::Mailbox::by_name("Node14-worker"));
+	workers.push_back(simgrid::s4u::Mailbox::by_name("Node15-worker"));
+	workers.push_back(simgrid::s4u::Mailbox::by_name("Node16-worker"));
+	workers.push_back(simgrid::s4u::Mailbox::by_name("Node17-worker"));
+	workers.push_back(simgrid::s4u::Mailbox::by_name("Node18-worker"));
+	workers.push_back(simgrid::s4u::Mailbox::by_name("Node19-worker"));
+	workers.push_back(simgrid::s4u::Mailbox::by_name("Node20-worker"));
+	workers.push_back(simgrid::s4u::Mailbox::by_name("Node21-worker"));
+	workers.push_back(simgrid::s4u::Mailbox::by_name("Node22-worker"));
+	workers.push_back(simgrid::s4u::Mailbox::by_name("Node23-worker"));
+	workers.push_back(simgrid::s4u::Mailbox::by_name("Node24-worker"));
+	workers.push_back(simgrid::s4u::Mailbox::by_name("Node25-worker"));
+	workers.push_back(simgrid::s4u::Mailbox::by_name("Node26-worker"));
+	workers.push_back(simgrid::s4u::Mailbox::by_name("Node27-worker"));
+	workers.push_back(simgrid::s4u::Mailbox::by_name("Node28-worker"));
+	workers.push_back(simgrid::s4u::Mailbox::by_name("Node29-worker"));
+	workers.push_back(simgrid::s4u::Mailbox::by_name("Node30-worker"));
+	workers.push_back(simgrid::s4u::Mailbox::by_name("Node31-worker"));
+	workers.push_back(simgrid::s4u::Mailbox::by_name("Node32-worker"));
+	workers.push_back(simgrid::s4u::Mailbox::by_name("Node33-worker"));
+	workers.push_back(simgrid::s4u::Mailbox::by_name("Node34-worker"));
+	workers.push_back(simgrid::s4u::Mailbox::by_name("Node35-worker"));
+	workers.push_back(simgrid::s4u::Mailbox::by_name("Node36-worker"));
+	workers.push_back(simgrid::s4u::Mailbox::by_name("Node37-worker"));
+	workers.push_back(simgrid::s4u::Mailbox::by_name("Node38-worker"));
+	workers.push_back(simgrid::s4u::Mailbox::by_name("Node39-worker"));
+	workers.push_back(simgrid::s4u::Mailbox::by_name("Node40-worker"));
+	workers.push_back(simgrid::s4u::Mailbox::by_name("Node41-worker"));
+	workers.push_back(simgrid::s4u::Mailbox::by_name("Node42-worker"));
+	workers.push_back(simgrid::s4u::Mailbox::by_name("Node43-worker"));
+	workers.push_back(simgrid::s4u::Mailbox::by_name("Node44-worker"));
+	workers.push_back(simgrid::s4u::Mailbox::by_name("Node45-worker"));
+	workers.push_back(simgrid::s4u::Mailbox::by_name("Node46-worker"));
+	workers.push_back(simgrid::s4u::Mailbox::by_name("Node47-worker"));
 
 	// Threshold of array execution completed to begin resending tasks
-	int initial_threshold = 50;
+	int initial_threshold = 90;
 
 	// Timeout in seconds before beginning to resend tasks
 	int timeout = 10;
 
-	MapReduceCoordinator::setup_map_reduce_coordinator_in_this_host(map_tasks_in_flops, workers, initial_threshold, timeout, &mailboxes_manager, partition_redundancy_mode_enabled, threshold_of_execution_mode_enabled);
+	MapReduceCoordinator::setup_map_reduce_coordinator_in_this_host(map_tasks_in_flops, workers, initial_threshold, timeout, &mailboxes_manager, partition_redundancy_mode_enabled_global, threshold_of_execution_mode_enabled_global);
 }
 ////////////////////////////End actors//////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-int main(int argc, char* argv[]) {
-	simgrid::s4u::Engine e(&argc, argv);
-	// xbt_assert(argc > 2, "Usage: %s platform_file deployment_file\n", argv[0]);
+void read_tasks_from_file() {
+	std::ifstream infile("tasks.txt");
 
-	if (argv[1] == NULL || argv[2] == NULL) {
-		XBT_INFO("Error, execution arguments should be: '<redundancy/no_redundancy> <threshold/no_threshold>'");
+	std::string line;
+	getline(infile, line);
+	std::istringstream iss(line);
+	
+	int task_in_flops;
+	while (iss >> task_in_flops)
+	{
+	    map_tasks_in_flops.push_back(task_in_flops);
 	}
 
-	partition_redundancy_mode_enabled = strcmp(argv[1], "redundancy") == 0;
-	threshold_of_execution_mode_enabled = strcmp(argv[2], "threshold") == 0;
+	infile.close();
+}
 
-	XBT_INFO("Running with redundancy %i, threshold %i", partition_redundancy_mode_enabled, threshold_of_execution_mode_enabled);
+void run_simulation(int argc, char* argv[], bool partition_redundancy_mode_enabled, bool threshold_of_execution_mode_enabled) {
+	simgrid::s4u::Engine e(&argc, argv);
 
 	/* Register the functions representing the actors */
 	e.register_function("map_reduce_coordinator_host_setup", &map_reduce_coordinator_host_setup);
@@ -202,13 +157,31 @@ int main(int argc, char* argv[]) {
 	/* Load the platform description and then deploy the application */
 	e.load_platform("platform.xml");
 	e.load_deployment("deployment.xml");
-	// e.load_platform(argv[1]);
-	// e.load_deployment(argv[2]);
+
+	partition_redundancy_mode_enabled_global = partition_redundancy_mode_enabled;
+	threshold_of_execution_mode_enabled_global = threshold_of_execution_mode_enabled;
+
+	XBT_INFO("Running with redundancy %i, threshold %i", partition_redundancy_mode_enabled, threshold_of_execution_mode_enabled);
 
 	/* Run the simulation */
 	e.run();
 
 	XBT_INFO("Simulation is over");
+}
+
+int main(int argc, char* argv[]) {
+	read_tasks_from_file();
+
+	if (argv[1] == NULL || argv[2] == NULL) {
+		XBT_INFO("Execution arguments are: '<redundancy/no_redundancy> <threshold/no_threshold>', cancelling simulation");
+
+		return 0;
+	}
+
+	bool partition_redundancy_mode_enabled = strcmp(argv[1], "redundancy") == 0;
+	bool threshold_of_execution_mode_enabled = strcmp(argv[2], "threshold") == 0;
+
+	run_simulation(argc, argv, partition_redundancy_mode_enabled, threshold_of_execution_mode_enabled);
 
 	return 0;
 }
