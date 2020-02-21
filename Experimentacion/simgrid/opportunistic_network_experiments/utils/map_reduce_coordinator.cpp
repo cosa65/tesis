@@ -59,7 +59,7 @@ void MapReduceCoordinator::setup_map_reduce_coordinator_in_this_host(std::list<i
 
 		// actor = simgrid::s4u::Actor::create("handle_reduce_mapped_elements_task", my_host, &handle_reduce_mapped_elements_task, mailbox);
 		// THIS MAKES ACTOR HAVE TO BE MANUALLY ENABLED TO BE GARBAGE COLLECTED WITH set_receiver(null)
-		// mailbox -> set_receiver(actor); 
+		mailbox -> set_receiver(actor); 
 	}
 }
 
@@ -168,7 +168,7 @@ void MapReduceCoordinator::distribute_and_send_maps(std::list<int> map_tasks_in_
 		XBT_INFO("Preparing to send map task: %s", message.c_str());
 
 		// This should be doing the same as the 3 lines below it, but for some reason it fails in this case, REVISATION    
-		// simgrid::s4u::CommPtr pending_map_comm = send_message(message, *workers_it, subarray_size);
+		// simgrid::s4u::CommPtr pending_map_comm = sendbig_network_no_disconnections_message(message, *workers_it, subarray_size);
 
 		simgrid::s4u::Host* my_host = simgrid::s4u::this_actor::get_host();
 		std::string *message_to_send = new std::string("from:" + my_host -> get_name() + ";payload:" + message);
@@ -197,8 +197,6 @@ MapReduceCoordinator::MapReduceCoordinator(void *message_raw, simgrid::s4u::Mail
 void MapReduceCoordinator::operator()() {
 	MapReduceCoordinator::reduce_lock -> lock();
 
-	receive_mailbox -> set_receiver(simgrid::s4u::Actor::self());
-
 	simgrid::s4u::Host* my_host = simgrid::s4u::this_actor::get_host();
 	std::string* message = static_cast<std::string*>(message_raw);
 
@@ -211,24 +209,38 @@ void MapReduceCoordinator::operator()() {
 	int flops = std::stoi(flops_str);
 	int index = std::stoi(index_str);
 
-	// TODO CHEQUEA QUE ESTO ANDE
-	MapReduceCoordinator::pending_maps.remove_if([index](std::list<PendingMapTask*> pending_task_list) { return pending_task_list.front() -> map_index == index; });
-
 	if(MapReduceCoordinator::mailboxes_manager -> is_disconnected(receive_mailbox -> get_name())) {
 		XBT_INFO("Reducer in host %s couldn't receive mapped subarray \"%s\" because it is disconnected", (my_host -> get_name()).c_str(), (*message).c_str());
 		return;
 	}
 
-	XBT_INFO("Host %s received map result from %s and will begin executing reduce of %i flops", (my_host -> get_name()).c_str(), sender.c_str(), flops);
+
 
 	MapReduceCoordinator::idle_workers.push_back(sender);
 
+	// If the finished task is no longer pending (already received result from another node), then ignore
+	auto finished_task_it = std::find_if(
+								MapReduceCoordinator::pending_maps.begin(),
+								MapReduceCoordinator::pending_maps.end(), 
+								[index](std::list<PendingMapTask*> pending_task_list) {
+									return pending_task_list.front() -> map_index == index; 
+								}
+							);
+	// MapReduceCoordinator::pending_maps.remove_if([index](std::list<PendingMapTask*> pending_task_list) { return pending_task_list.front() -> map_index == index; });
+	if (finished_task_it == MapReduceCoordinator::pending_maps.end()) {
+		// This task is no longer pending (already received result from another node), so ignore
+
+		MapReduceCoordinator::reduce_lock -> unlock();
+		return;
+	}
+	MapReduceCoordinator::pending_maps.erase(finished_task_it);
+
+	XBT_INFO("Host %s received map result from %s and will begin executing reduce of %i flops", (my_host -> get_name()).c_str(), sender.c_str(), flops);
 	simgrid::s4u::this_actor::execute(flops);
 	pending_reduces_count--;
 
 	XBT_INFO("Host %s finished reducing task of %i flops", (my_host -> get_name()).c_str(), flops);
-	XBT_INFO("MapReduce pending tasks count is: %i", MapReduceCoordinator::pending_maps.size());
-	XBT_INFO("MapReduce pending reduces count is: %i", MapReduceCoordinator::pending_reduces_count);
+	XBT_INFO("MapReduce pending tasks count is: %i", MapReduceCoordinator::pending_reduces_count);
 
 	if (MapReduceCoordinator::pending_reduces_count == 0 ||
 		MapReduceCoordinator::pending_reduces_count == 1 && MapReduceCoordinator::partitioned_redundancy_mode_enabled)
@@ -245,11 +257,11 @@ void MapReduceCoordinator::operator()() {
 		return;
 	}
 
+	MapReduceCoordinator::reduce_lock -> unlock();
+
   	if (threshold_of_execution_mode_enabled) {
 		check_completion_threshold_and_resend_if_necessary();
   	}
-
-	MapReduceCoordinator::reduce_lock -> unlock();
 }
 
 void MapReduceCoordinator::check_completion_threshold_and_resend_if_necessary() {
@@ -321,7 +333,6 @@ void MapReduceCoordinator::resend_pending_tasks() {
 		pending_maps_it++;
 		idle_worker_it++;
 	}
-
 
 	// Remove workers that are no longer idle
 	MapReduceCoordinator::idle_workers.erase(MapReduceCoordinator::idle_workers.begin(), idle_worker_it);
