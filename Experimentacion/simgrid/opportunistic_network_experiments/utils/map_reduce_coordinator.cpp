@@ -15,6 +15,8 @@ int MapReduceCoordinator::threshold;
 int MapReduceCoordinator::timeout;
 bool MapReduceCoordinator::partitioned_redundancy_mode_enabled;
 bool MapReduceCoordinator::threshold_of_execution_mode_enabled;
+bool MapReduceCoordinator::initial_threshold_of_execution_mode_enabled;
+
 
 simgrid::s4u::ActorPtr MapReduceCoordinator::resend_on_timeout_actor;
 
@@ -33,6 +35,8 @@ void MapReduceCoordinator::setup_map_reduce_coordinator_in_this_host(std::list<i
 	MapReduceCoordinator::timeout = timeout; 
 	MapReduceCoordinator::partitioned_redundancy_mode_enabled = partitioned_redundancy_mode_enabled;
 	MapReduceCoordinator::threshold_of_execution_mode_enabled = threshold_of_execution_mode_enabled;
+	MapReduceCoordinator::initial_threshold_of_execution_mode_enabled = threshold_of_execution_mode_enabled;
+
 	MapReduceCoordinator::workers = workers;
 
 	MapReduceCoordinator::resending_map_lock = simgrid::s4u::Mutex::create();
@@ -195,7 +199,6 @@ MapReduceCoordinator::MapReduceCoordinator(void *message_raw, simgrid::s4u::Mail
 }
 
 void MapReduceCoordinator::operator()() {
-	MapReduceCoordinator::reduce_lock -> lock();
 
 	simgrid::s4u::Host* my_host = simgrid::s4u::this_actor::get_host();
 	std::string* message = static_cast<std::string*>(message_raw);
@@ -214,8 +217,8 @@ void MapReduceCoordinator::operator()() {
 		return;
 	}
 
-
-
+	MapReduceCoordinator::reduce_lock -> lock();
+	
 	MapReduceCoordinator::idle_workers.push_back(sender);
 
 	// If the finished task is no longer pending (already received result from another node), then ignore
@@ -226,6 +229,7 @@ void MapReduceCoordinator::operator()() {
 									return pending_task_list.front() -> map_index == index; 
 								}
 							);
+
 	// MapReduceCoordinator::pending_maps.remove_if([index](std::list<PendingMapTask*> pending_task_list) { return pending_task_list.front() -> map_index == index; });
 	if (finished_task_it == MapReduceCoordinator::pending_maps.end()) {
 		// This task is no longer pending (already received result from another node), so ignore
@@ -233,6 +237,7 @@ void MapReduceCoordinator::operator()() {
 		MapReduceCoordinator::reduce_lock -> unlock();
 		return;
 	}
+
 	MapReduceCoordinator::pending_maps.erase(finished_task_it);
 
 	XBT_INFO("Host %s received map result from %s and will begin executing reduce of %i flops", (my_host -> get_name()).c_str(), sender.c_str(), flops);
@@ -355,7 +360,7 @@ void MapReduceCoordinator::save_logs() {
 	std::ofstream file("simulation_logs.txt", std::fstream::app);
 
 	file << "Execution with redundancy: " << MapReduceCoordinator::partitioned_redundancy_mode_enabled 
-		<< ", threshold: " << MapReduceCoordinator::threshold_of_execution_mode_enabled 
+		<< ", threshold: " << MapReduceCoordinator::initial_threshold_of_execution_mode_enabled 
 		<< std::endl;
 
 	

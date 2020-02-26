@@ -13,12 +13,12 @@ def create_platform(amount_of_nodes, link_latencies_lower_bound, link_latencies_
 	file.write("""
 		<host id="Organizer" speed="76.296Mf"/>
 
-		<host id="NodeCoordinator" speed="76.296Mf"/>
+		<host id="NodeCoordinator" speed="1.0Mf"/>
 	""")
 
 	for i in range(amount_of_nodes):
 		file.write(f"""
-		<host id="Node{i}" speed="40.0Mf"/>
+		<host id="Node{i}" speed="5.0Mf"/>
 	""")
 
 	file.write(f"""<link id="loopback" bandwidth="100.0MBps" latency="0us"/>""")

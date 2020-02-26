@@ -1,0 +1,11 @@
+
+Decisiones:
+
+- 
+
+
+Observaciones:
+
+- Threshold tiene mas chances de funcionar mejor que timeout porque sus triggers para resend estan mas ligados a la velocidad de ejecucion de los nodos (mas ligados que timeout, a menos que se lo ajuste caso por caso), entonces sin conocer nada de la red es mas posible que threshold funcione mejor.
+
+- Redundancy hace mas pesados todos los paquetes de tasks

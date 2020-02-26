@@ -68,7 +68,7 @@ static void map_reduce_worker_host_setup(std::vector<std::string> args) {
 static void map_reduce_coordinator_host_setup(std::vector<std::string> args) {
 	std::list<simgrid::s4u::Mailbox*> workers;
 
-// Worker mailbox names should always be hostname + "-worker", errors on logging idle times will take place if not
+	// Worker mailbox names should always be hostname + "-worker", errors on logging idle times will take place if not
 	workers.push_back(simgrid::s4u::Mailbox::by_name("NodeCoordinator-worker"));
 	workers.push_back(simgrid::s4u::Mailbox::by_name("Node0-worker"));
 	workers.push_back(simgrid::s4u::Mailbox::by_name("Node1-worker"));
@@ -118,12 +118,63 @@ static void map_reduce_coordinator_host_setup(std::vector<std::string> args) {
 	workers.push_back(simgrid::s4u::Mailbox::by_name("Node45-worker"));
 	workers.push_back(simgrid::s4u::Mailbox::by_name("Node46-worker"));
 	workers.push_back(simgrid::s4u::Mailbox::by_name("Node47-worker"));
+	workers.push_back(simgrid::s4u::Mailbox::by_name("Node48-worker"));
+	workers.push_back(simgrid::s4u::Mailbox::by_name("Node49-worker"));
+	workers.push_back(simgrid::s4u::Mailbox::by_name("Node50-worker"));
+	workers.push_back(simgrid::s4u::Mailbox::by_name("Node51-worker"));
+	workers.push_back(simgrid::s4u::Mailbox::by_name("Node52-worker"));
+	workers.push_back(simgrid::s4u::Mailbox::by_name("Node53-worker"));
+	workers.push_back(simgrid::s4u::Mailbox::by_name("Node54-worker"));
+	workers.push_back(simgrid::s4u::Mailbox::by_name("Node55-worker"));
+	workers.push_back(simgrid::s4u::Mailbox::by_name("Node56-worker"));
+	workers.push_back(simgrid::s4u::Mailbox::by_name("Node57-worker"));
+	workers.push_back(simgrid::s4u::Mailbox::by_name("Node58-worker"));
+	workers.push_back(simgrid::s4u::Mailbox::by_name("Node59-worker"));
+	workers.push_back(simgrid::s4u::Mailbox::by_name("Node60-worker"));
+	workers.push_back(simgrid::s4u::Mailbox::by_name("Node61-worker"));
+	workers.push_back(simgrid::s4u::Mailbox::by_name("Node62-worker"));
+	workers.push_back(simgrid::s4u::Mailbox::by_name("Node63-worker"));
+	workers.push_back(simgrid::s4u::Mailbox::by_name("Node64-worker"));
+	workers.push_back(simgrid::s4u::Mailbox::by_name("Node65-worker"));
+	workers.push_back(simgrid::s4u::Mailbox::by_name("Node66-worker"));
+	workers.push_back(simgrid::s4u::Mailbox::by_name("Node67-worker"));
+	workers.push_back(simgrid::s4u::Mailbox::by_name("Node68-worker"));
+	workers.push_back(simgrid::s4u::Mailbox::by_name("Node69-worker"));
+	workers.push_back(simgrid::s4u::Mailbox::by_name("Node70-worker"));
+	workers.push_back(simgrid::s4u::Mailbox::by_name("Node71-worker"));
+	workers.push_back(simgrid::s4u::Mailbox::by_name("Node72-worker"));
+	workers.push_back(simgrid::s4u::Mailbox::by_name("Node73-worker"));
+	workers.push_back(simgrid::s4u::Mailbox::by_name("Node74-worker"));
+	workers.push_back(simgrid::s4u::Mailbox::by_name("Node75-worker"));
+	workers.push_back(simgrid::s4u::Mailbox::by_name("Node76-worker"));
+	workers.push_back(simgrid::s4u::Mailbox::by_name("Node77-worker"));
+	workers.push_back(simgrid::s4u::Mailbox::by_name("Node78-worker"));
+	workers.push_back(simgrid::s4u::Mailbox::by_name("Node79-worker"));
+	workers.push_back(simgrid::s4u::Mailbox::by_name("Node80-worker"));
+	workers.push_back(simgrid::s4u::Mailbox::by_name("Node81-worker"));
+	workers.push_back(simgrid::s4u::Mailbox::by_name("Node82-worker"));
+	workers.push_back(simgrid::s4u::Mailbox::by_name("Node83-worker"));
+	workers.push_back(simgrid::s4u::Mailbox::by_name("Node84-worker"));
+	workers.push_back(simgrid::s4u::Mailbox::by_name("Node85-worker"));
+	workers.push_back(simgrid::s4u::Mailbox::by_name("Node86-worker"));
+	workers.push_back(simgrid::s4u::Mailbox::by_name("Node87-worker"));
+	workers.push_back(simgrid::s4u::Mailbox::by_name("Node88-worker"));
+	workers.push_back(simgrid::s4u::Mailbox::by_name("Node89-worker"));
+	workers.push_back(simgrid::s4u::Mailbox::by_name("Node90-worker"));
+	workers.push_back(simgrid::s4u::Mailbox::by_name("Node91-worker"));
+	workers.push_back(simgrid::s4u::Mailbox::by_name("Node92-worker"));
+	workers.push_back(simgrid::s4u::Mailbox::by_name("Node93-worker"));
+	workers.push_back(simgrid::s4u::Mailbox::by_name("Node94-worker"));
+	workers.push_back(simgrid::s4u::Mailbox::by_name("Node95-worker"));
+	workers.push_back(simgrid::s4u::Mailbox::by_name("Node96-worker"));
+	workers.push_back(simgrid::s4u::Mailbox::by_name("Node97-worker"));
+	workers.push_back(simgrid::s4u::Mailbox::by_name("Node98-worker"));
 
 	// Threshold of array execution completed to begin resending tasks
-	int initial_threshold = 90;
+	int initial_threshold = 75;
 
 	// Timeout in seconds before beginning to resend tasks
-	int timeout = 10;
+	int timeout = 4;
 
 	MapReduceCoordinator::setup_map_reduce_coordinator_in_this_host(map_tasks_in_flops, workers, initial_threshold, timeout, &mailboxes_manager, partition_redundancy_mode_enabled_global, threshold_of_execution_mode_enabled_global);
 }

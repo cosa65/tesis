@@ -59,6 +59,9 @@ private:
 	static bool partitioned_redundancy_mode_enabled;
 	static bool threshold_of_execution_mode_enabled;
 
+	// This initial state is saved for logging purposes (since above threshold flag is eventually disabled during execution)
+	static bool initial_threshold_of_execution_mode_enabled;
+
 	static simgrid::s4u::MutexPtr resending_map_lock;
 	static simgrid::s4u::MutexPtr reduce_lock; 	
 
