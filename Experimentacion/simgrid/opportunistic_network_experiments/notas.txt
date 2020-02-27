@@ -1,11 +1,29 @@
+Definiciones:
+
+- Nodos: Son dispositivos que pueden tener un proceso de coordinador o uno de trabajador (worker) corriendo en ellos, o ambos al mismo tiempo.
+
+- Tasks: Son cada tarea de map (y reduce quizás también). 
+
 
 Decisiones:
 
-- 
+1 - El idle time en cada nodo worker se mide en la parte de ejecución.
+
+2 - Se hace un reduce apenas el coordinador recibe un map, toma 10000 u. ejecución y se ejecuta sólo en el coordinador de forma no concurrente. 
 
 
 Observaciones:
 
-- Threshold tiene mas chances de funcionar mejor que timeout porque sus triggers para resend estan mas ligados a la velocidad de ejecucion de los nodos (mas ligados que timeout, a menos que se lo ajuste caso por caso), entonces sin conocer nada de la red es mas posible que threshold funcione mejor.
+1 - Threshold tiene más chances de funcionar mejor que timeout porque sus triggers para resend están más ligados a aspectos del sistema distribuido en el que corre (en particular a la velocidad de ejecución de los nodos) a menos que se ajuste el timeout caso por caso, entonces sin conocer nada de la red es más posible que threshold funcione mejor.
 
-- Redundancy hace mas pesados todos los paquetes de tasks
+2 - Redundancy hace más pesados todos los paquetes de tasks.
+
+
+Ideas:
+
+1 - Agregar reduce distribuido, (agrupar tasks tal que tasks[0..10) sean necesarias para formar el primer reduce, tasks[10..20), etc.). No agregaría mucho lío si le damos prioridad a los maps para el reenvío de tasks, fuera de eso se podrían tratar como tareas normales.
+	Por lo general los reduces requieren el resultado de un grupo de maps para llegar a un resultado inmutable (de lo contrario tendríamos que generar un reduce nuevo por cada resultado de map que nos llega). 
+		Ejemplo: Podríamos contar cuántos 1's hay en este array de resultados de maps [1, 0, 1, 0, 1, 1] una sola vez, con un solo reduce, o podríamos generar un reduce nuevo con cada resultado de map que nos llega que agregue 1 o 0 al total de 1's.
+		Es discutible si la generación de tráfico extra en una red que ya de por sí suponemos que es poco confiable vale la pena cuando esperar a los maps necesaros para un reduce tiene más sentido (o la mitad de los maps necesarios, aunque quizás eso ya complejiza bastante las cosas).
+
+2 -
