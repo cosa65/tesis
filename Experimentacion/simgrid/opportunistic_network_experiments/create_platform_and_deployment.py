@@ -1,7 +1,7 @@
 import sys
 import random
 
-def create_platform(amount_of_nodes, link_latencies_lower_bound, link_latencies_upper_bound):
+def create_platform(amount_of_nodes, link_latencies_lower_bound, link_latencies_upper_bound, node_performance_lower_bound_in_mflops, node_performance_upper_bound_in_mflops):
 	file = open("platform.xml","w")
 
 	file.write("""<?xml version='1.0'?>
@@ -16,9 +16,11 @@ def create_platform(amount_of_nodes, link_latencies_lower_bound, link_latencies_
 		<host id="NodeCoordinator" speed="1.0Mf"/>
 	""")
 
+	node_performances = [random.randint(node_performance_lower_bound_in_mflops, node_performance_upper_bound_in_mflops) for iter in range(amount_of_nodes)]
+
 	for i in range(amount_of_nodes):
 		file.write(f"""
-		<host id="Node{i}" speed="5.0Mf"/>
+		<host id="Node{i}" speed="{node_performances[i]}.0Mf"/>
 	""")
 
 	file.write(f"""<link id="loopback" bandwidth="100.0MBps" latency="0us"/>""")
@@ -71,16 +73,20 @@ def create_deployment(amount_of_nodes):
 amount_of_nodes = int(sys.argv[1])
 link_latencies_lower_bound = 10
 link_latencies_upper_bound = 200
+node_performance_lower_bound_in_mflops = 1
+node_performance_upper_bound_in_mflops = 15
 
 if sys.argv[2:]:
         link_latencies_lower_bound = sys.argv[2]  # careful 'True' is a string, not a boolean
-        link_latencies_upper_bound = sys.argv[3:] 
+        link_latencies_upper_bound = sys.argv[3] 
+        node_performance_lower_bound_in_mflops = sys.argv[4]
+        node_performance_upper_bound_in_mflops = sys.argv[5] 
 
 # The coordinator has to exist without exception, right now it always doubles as a worker node so it adds one to the amount_of_nodes
 amount_of_nodes -= 1
 
-create_platform(amount_of_nodes, link_latencies_lower_bound, link_latencies_upper_bound)
-create_deployment(amount_of_nodes,)
+create_platform(amount_of_nodes, link_latencies_lower_bound, link_latencies_upper_bound, node_performance_lower_bound_in_mflops, node_performance_upper_bound_in_mflops)
+create_deployment(amount_of_nodes)
 
 print("Copy and paste the following under \"static void map_reduce_coordinator_host_setup(std::vector<std::string> args) {\"")
 

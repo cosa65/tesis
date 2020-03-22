@@ -1,5 +1,7 @@
 #include "map_reduce_worker.h"
 
+#define KFLOP 1000
+
 XBT_LOG_EXTERNAL_DEFAULT_CATEGORY(logging);
 
 MailboxesManager *MapReduceWorker::mailboxes_manager;
@@ -45,13 +47,14 @@ void MapReduceWorker::setup_map_worker_in_this_host(MailboxesManager *mailboxes_
 		simgrid::s4u::Mailbox* mailbox = simgrid::s4u::Mailbox::by_name(mailbox_name);
 
 		auto message = mailbox -> get();
-
+		
+		simgrid::s4u::ActorPtr actor;
 		MapReduceWorker map_worker_actor(message, mailbox, executing, running_tasks_start_point, total_execution_time, concurrent_executions_mutex);
-		simgrid::s4u::Actor::create("map_worker_actor", my_host, map_worker_actor);
+		actor = simgrid::s4u::Actor::create("map_worker_actor", my_host, map_worker_actor);
 
 		// actor = simgrid::s4u::Actor::create("handle_execute_map_task", my_host, &handle_execute_map_task, mailbox);
 		// // TODO THIS MAKES ACTOR HAVE TO BE GARBAGE COLLECTED WITH set_receiver
-		// mailbox -> set_receiver(actor);
+		mailbox -> set_receiver(actor);
 	}
 }
 
@@ -76,6 +79,13 @@ MapReduceWorker::MapReduceWorker(
 }
 
 void MapReduceWorker::operator()() {
+	simgrid::s4u::Host* my_host = simgrid::s4u::this_actor::get_host();
+
+	if(MapReduceWorker::mailboxes_manager -> is_disconnected(receive_mailbox -> get_name())) {
+		XBT_INFO("Host %s couldn't receive map message because it is disconnected", (my_host -> get_name()).c_str());
+		return;
+	}
+
 	PointInTime start_point = simgrid::s4u::Engine::get_instance() -> get_clock();
 
 	this -> concurrent_executions_mutex -> lock();
@@ -86,7 +96,6 @@ void MapReduceWorker::operator()() {
 	*executing += 1;
 	this -> concurrent_executions_mutex -> unlock();
 
-	simgrid::s4u::Host* my_host = simgrid::s4u::this_actor::get_host();
 	// std::string* message = static_cast<std::string*>(receive_mailbox -> get());
 	std::string* message = static_cast<std::string*>(message_raw);
 
@@ -96,16 +105,12 @@ void MapReduceWorker::operator()() {
 	auto payload_tuple = MessageHelper::unpack_task_payload(payload);
 	std::string flops_str = std::get<0>(payload_tuple), index = std::get<1>(payload_tuple);
 
-	int flops = std::stoi(flops_str);
+	long flops = std::stoi(flops_str);
 
-	if(MapReduceWorker::mailboxes_manager -> is_disconnected(receive_mailbox -> get_name())) {
-		XBT_INFO("Host %s couldn't receive map message of %i flops because it is disconnected", (my_host -> get_name()).c_str(), flops);
-		return;
-	}
 
 	XBT_INFO("Host %s received and will begin executing map of %i flops", (my_host -> get_name()).c_str(), flops);
 
-	simgrid::s4u::this_actor::execute(flops);
+	simgrid::s4u::this_actor::execute(flops * KFLOP);
 
 	
 	PointInTime end_point = simgrid::s4u::Engine::get_instance() -> get_clock();

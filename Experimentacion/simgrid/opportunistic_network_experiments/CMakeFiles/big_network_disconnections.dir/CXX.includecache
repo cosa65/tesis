@@ -67,6 +67,8 @@ mailboxes_manager.h
 /home/martin/Documents/tesis/Experimentacion/simgrid/opportunistic_network_experiments/utils/mailboxes_manager.h
 utils.h
 /home/martin/Documents/tesis/Experimentacion/simgrid/opportunistic_network_experiments/utils/utils.h
+node_performance.h
+/home/martin/Documents/tesis/Experimentacion/simgrid/opportunistic_network_experiments/utils/node_performance.h
 
 /home/martin/Documents/tesis/Experimentacion/simgrid/opportunistic_network_experiments/utils/map_reduce_worker.cpp
 map_reduce_worker.h
@@ -76,8 +78,6 @@ map_reduce_worker.h
 simgrid/s4u.hpp
 -
 list
--
-ctime
 -
 ratio
 -
@@ -94,12 +94,24 @@ message_helper.h
 simgrid/s4u.hpp
 -
 
+/home/martin/Documents/tesis/Experimentacion/simgrid/opportunistic_network_experiments/utils/node_performance.cpp
+node_performance.h
+/home/martin/Documents/tesis/Experimentacion/simgrid/opportunistic_network_experiments/utils/node_performance.h
+
+/home/martin/Documents/tesis/Experimentacion/simgrid/opportunistic_network_experiments/utils/node_performance.h
+iostream
+-
+list
+-
+
 /home/martin/Documents/tesis/Experimentacion/simgrid/opportunistic_network_experiments/utils/pending_map_task.h
+simgrid/s4u.hpp
+-
 chrono
 -
 string
 -
-list
+map
 -
 
 /home/martin/Documents/tesis/Experimentacion/simgrid/opportunistic_network_experiments/utils/utils.cpp

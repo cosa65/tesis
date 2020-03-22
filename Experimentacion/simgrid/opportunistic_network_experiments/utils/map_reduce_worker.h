@@ -2,7 +2,6 @@
 
 #include <simgrid/s4u.hpp>
 #include <list>
-#include <ctime>
 #include <ratio>
 
 #include "message_helper.h"

@@ -1,8 +1,13 @@
 Definiciones:
 
+
+Walltime
+
 - Nodos: Son dispositivos que pueden tener un proceso de coordinador o uno de trabajador (worker) corriendo en ellos, o ambos al mismo tiempo.
 
 - Tasks: Son cada tarea de map (y reduce quizás también). 
+
+- Historias de redes: Los eventos relevantes para el MapReduce que tienen lugar en una red oportunista a lo largo de una cierta cantidad de tiempo. Esto incluye desconexión de nodos a la red y conexión de nodos a la red.
 
 
 Decisiones:
@@ -11,13 +16,24 @@ Decisiones:
 
 2 - Se hace un reduce apenas el coordinador recibe un map, toma 10000 u. ejecución y se ejecuta sólo en el coordinador de forma no concurrente. 
 
+3 - Guardamos la historia de la performance de cada nodo permanentemente.
 
 Observaciones:
 
 1 - Threshold tiene más chances de funcionar mejor que timeout porque sus triggers para resend están más ligados a aspectos del sistema distribuido en el que corre (en particular a la velocidad de ejecución de los nodos) a menos que se ajuste el timeout caso por caso, entonces sin conocer nada de la red es más posible que threshold funcione mejor.
 
-2 - Redundancy hace más pesados todos los paquetes de tasks.
+2 - Threshold apreovecha mas los nodos mas cerca (menos latencia)
 
+3 - Redundancy hace más pesados todos los paquetes de tasks.
+
+4 - Hadoop tiene HDFS, distribuye 
+
+5 - El MapReduce implementado está enfocado en la preparación y distribución de tareas, sin intentar solucionar los problemas de confiabilidad y flexibilidad de la red oportunista.
+
+6 - Sobre la decisión de guardar cada tiempo de respuesta de cada nodo de manera permanente:
+	+ No sabemos si el peso computacional de cada paquete de map tasks enviado a cada nodo es realmente parecido al resto de los nodos, y no podemos separar esa información de la de la performance de los nodos, pero si guardamos toda la historia de la performance de un nodo entonces, a largo plazo, es probable que reciba tareas de diversos tamaños y el valor de performance extraído de esta historia termine aproximándose a algo independiente del valor individual de cada tarea.
+
+	- Si un nodo se vuelve muy malo a partir de un momento, el valor de esa información queda diluido por la anterior historia de buena performance que tenia
 
 Ideas:
 
@@ -26,4 +42,6 @@ Ideas:
 		Ejemplo: Podríamos contar cuántos 1's hay en este array de resultados de maps [1, 0, 1, 0, 1, 1] una sola vez, con un solo reduce, o podríamos generar un reduce nuevo con cada resultado de map que nos llega que agregue 1 o 0 al total de 1's.
 		Es discutible si la generación de tráfico extra en una red que ya de por sí suponemos que es poco confiable vale la pena cuando esperar a los maps necesaros para un reduce tiene más sentido (o la mitad de los maps necesarios, aunque quizás eso ya complejiza bastante las cosas).
 
-2 -
+2 - Simular mejor las subredes oportunistas 
+
+3 - Guardar la historia de la performance de cada nodo y además intentar identificar variaciones en performance a lo largo del día (quizás es más performante entre las 0:00 y 7:00 y el resto del día no responde, por ejemplo).

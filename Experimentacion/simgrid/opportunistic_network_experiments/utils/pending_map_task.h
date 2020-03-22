@@ -1,29 +1,33 @@
 #pragma once
 
+#include <simgrid/s4u.hpp>
 #include <chrono>
 #include <string>
-#include <list>
+#include <map>
 
 struct PendingMapTask {
 	// map_index is an integer that represents the index of the subarray that is being mapped (so its value range is from 0 .. array_size/subarray_size - 1)
-	PendingMapTask(int map_index, std::string worker_id, std::string task_data) {
+	PendingMapTask(int map_index, std::string task_data) {
 		this -> map_index = map_index;
-		this -> worker_id = worker_id;
 		this -> task_data = task_data;
-		this -> time_created = std::chrono::steady_clock::now();
+		this -> finished = false;
 	}
 
-	PendingMapTask *copy_task(std::string worker_id) {
-		return new PendingMapTask(this -> map_index, worker_id, this -> task_data);
+	double time_since_creation(std::string worker_id) {
+		double now = simgrid::s4u::Engine::get_instance() -> get_clock();
+		return now - start_times_by_worker_ids[worker_id];
 	}
 
-	std::chrono::seconds time_since_creation() {
-		auto now = std::chrono::steady_clock::now();
-		std::chrono::duration_cast<std::chrono::seconds>(now - time_created).count();
+	void add_new_worker(std::string worker_id) {
+		start_times_by_worker_ids[worker_id] = simgrid::s4u::Engine::get_instance() -> get_clock();
+	}
+
+	void mark_as_finished() {
+		this -> finished = true;
 	}
 
 	int map_index;
-	std::string worker_id;
+	std::map<std::string, double> start_times_by_worker_ids;
 	std::string task_data;
-	std::chrono::steady_clock::time_point time_created;
+	bool finished;
 };

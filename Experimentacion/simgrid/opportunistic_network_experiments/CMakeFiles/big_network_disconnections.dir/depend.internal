@@ -7,6 +7,7 @@ CMakeFiles/big_network_disconnections.dir/big_network_disconnections/big_network
  /home/martin/Documents/tesis/Experimentacion/simgrid/opportunistic_network_experiments/utils/map_reduce_coordinator.h
  /home/martin/Documents/tesis/Experimentacion/simgrid/opportunistic_network_experiments/utils/map_reduce_worker.h
  /home/martin/Documents/tesis/Experimentacion/simgrid/opportunistic_network_experiments/utils/message_helper.h
+ /home/martin/Documents/tesis/Experimentacion/simgrid/opportunistic_network_experiments/utils/node_performance.h
  /home/martin/Documents/tesis/Experimentacion/simgrid/opportunistic_network_experiments/utils/pending_map_task.h
  /home/martin/Documents/tesis/Experimentacion/simgrid/opportunistic_network_experiments/utils/utils.h
 CMakeFiles/big_network_disconnections.dir/utils/mailboxes_manager.cpp.o
@@ -18,6 +19,7 @@ CMakeFiles/big_network_disconnections.dir/utils/map_reduce_coordinator.cpp.o
  /home/martin/Documents/tesis/Experimentacion/simgrid/opportunistic_network_experiments/utils/map_reduce_coordinator.h
  /home/martin/Documents/tesis/Experimentacion/simgrid/opportunistic_network_experiments/utils/map_reduce_worker.h
  /home/martin/Documents/tesis/Experimentacion/simgrid/opportunistic_network_experiments/utils/message_helper.h
+ /home/martin/Documents/tesis/Experimentacion/simgrid/opportunistic_network_experiments/utils/node_performance.h
  /home/martin/Documents/tesis/Experimentacion/simgrid/opportunistic_network_experiments/utils/pending_map_task.h
  /home/martin/Documents/tesis/Experimentacion/simgrid/opportunistic_network_experiments/utils/utils.h
 CMakeFiles/big_network_disconnections.dir/utils/map_reduce_worker.cpp.o
@@ -28,6 +30,9 @@ CMakeFiles/big_network_disconnections.dir/utils/map_reduce_worker.cpp.o
 CMakeFiles/big_network_disconnections.dir/utils/message_helper.cpp.o
  /home/martin/Documents/tesis/Experimentacion/simgrid/opportunistic_network_experiments/utils/message_helper.cpp
  /home/martin/Documents/tesis/Experimentacion/simgrid/opportunistic_network_experiments/utils/message_helper.h
+CMakeFiles/big_network_disconnections.dir/utils/node_performance.cpp.o
+ /home/martin/Documents/tesis/Experimentacion/simgrid/opportunistic_network_experiments/utils/node_performance.cpp
+ /home/martin/Documents/tesis/Experimentacion/simgrid/opportunistic_network_experiments/utils/node_performance.h
 CMakeFiles/big_network_disconnections.dir/utils/utils.cpp.o
  /home/martin/Documents/tesis/Experimentacion/simgrid/opportunistic_network_experiments/utils/utils.cpp
  /home/martin/Documents/tesis/Experimentacion/simgrid/opportunistic_network_experiments/utils/utils.h

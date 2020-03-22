@@ -7,401 +7,401 @@
 
 		<host id="NodeCoordinator" speed="1.0Mf"/>
 	
-		<host id="Node0" speed="5.0Mf"/>
+		<host id="Node0" speed="12.0Mf"/>
 	
-		<host id="Node1" speed="5.0Mf"/>
+		<host id="Node1" speed="6.0Mf"/>
 	
-		<host id="Node2" speed="5.0Mf"/>
+		<host id="Node2" speed="1.0Mf"/>
 	
-		<host id="Node3" speed="5.0Mf"/>
+		<host id="Node3" speed="6.0Mf"/>
 	
-		<host id="Node4" speed="5.0Mf"/>
+		<host id="Node4" speed="4.0Mf"/>
 	
-		<host id="Node5" speed="5.0Mf"/>
+		<host id="Node5" speed="1.0Mf"/>
 	
-		<host id="Node6" speed="5.0Mf"/>
+		<host id="Node6" speed="8.0Mf"/>
 	
-		<host id="Node7" speed="5.0Mf"/>
+		<host id="Node7" speed="6.0Mf"/>
 	
-		<host id="Node8" speed="5.0Mf"/>
+		<host id="Node8" speed="2.0Mf"/>
 	
-		<host id="Node9" speed="5.0Mf"/>
+		<host id="Node9" speed="9.0Mf"/>
 	
-		<host id="Node10" speed="5.0Mf"/>
+		<host id="Node10" speed="1.0Mf"/>
 	
-		<host id="Node11" speed="5.0Mf"/>
+		<host id="Node11" speed="6.0Mf"/>
 	
-		<host id="Node12" speed="5.0Mf"/>
+		<host id="Node12" speed="11.0Mf"/>
 	
-		<host id="Node13" speed="5.0Mf"/>
+		<host id="Node13" speed="12.0Mf"/>
 	
 		<host id="Node14" speed="5.0Mf"/>
 	
-		<host id="Node15" speed="5.0Mf"/>
+		<host id="Node15" speed="6.0Mf"/>
 	
-		<host id="Node16" speed="5.0Mf"/>
+		<host id="Node16" speed="1.0Mf"/>
 	
-		<host id="Node17" speed="5.0Mf"/>
+		<host id="Node17" speed="10.0Mf"/>
 	
-		<host id="Node18" speed="5.0Mf"/>
+		<host id="Node18" speed="2.0Mf"/>
 	
-		<host id="Node19" speed="5.0Mf"/>
+		<host id="Node19" speed="4.0Mf"/>
 	
-		<host id="Node20" speed="5.0Mf"/>
+		<host id="Node20" speed="13.0Mf"/>
 	
-		<host id="Node21" speed="5.0Mf"/>
+		<host id="Node21" speed="15.0Mf"/>
 	
-		<host id="Node22" speed="5.0Mf"/>
+		<host id="Node22" speed="7.0Mf"/>
 	
-		<host id="Node23" speed="5.0Mf"/>
+		<host id="Node23" speed="13.0Mf"/>
 	
-		<host id="Node24" speed="5.0Mf"/>
+		<host id="Node24" speed="4.0Mf"/>
 	
 		<host id="Node25" speed="5.0Mf"/>
 	
-		<host id="Node26" speed="5.0Mf"/>
+		<host id="Node26" speed="1.0Mf"/>
 	
 		<host id="Node27" speed="5.0Mf"/>
 	
-		<host id="Node28" speed="5.0Mf"/>
+		<host id="Node28" speed="15.0Mf"/>
 	
-		<host id="Node29" speed="5.0Mf"/>
+		<host id="Node29" speed="1.0Mf"/>
 	
-		<host id="Node30" speed="5.0Mf"/>
+		<host id="Node30" speed="12.0Mf"/>
 	
-		<host id="Node31" speed="5.0Mf"/>
+		<host id="Node31" speed="1.0Mf"/>
 	
-		<host id="Node32" speed="5.0Mf"/>
+		<host id="Node32" speed="4.0Mf"/>
 	
-		<host id="Node33" speed="5.0Mf"/>
+		<host id="Node33" speed="10.0Mf"/>
 	
-		<host id="Node34" speed="5.0Mf"/>
+		<host id="Node34" speed="13.0Mf"/>
 	
-		<host id="Node35" speed="5.0Mf"/>
+		<host id="Node35" speed="2.0Mf"/>
 	
-		<host id="Node36" speed="5.0Mf"/>
+		<host id="Node36" speed="10.0Mf"/>
 	
-		<host id="Node37" speed="5.0Mf"/>
+		<host id="Node37" speed="13.0Mf"/>
 	
-		<host id="Node38" speed="5.0Mf"/>
+		<host id="Node38" speed="12.0Mf"/>
 	
-		<host id="Node39" speed="5.0Mf"/>
+		<host id="Node39" speed="3.0Mf"/>
 	
-		<host id="Node40" speed="5.0Mf"/>
+		<host id="Node40" speed="6.0Mf"/>
 	
 		<host id="Node41" speed="5.0Mf"/>
 	
-		<host id="Node42" speed="5.0Mf"/>
+		<host id="Node42" speed="13.0Mf"/>
 	
-		<host id="Node43" speed="5.0Mf"/>
+		<host id="Node43" speed="15.0Mf"/>
 	
-		<host id="Node44" speed="5.0Mf"/>
+		<host id="Node44" speed="9.0Mf"/>
 	
-		<host id="Node45" speed="5.0Mf"/>
+		<host id="Node45" speed="6.0Mf"/>
 	
-		<host id="Node46" speed="5.0Mf"/>
+		<host id="Node46" speed="8.0Mf"/>
 	
-		<host id="Node47" speed="5.0Mf"/>
+		<host id="Node47" speed="11.0Mf"/>
 	
-		<host id="Node48" speed="5.0Mf"/>
+		<host id="Node48" speed="1.0Mf"/>
 	
-		<host id="Node49" speed="5.0Mf"/>
+		<host id="Node49" speed="1.0Mf"/>
 	
-		<host id="Node50" speed="5.0Mf"/>
+		<host id="Node50" speed="2.0Mf"/>
 	
-		<host id="Node51" speed="5.0Mf"/>
+		<host id="Node51" speed="1.0Mf"/>
 	
-		<host id="Node52" speed="5.0Mf"/>
+		<host id="Node52" speed="3.0Mf"/>
 	
-		<host id="Node53" speed="5.0Mf"/>
+		<host id="Node53" speed="2.0Mf"/>
 	
-		<host id="Node54" speed="5.0Mf"/>
+		<host id="Node54" speed="11.0Mf"/>
 	
-		<host id="Node55" speed="5.0Mf"/>
+		<host id="Node55" speed="2.0Mf"/>
 	
-		<host id="Node56" speed="5.0Mf"/>
+		<host id="Node56" speed="9.0Mf"/>
 	
-		<host id="Node57" speed="5.0Mf"/>
+		<host id="Node57" speed="15.0Mf"/>
 	
-		<host id="Node58" speed="5.0Mf"/>
+		<host id="Node58" speed="11.0Mf"/>
 	
-		<host id="Node59" speed="5.0Mf"/>
+		<host id="Node59" speed="8.0Mf"/>
 	
-		<host id="Node60" speed="5.0Mf"/>
+		<host id="Node60" speed="6.0Mf"/>
 	
-		<host id="Node61" speed="5.0Mf"/>
+		<host id="Node61" speed="4.0Mf"/>
 	
-		<host id="Node62" speed="5.0Mf"/>
+		<host id="Node62" speed="10.0Mf"/>
 	
-		<host id="Node63" speed="5.0Mf"/>
+		<host id="Node63" speed="6.0Mf"/>
 	
-		<host id="Node64" speed="5.0Mf"/>
+		<host id="Node64" speed="15.0Mf"/>
 	
 		<host id="Node65" speed="5.0Mf"/>
 	
-		<host id="Node66" speed="5.0Mf"/>
+		<host id="Node66" speed="2.0Mf"/>
 	
-		<host id="Node67" speed="5.0Mf"/>
+		<host id="Node67" speed="2.0Mf"/>
 	
-		<host id="Node68" speed="5.0Mf"/>
+		<host id="Node68" speed="14.0Mf"/>
 	
-		<host id="Node69" speed="5.0Mf"/>
+		<host id="Node69" speed="11.0Mf"/>
 	
-		<host id="Node70" speed="5.0Mf"/>
+		<host id="Node70" speed="14.0Mf"/>
 	
-		<host id="Node71" speed="5.0Mf"/>
+		<host id="Node71" speed="12.0Mf"/>
 	
-		<host id="Node72" speed="5.0Mf"/>
+		<host id="Node72" speed="12.0Mf"/>
 	
 		<host id="Node73" speed="5.0Mf"/>
 	
-		<host id="Node74" speed="5.0Mf"/>
+		<host id="Node74" speed="3.0Mf"/>
 	
-		<host id="Node75" speed="5.0Mf"/>
+		<host id="Node75" speed="11.0Mf"/>
 	
-		<host id="Node76" speed="5.0Mf"/>
+		<host id="Node76" speed="7.0Mf"/>
 	
 		<host id="Node77" speed="5.0Mf"/>
 	
-		<host id="Node78" speed="5.0Mf"/>
+		<host id="Node78" speed="2.0Mf"/>
 	
-		<host id="Node79" speed="5.0Mf"/>
+		<host id="Node79" speed="3.0Mf"/>
 	
-		<host id="Node80" speed="5.0Mf"/>
+		<host id="Node80" speed="3.0Mf"/>
 	
-		<host id="Node81" speed="5.0Mf"/>
+		<host id="Node81" speed="10.0Mf"/>
 	
-		<host id="Node82" speed="5.0Mf"/>
+		<host id="Node82" speed="13.0Mf"/>
 	
-		<host id="Node83" speed="5.0Mf"/>
+		<host id="Node83" speed="9.0Mf"/>
 	
-		<host id="Node84" speed="5.0Mf"/>
+		<host id="Node84" speed="13.0Mf"/>
 	
-		<host id="Node85" speed="5.0Mf"/>
+		<host id="Node85" speed="1.0Mf"/>
 	
-		<host id="Node86" speed="5.0Mf"/>
+		<host id="Node86" speed="8.0Mf"/>
 	
-		<host id="Node87" speed="5.0Mf"/>
+		<host id="Node87" speed="6.0Mf"/>
 	
-		<host id="Node88" speed="5.0Mf"/>
+		<host id="Node88" speed="4.0Mf"/>
 	
-		<host id="Node89" speed="5.0Mf"/>
+		<host id="Node89" speed="13.0Mf"/>
 	
-		<host id="Node90" speed="5.0Mf"/>
+		<host id="Node90" speed="3.0Mf"/>
 	
-		<host id="Node91" speed="5.0Mf"/>
+		<host id="Node91" speed="8.0Mf"/>
 	
-		<host id="Node92" speed="5.0Mf"/>
+		<host id="Node92" speed="2.0Mf"/>
 	
-		<host id="Node93" speed="5.0Mf"/>
+		<host id="Node93" speed="6.0Mf"/>
 	
-		<host id="Node94" speed="5.0Mf"/>
+		<host id="Node94" speed="9.0Mf"/>
 	
-		<host id="Node95" speed="5.0Mf"/>
+		<host id="Node95" speed="14.0Mf"/>
 	
-		<host id="Node96" speed="5.0Mf"/>
+		<host id="Node96" speed="15.0Mf"/>
 	
-		<host id="Node97" speed="5.0Mf"/>
+		<host id="Node97" speed="3.0Mf"/>
 	
-		<host id="Node98" speed="5.0Mf"/>
+		<host id="Node98" speed="6.0Mf"/>
 	<link id="loopback" bandwidth="100.0MBps" latency="0us"/>
-		<link id="link_coord_0" bandwidth="40MBps" latency="21ms"/>
+		<link id="link_coord_0" bandwidth="40MBps" latency="10ms"/>
 	
-		<link id="link_coord_1" bandwidth="40MBps" latency="22ms"/>
+		<link id="link_coord_1" bandwidth="40MBps" latency="12ms"/>
 	
-		<link id="link_coord_2" bandwidth="40MBps" latency="22ms"/>
+		<link id="link_coord_2" bandwidth="40MBps" latency="14ms"/>
 	
-		<link id="link_coord_3" bandwidth="40MBps" latency="23ms"/>
+		<link id="link_coord_3" bandwidth="40MBps" latency="16ms"/>
 	
-		<link id="link_coord_4" bandwidth="40MBps" latency="24ms"/>
+		<link id="link_coord_4" bandwidth="40MBps" latency="17ms"/>
 	
-		<link id="link_coord_5" bandwidth="40MBps" latency="24ms"/>
+		<link id="link_coord_5" bandwidth="40MBps" latency="20ms"/>
 	
-		<link id="link_coord_6" bandwidth="40MBps" latency="25ms"/>
+		<link id="link_coord_6" bandwidth="40MBps" latency="20ms"/>
 	
-		<link id="link_coord_7" bandwidth="40MBps" latency="25ms"/>
+		<link id="link_coord_7" bandwidth="40MBps" latency="20ms"/>
 	
-		<link id="link_coord_8" bandwidth="40MBps" latency="26ms"/>
+		<link id="link_coord_8" bandwidth="40MBps" latency="22ms"/>
 	
 		<link id="link_coord_9" bandwidth="40MBps" latency="28ms"/>
 	
 		<link id="link_coord_10" bandwidth="40MBps" latency="30ms"/>
 	
-		<link id="link_coord_11" bandwidth="40MBps" latency="33ms"/>
+		<link id="link_coord_11" bandwidth="40MBps" latency="31ms"/>
 	
-		<link id="link_coord_12" bandwidth="40MBps" latency="34ms"/>
+		<link id="link_coord_12" bandwidth="40MBps" latency="33ms"/>
 	
-		<link id="link_coord_13" bandwidth="40MBps" latency="34ms"/>
+		<link id="link_coord_13" bandwidth="40MBps" latency="35ms"/>
 	
-		<link id="link_coord_14" bandwidth="40MBps" latency="41ms"/>
+		<link id="link_coord_14" bandwidth="40MBps" latency="35ms"/>
 	
-		<link id="link_coord_15" bandwidth="40MBps" latency="43ms"/>
+		<link id="link_coord_15" bandwidth="40MBps" latency="37ms"/>
 	
-		<link id="link_coord_16" bandwidth="40MBps" latency="44ms"/>
+		<link id="link_coord_16" bandwidth="40MBps" latency="38ms"/>
 	
-		<link id="link_coord_17" bandwidth="40MBps" latency="44ms"/>
+		<link id="link_coord_17" bandwidth="40MBps" latency="40ms"/>
 	
-		<link id="link_coord_18" bandwidth="40MBps" latency="48ms"/>
+		<link id="link_coord_18" bandwidth="40MBps" latency="45ms"/>
 	
-		<link id="link_coord_19" bandwidth="40MBps" latency="49ms"/>
+		<link id="link_coord_19" bandwidth="40MBps" latency="45ms"/>
 	
 		<link id="link_coord_20" bandwidth="40MBps" latency="49ms"/>
 	
-		<link id="link_coord_21" bandwidth="40MBps" latency="51ms"/>
+		<link id="link_coord_21" bandwidth="40MBps" latency="50ms"/>
 	
-		<link id="link_coord_22" bandwidth="40MBps" latency="52ms"/>
+		<link id="link_coord_22" bandwidth="40MBps" latency="51ms"/>
 	
-		<link id="link_coord_23" bandwidth="40MBps" latency="55ms"/>
+		<link id="link_coord_23" bandwidth="40MBps" latency="52ms"/>
 	
-		<link id="link_coord_24" bandwidth="40MBps" latency="56ms"/>
+		<link id="link_coord_24" bandwidth="40MBps" latency="55ms"/>
 	
-		<link id="link_coord_25" bandwidth="40MBps" latency="59ms"/>
+		<link id="link_coord_25" bandwidth="40MBps" latency="55ms"/>
 	
-		<link id="link_coord_26" bandwidth="40MBps" latency="60ms"/>
+		<link id="link_coord_26" bandwidth="40MBps" latency="56ms"/>
 	
-		<link id="link_coord_27" bandwidth="40MBps" latency="60ms"/>
+		<link id="link_coord_27" bandwidth="40MBps" latency="58ms"/>
 	
-		<link id="link_coord_28" bandwidth="40MBps" latency="64ms"/>
+		<link id="link_coord_28" bandwidth="40MBps" latency="59ms"/>
 	
-		<link id="link_coord_29" bandwidth="40MBps" latency="68ms"/>
+		<link id="link_coord_29" bandwidth="40MBps" latency="62ms"/>
 	
-		<link id="link_coord_30" bandwidth="40MBps" latency="69ms"/>
+		<link id="link_coord_30" bandwidth="40MBps" latency="65ms"/>
 	
-		<link id="link_coord_31" bandwidth="40MBps" latency="69ms"/>
+		<link id="link_coord_31" bandwidth="40MBps" latency="67ms"/>
 	
-		<link id="link_coord_32" bandwidth="40MBps" latency="69ms"/>
+		<link id="link_coord_32" bandwidth="40MBps" latency="67ms"/>
 	
-		<link id="link_coord_33" bandwidth="40MBps" latency="75ms"/>
+		<link id="link_coord_33" bandwidth="40MBps" latency="68ms"/>
 	
-		<link id="link_coord_34" bandwidth="40MBps" latency="76ms"/>
+		<link id="link_coord_34" bandwidth="40MBps" latency="71ms"/>
 	
-		<link id="link_coord_35" bandwidth="40MBps" latency="76ms"/>
+		<link id="link_coord_35" bandwidth="40MBps" latency="71ms"/>
 	
 		<link id="link_coord_36" bandwidth="40MBps" latency="77ms"/>
 	
-		<link id="link_coord_37" bandwidth="40MBps" latency="79ms"/>
+		<link id="link_coord_37" bandwidth="40MBps" latency="77ms"/>
 	
-		<link id="link_coord_38" bandwidth="40MBps" latency="81ms"/>
+		<link id="link_coord_38" bandwidth="40MBps" latency="78ms"/>
 	
-		<link id="link_coord_39" bandwidth="40MBps" latency="82ms"/>
+		<link id="link_coord_39" bandwidth="40MBps" latency="80ms"/>
 	
-		<link id="link_coord_40" bandwidth="40MBps" latency="83ms"/>
+		<link id="link_coord_40" bandwidth="40MBps" latency="85ms"/>
 	
-		<link id="link_coord_41" bandwidth="40MBps" latency="83ms"/>
+		<link id="link_coord_41" bandwidth="40MBps" latency="91ms"/>
 	
-		<link id="link_coord_42" bandwidth="40MBps" latency="85ms"/>
+		<link id="link_coord_42" bandwidth="40MBps" latency="93ms"/>
 	
-		<link id="link_coord_43" bandwidth="40MBps" latency="85ms"/>
+		<link id="link_coord_43" bandwidth="40MBps" latency="95ms"/>
 	
-		<link id="link_coord_44" bandwidth="40MBps" latency="87ms"/>
+		<link id="link_coord_44" bandwidth="40MBps" latency="96ms"/>
 	
-		<link id="link_coord_45" bandwidth="40MBps" latency="88ms"/>
+		<link id="link_coord_45" bandwidth="40MBps" latency="98ms"/>
 	
-		<link id="link_coord_46" bandwidth="40MBps" latency="88ms"/>
+		<link id="link_coord_46" bandwidth="40MBps" latency="99ms"/>
 	
-		<link id="link_coord_47" bandwidth="40MBps" latency="90ms"/>
+		<link id="link_coord_47" bandwidth="40MBps" latency="100ms"/>
 	
-		<link id="link_coord_48" bandwidth="40MBps" latency="92ms"/>
+		<link id="link_coord_48" bandwidth="40MBps" latency="100ms"/>
 	
-		<link id="link_coord_49" bandwidth="40MBps" latency="94ms"/>
+		<link id="link_coord_49" bandwidth="40MBps" latency="104ms"/>
 	
-		<link id="link_coord_50" bandwidth="40MBps" latency="95ms"/>
+		<link id="link_coord_50" bandwidth="40MBps" latency="105ms"/>
 	
-		<link id="link_coord_51" bandwidth="40MBps" latency="96ms"/>
+		<link id="link_coord_51" bandwidth="40MBps" latency="106ms"/>
 	
-		<link id="link_coord_52" bandwidth="40MBps" latency="98ms"/>
+		<link id="link_coord_52" bandwidth="40MBps" latency="107ms"/>
 	
-		<link id="link_coord_53" bandwidth="40MBps" latency="99ms"/>
+		<link id="link_coord_53" bandwidth="40MBps" latency="111ms"/>
 	
-		<link id="link_coord_54" bandwidth="40MBps" latency="100ms"/>
+		<link id="link_coord_54" bandwidth="40MBps" latency="114ms"/>
 	
-		<link id="link_coord_55" bandwidth="40MBps" latency="100ms"/>
+		<link id="link_coord_55" bandwidth="40MBps" latency="118ms"/>
 	
-		<link id="link_coord_56" bandwidth="40MBps" latency="100ms"/>
+		<link id="link_coord_56" bandwidth="40MBps" latency="119ms"/>
 	
-		<link id="link_coord_57" bandwidth="40MBps" latency="106ms"/>
+		<link id="link_coord_57" bandwidth="40MBps" latency="121ms"/>
 	
-		<link id="link_coord_58" bandwidth="40MBps" latency="113ms"/>
+		<link id="link_coord_58" bandwidth="40MBps" latency="123ms"/>
 	
-		<link id="link_coord_59" bandwidth="40MBps" latency="113ms"/>
+		<link id="link_coord_59" bandwidth="40MBps" latency="124ms"/>
 	
-		<link id="link_coord_60" bandwidth="40MBps" latency="114ms"/>
+		<link id="link_coord_60" bandwidth="40MBps" latency="124ms"/>
 	
-		<link id="link_coord_61" bandwidth="40MBps" latency="115ms"/>
+		<link id="link_coord_61" bandwidth="40MBps" latency="126ms"/>
 	
-		<link id="link_coord_62" bandwidth="40MBps" latency="122ms"/>
+		<link id="link_coord_62" bandwidth="40MBps" latency="126ms"/>
 	
-		<link id="link_coord_63" bandwidth="40MBps" latency="123ms"/>
+		<link id="link_coord_63" bandwidth="40MBps" latency="129ms"/>
 	
-		<link id="link_coord_64" bandwidth="40MBps" latency="125ms"/>
+		<link id="link_coord_64" bandwidth="40MBps" latency="130ms"/>
 	
-		<link id="link_coord_65" bandwidth="40MBps" latency="127ms"/>
+		<link id="link_coord_65" bandwidth="40MBps" latency="133ms"/>
 	
-		<link id="link_coord_66" bandwidth="40MBps" latency="127ms"/>
+		<link id="link_coord_66" bandwidth="40MBps" latency="134ms"/>
 	
-		<link id="link_coord_67" bandwidth="40MBps" latency="129ms"/>
+		<link id="link_coord_67" bandwidth="40MBps" latency="141ms"/>
 	
-		<link id="link_coord_68" bandwidth="40MBps" latency="132ms"/>
+		<link id="link_coord_68" bandwidth="40MBps" latency="145ms"/>
 	
-		<link id="link_coord_69" bandwidth="40MBps" latency="133ms"/>
+		<link id="link_coord_69" bandwidth="40MBps" latency="145ms"/>
 	
-		<link id="link_coord_70" bandwidth="40MBps" latency="134ms"/>
+		<link id="link_coord_70" bandwidth="40MBps" latency="146ms"/>
 	
-		<link id="link_coord_71" bandwidth="40MBps" latency="141ms"/>
+		<link id="link_coord_71" bandwidth="40MBps" latency="146ms"/>
 	
-		<link id="link_coord_72" bandwidth="40MBps" latency="144ms"/>
+		<link id="link_coord_72" bandwidth="40MBps" latency="148ms"/>
 	
-		<link id="link_coord_73" bandwidth="40MBps" latency="147ms"/>
+		<link id="link_coord_73" bandwidth="40MBps" latency="149ms"/>
 	
 		<link id="link_coord_74" bandwidth="40MBps" latency="151ms"/>
 	
 		<link id="link_coord_75" bandwidth="40MBps" latency="151ms"/>
 	
-		<link id="link_coord_76" bandwidth="40MBps" latency="152ms"/>
+		<link id="link_coord_76" bandwidth="40MBps" latency="155ms"/>
 	
-		<link id="link_coord_77" bandwidth="40MBps" latency="156ms"/>
+		<link id="link_coord_77" bandwidth="40MBps" latency="157ms"/>
 	
-		<link id="link_coord_78" bandwidth="40MBps" latency="156ms"/>
+		<link id="link_coord_78" bandwidth="40MBps" latency="158ms"/>
 	
-		<link id="link_coord_79" bandwidth="40MBps" latency="156ms"/>
+		<link id="link_coord_79" bandwidth="40MBps" latency="161ms"/>
 	
-		<link id="link_coord_80" bandwidth="40MBps" latency="156ms"/>
+		<link id="link_coord_80" bandwidth="40MBps" latency="162ms"/>
 	
-		<link id="link_coord_81" bandwidth="40MBps" latency="158ms"/>
+		<link id="link_coord_81" bandwidth="40MBps" latency="168ms"/>
 	
-		<link id="link_coord_82" bandwidth="40MBps" latency="160ms"/>
+		<link id="link_coord_82" bandwidth="40MBps" latency="168ms"/>
 	
-		<link id="link_coord_83" bandwidth="40MBps" latency="160ms"/>
+		<link id="link_coord_83" bandwidth="40MBps" latency="168ms"/>
 	
-		<link id="link_coord_84" bandwidth="40MBps" latency="162ms"/>
+		<link id="link_coord_84" bandwidth="40MBps" latency="173ms"/>
 	
-		<link id="link_coord_85" bandwidth="40MBps" latency="165ms"/>
+		<link id="link_coord_85" bandwidth="40MBps" latency="173ms"/>
 	
-		<link id="link_coord_86" bandwidth="40MBps" latency="168ms"/>
+		<link id="link_coord_86" bandwidth="40MBps" latency="179ms"/>
 	
-		<link id="link_coord_87" bandwidth="40MBps" latency="171ms"/>
+		<link id="link_coord_87" bandwidth="40MBps" latency="180ms"/>
 	
-		<link id="link_coord_88" bandwidth="40MBps" latency="171ms"/>
+		<link id="link_coord_88" bandwidth="40MBps" latency="183ms"/>
 	
-		<link id="link_coord_89" bandwidth="40MBps" latency="172ms"/>
+		<link id="link_coord_89" bandwidth="40MBps" latency="184ms"/>
 	
-		<link id="link_coord_90" bandwidth="40MBps" latency="174ms"/>
+		<link id="link_coord_90" bandwidth="40MBps" latency="186ms"/>
 	
-		<link id="link_coord_91" bandwidth="40MBps" latency="174ms"/>
+		<link id="link_coord_91" bandwidth="40MBps" latency="188ms"/>
 	
-		<link id="link_coord_92" bandwidth="40MBps" latency="177ms"/>
+		<link id="link_coord_92" bandwidth="40MBps" latency="193ms"/>
 	
-		<link id="link_coord_93" bandwidth="40MBps" latency="179ms"/>
+		<link id="link_coord_93" bandwidth="40MBps" latency="193ms"/>
 	
-		<link id="link_coord_94" bandwidth="40MBps" latency="185ms"/>
+		<link id="link_coord_94" bandwidth="40MBps" latency="195ms"/>
 	
-		<link id="link_coord_95" bandwidth="40MBps" latency="186ms"/>
+		<link id="link_coord_95" bandwidth="40MBps" latency="197ms"/>
 	
-		<link id="link_coord_96" bandwidth="40MBps" latency="189ms"/>
+		<link id="link_coord_96" bandwidth="40MBps" latency="199ms"/>
 	
-		<link id="link_coord_97" bandwidth="40MBps" latency="194ms"/>
+		<link id="link_coord_97" bandwidth="40MBps" latency="199ms"/>
 	
-		<link id="link_coord_98" bandwidth="40MBps" latency="199ms"/>
+		<link id="link_coord_98" bandwidth="40MBps" latency="200ms"/>
 	
 	    <route src="Organizer" dst="Organizer">
 	      <link_ctn id="loopback"/>

@@ -570,6 +570,51 @@ utils/message_helper.cpp.s:
 	$(MAKE) -f CMakeFiles/no_disconnection_network.dir/build.make CMakeFiles/no_disconnection_network.dir/utils/message_helper.cpp.s
 .PHONY : utils/message_helper.cpp.s
 
+utils/node_performance.o: utils/node_performance.cpp.o
+
+.PHONY : utils/node_performance.o
+
+# target to build an object file
+utils/node_performance.cpp.o:
+	$(MAKE) -f CMakeFiles/big_network_disconnections.dir/build.make CMakeFiles/big_network_disconnections.dir/utils/node_performance.cpp.o
+	$(MAKE) -f CMakeFiles/master-workers.dir/build.make CMakeFiles/master-workers.dir/utils/node_performance.cpp.o
+	$(MAKE) -f CMakeFiles/one_disconnection_network.dir/build.make CMakeFiles/one_disconnection_network.dir/utils/node_performance.cpp.o
+	$(MAKE) -f CMakeFiles/ping-pong.dir/build.make CMakeFiles/ping-pong.dir/utils/node_performance.cpp.o
+	$(MAKE) -f CMakeFiles/first_network.dir/build.make CMakeFiles/first_network.dir/utils/node_performance.cpp.o
+	$(MAKE) -f CMakeFiles/big_network_no_disconnections.dir/build.make CMakeFiles/big_network_no_disconnections.dir/utils/node_performance.cpp.o
+	$(MAKE) -f CMakeFiles/no_disconnection_network.dir/build.make CMakeFiles/no_disconnection_network.dir/utils/node_performance.cpp.o
+.PHONY : utils/node_performance.cpp.o
+
+utils/node_performance.i: utils/node_performance.cpp.i
+
+.PHONY : utils/node_performance.i
+
+# target to preprocess a source file
+utils/node_performance.cpp.i:
+	$(MAKE) -f CMakeFiles/big_network_disconnections.dir/build.make CMakeFiles/big_network_disconnections.dir/utils/node_performance.cpp.i
+	$(MAKE) -f CMakeFiles/master-workers.dir/build.make CMakeFiles/master-workers.dir/utils/node_performance.cpp.i
+	$(MAKE) -f CMakeFiles/one_disconnection_network.dir/build.make CMakeFiles/one_disconnection_network.dir/utils/node_performance.cpp.i
+	$(MAKE) -f CMakeFiles/ping-pong.dir/build.make CMakeFiles/ping-pong.dir/utils/node_performance.cpp.i
+	$(MAKE) -f CMakeFiles/first_network.dir/build.make CMakeFiles/first_network.dir/utils/node_performance.cpp.i
+	$(MAKE) -f CMakeFiles/big_network_no_disconnections.dir/build.make CMakeFiles/big_network_no_disconnections.dir/utils/node_performance.cpp.i
+	$(MAKE) -f CMakeFiles/no_disconnection_network.dir/build.make CMakeFiles/no_disconnection_network.dir/utils/node_performance.cpp.i
+.PHONY : utils/node_performance.cpp.i
+
+utils/node_performance.s: utils/node_performance.cpp.s
+
+.PHONY : utils/node_performance.s
+
+# target to generate assembly for a file
+utils/node_performance.cpp.s:
+	$(MAKE) -f CMakeFiles/big_network_disconnections.dir/build.make CMakeFiles/big_network_disconnections.dir/utils/node_performance.cpp.s
+	$(MAKE) -f CMakeFiles/master-workers.dir/build.make CMakeFiles/master-workers.dir/utils/node_performance.cpp.s
+	$(MAKE) -f CMakeFiles/one_disconnection_network.dir/build.make CMakeFiles/one_disconnection_network.dir/utils/node_performance.cpp.s
+	$(MAKE) -f CMakeFiles/ping-pong.dir/build.make CMakeFiles/ping-pong.dir/utils/node_performance.cpp.s
+	$(MAKE) -f CMakeFiles/first_network.dir/build.make CMakeFiles/first_network.dir/utils/node_performance.cpp.s
+	$(MAKE) -f CMakeFiles/big_network_no_disconnections.dir/build.make CMakeFiles/big_network_no_disconnections.dir/utils/node_performance.cpp.s
+	$(MAKE) -f CMakeFiles/no_disconnection_network.dir/build.make CMakeFiles/no_disconnection_network.dir/utils/node_performance.cpp.s
+.PHONY : utils/node_performance.cpp.s
+
 utils/utils.o: utils/utils.cpp.o
 
 .PHONY : utils/utils.o
@@ -663,6 +708,9 @@ help:
 	@echo "... utils/message_helper.o"
 	@echo "... utils/message_helper.i"
 	@echo "... utils/message_helper.s"
+	@echo "... utils/node_performance.o"
+	@echo "... utils/node_performance.i"
+	@echo "... utils/node_performance.s"
 	@echo "... utils/utils.o"
 	@echo "... utils/utils.i"
 	@echo "... utils/utils.s"

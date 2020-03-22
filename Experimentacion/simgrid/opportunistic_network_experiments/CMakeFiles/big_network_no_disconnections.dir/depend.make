@@ -6,6 +6,7 @@ CMakeFiles/big_network_no_disconnections.dir/big_network_no_disconnections/big_n
 CMakeFiles/big_network_no_disconnections.dir/big_network_no_disconnections/big_network_no_disconnections.cpp.o: utils/map_reduce_coordinator.h
 CMakeFiles/big_network_no_disconnections.dir/big_network_no_disconnections/big_network_no_disconnections.cpp.o: utils/map_reduce_worker.h
 CMakeFiles/big_network_no_disconnections.dir/big_network_no_disconnections/big_network_no_disconnections.cpp.o: utils/message_helper.h
+CMakeFiles/big_network_no_disconnections.dir/big_network_no_disconnections/big_network_no_disconnections.cpp.o: utils/node_performance.h
 CMakeFiles/big_network_no_disconnections.dir/big_network_no_disconnections/big_network_no_disconnections.cpp.o: utils/pending_map_task.h
 CMakeFiles/big_network_no_disconnections.dir/big_network_no_disconnections/big_network_no_disconnections.cpp.o: utils/utils.h
 
@@ -17,6 +18,7 @@ CMakeFiles/big_network_no_disconnections.dir/utils/map_reduce_coordinator.cpp.o:
 CMakeFiles/big_network_no_disconnections.dir/utils/map_reduce_coordinator.cpp.o: utils/map_reduce_coordinator.h
 CMakeFiles/big_network_no_disconnections.dir/utils/map_reduce_coordinator.cpp.o: utils/map_reduce_worker.h
 CMakeFiles/big_network_no_disconnections.dir/utils/map_reduce_coordinator.cpp.o: utils/message_helper.h
+CMakeFiles/big_network_no_disconnections.dir/utils/map_reduce_coordinator.cpp.o: utils/node_performance.h
 CMakeFiles/big_network_no_disconnections.dir/utils/map_reduce_coordinator.cpp.o: utils/pending_map_task.h
 CMakeFiles/big_network_no_disconnections.dir/utils/map_reduce_coordinator.cpp.o: utils/utils.h
 
@@ -27,6 +29,9 @@ CMakeFiles/big_network_no_disconnections.dir/utils/map_reduce_worker.cpp.o: util
 
 CMakeFiles/big_network_no_disconnections.dir/utils/message_helper.cpp.o: utils/message_helper.cpp
 CMakeFiles/big_network_no_disconnections.dir/utils/message_helper.cpp.o: utils/message_helper.h
+
+CMakeFiles/big_network_no_disconnections.dir/utils/node_performance.cpp.o: utils/node_performance.cpp
+CMakeFiles/big_network_no_disconnections.dir/utils/node_performance.cpp.o: utils/node_performance.h
 
 CMakeFiles/big_network_no_disconnections.dir/utils/utils.cpp.o: utils/utils.cpp
 CMakeFiles/big_network_no_disconnections.dir/utils/utils.cpp.o: utils/utils.h
