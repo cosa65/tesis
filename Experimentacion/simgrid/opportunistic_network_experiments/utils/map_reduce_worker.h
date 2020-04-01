@@ -16,7 +16,6 @@ public:
 	static const std::map<std::string, std::string> get_workers_idle_times();
 
 	static MailboxesManager *mailboxes_manager;
-	static std::map<std::string, std::string> workers_idle_times;
 
 	MapReduceWorker(
 		void *message_raw, 
@@ -30,6 +29,8 @@ public:
 	void operator()();
 
 private:
+	static std::map<std::string, std::string> workers_idle_times;
+	
 	void *message_raw;
 	simgrid::s4u::Mailbox* receive_mailbox;
 	int *executing;

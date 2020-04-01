@@ -33,19 +33,17 @@ public:
 		bool threshold_of_execution_mode_enabled
 	);
 
-	static void distribute_and_send_maps(std::list<long> map_tasks_in_flops, std::list<std::string> workers, int initial_threshold);
-	static void resend_pending_tasks_on_timeout();
-	static bool resend_pending_tasks();
-
-	static void save_logs();
-
 	static MailboxesManager *mailboxes_manager;
 
 	MapReduceCoordinator(void *message_raw, simgrid::s4u::Mailbox* receive_mailbox);
 	void operator()();
 
 private:
+	static void distribute_and_send_maps(std::list<long> map_tasks_in_flops, std::list<std::string> workers, int initial_threshold);
+	static void resend_pending_tasks_on_timeout();
+	static bool resend_pending_tasks();
 	static void update_nodes_state_and_performance_history(PendingMapTask *map_task, std::string worker_id);
+	static void save_logs();
 
 	// To keep track of which maps can be resent to idle workers
 	// Is reordered so that maps that have already been resent have less priority in next resend
@@ -59,8 +57,6 @@ private:
 	// Used to aid guessing which worker to pick when resending
 	static std::map<std::string, NodePerformance *> efficiency_by_worker_id;
 	static long average_execution_time; 
-
-
 
 	// To keep track of whether the execution of the MapReduce is finished or not
 	static int pending_maps_count;
