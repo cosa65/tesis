@@ -1,9 +1,0 @@
-protocol: 4
-domain: 177988
-start-time: 1567009552
-sender-id: m3-96
-app-name: robot_position_measures
-schema: 0 _experiment_metadata subject:string key:string value:string
-schema: 10 robot_pose timestamp_s:uint32 timestamp_us:uint32 x:double y:double theta:double
-content: text
-

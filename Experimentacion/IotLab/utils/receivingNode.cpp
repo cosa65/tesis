@@ -4,6 +4,8 @@
 #include <arpa/inet.h>
 #include <string.h> 
 
+#include "message_helper.h"
+
 int main(int argc, char *argv[]) {
 	// SOCK_DGRAM = UDP, SOCK_STREAM = TCP
 	int socket_file_descriptor = socket(AF_INET6, SOCK_DGRAM, 0);
@@ -17,7 +19,7 @@ int main(int argc, char *argv[]) {
 	if (argc == 1) {
 		// receiving_ipv6 = "fe80::1407:e249:c329:99e2"; //LOCAL VERSION
 		// receiving_interface = "wlp2s0"; //LOCAL VERSION
-		receiving_ipv6 = "2001:660:5307:3000::64";
+		receiving_ipv6 = "fe80::fadc:7aff:fe01:95f3::64";//"2001:660:5307:3000::64";
 		receiving_interface = "eth0";
 		std::cout << "Receiving at default ip " << receiving_ipv6 << std::endl;
 	} else {

@@ -1,0 +1,10 @@
+- Armar red con un nodo organizador_de_red que siempre es el mismo y actuamos como que tiene siempre misma IPv6 harcodeada.
+	- En el caso que haya cambiado, nos vamos a dar cuenta rapido y es solo cambiar un valor en el codigo.
+- Todos los nodos envian su ip al nodo organizador_de_red, ademas contandole cual rol cumplen (si worker o coordinator).
+- El nodo organizador_de_red crea la red a emular con todas las ips que necesita y luego publica a cada nodo su posicion en la red.
+	- En un primer experimento todos los nodos estan conectados con todos.
+- El nodo coordinador, ya sabiendo cuantos nodos tiene a su disposicion (info recibida del organizador_de_red) y como es la tarea a resolver, separa en las aprticiones y envia la info.
+
+- El experimento se maneja igual que en simgrid hasta resolverse el MapReduce simulado.
+
+- Una vez terminado el MapReduce, los nodos worker envian al coordinador la informacion relevante para el experimento y esta info queda guardada en un archivo en el coordinador.

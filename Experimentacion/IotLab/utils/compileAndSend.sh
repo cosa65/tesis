@@ -1,7 +1,8 @@
-arm-linux-gnueabi-g++ receivingNode.cpp -static -o receivingNodeArm
-arm-linux-gnueabi-g++ sendingNode.cpp -static -o sendingNodeArm
+arm-linux-gnueabi-g++ receivingNode.cpp message_helper.cpp -static -o receivingNodeArm
+arm-linux-gnueabi-g++ sendingNode.cpp message_helper.cpp -static -o sendingNodeArm
 
-scp receivingNodeArm fosco@grenoble.iot-lab.info:/senslab/users/fosco
+echo "Everything compiled successfully!"
+
 scp receivingNodeArm fosco@grenoble.iot-lab.info:/senslab/users/fosco
 scp sendingNodeArm fosco@strasbourg.iot-lab.info:/senslab/users/fosco
 
