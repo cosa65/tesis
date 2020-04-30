@@ -1,9 +1,3 @@
-#include <iostream>
-#include <sys/socket.h>
-#include <net/if.h>
-#include <arpa/inet.h>
-#include <string.h> 
-
 #include "message_helper.h"
 
 const char *network_manager_ipv6 = "2001:660:3207:400::1";

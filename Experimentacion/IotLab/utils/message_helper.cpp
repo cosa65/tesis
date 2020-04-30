@@ -28,7 +28,7 @@ void MessageHelper::send_message(std::string payload, std::string destination_ip
 	std::cout << "Sent message with content: " << content << std::endl;
 }
 
-std::string MessageHelper::listen_for_message(std::string receiving_ipv6, std::string receiving_interface) {
+MessageHelper::MessageData MessageHelper::listen_for_message(std::string receiving_ipv6, std::string receiving_interface) {
 	int socket_file_descriptor = socket(AF_INET6, SOCK_DGRAM, 0);
 
 	struct sockaddr_in6 socket_struct;
@@ -44,7 +44,7 @@ std::string MessageHelper::listen_for_message(std::string receiving_ipv6, std::s
     }
 
     char receive_buffer[549];
-	struct sockaddr_storage src_addr;
+	struct sockaddr src_addr;
 	socklen_t src_addr_len=sizeof(src_addr);
 
 	// Blocking to receive message
@@ -55,8 +55,12 @@ std::string MessageHelper::listen_for_message(std::string receiving_ipv6, std::s
 	// 	std::cout << "Received another bit, current message: " << receive_buffer << " count: " << count << std::endl;
 	// }
 
-	std::string result(receive_buffer);
-	return result;
+	std::string message_content(receive_buffer);
+	std::string ipv6_address = to_string(src_addr, src_addr_len);
+
+	MessageData message(message_content, ipv6_address);
+
+	return message;
 }
 
 std::tuple<std::string, std::string> MessageHelper::unpack_message(std::string message) {
@@ -79,4 +83,21 @@ std::tuple<std::string, std::string> MessageHelper::unpack_task_payload(std::str
 	// std::string map_index = payload.substr(map_index_start, (payload.length()) - map_index_start);
 
 	return std::make_tuple("flops", "map_index"); 
+}
+
+// https://stackoverflow.com/a/37722395
+std::string MessageHelper::to_string(sockaddr sockaddr, socklen_t address_length) {
+	char address_chars[address_length];
+
+	inet_ntop(AF_INET6, &(((struct sockaddr_in *)&sockaddr)->sin_addr), address_chars, address_length);
+
+	// struct sockaddr_in *sin = (struct sockaddr_in *)&s;
+	// char ip[address_length];
+	// uint16_t port;
+	// inet_pton(AF_INET, sin->sin_addr, ip, sizeof (ip));
+	// port = htons (sin->sin_port);
+
+
+	std::string address_str(address_chars);
+	return address_str;
 }
