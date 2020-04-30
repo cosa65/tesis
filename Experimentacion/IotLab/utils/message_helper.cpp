@@ -1,8 +1,6 @@
 #include "message_helper.h"
 
-const char *network_manager_ipv6 = "fe80::fadc:7aff:fe01:95f3::64";
-
-void MessageHelper::send_message(std::string payload, std::string destination_ipv6, int payload_size) {
+void MessageHelper::send_message(std::string payload, std::string destination_ipv6, std::string destination_interface, int payload_size) {
 
 	// SOCK_DGRAM = UDP, SOCK_STREAM = TCP
 	int socket_file_descriptor = socket(AF_INET6, SOCK_DGRAM, 0);
@@ -12,22 +10,53 @@ void MessageHelper::send_message(std::string payload, std::string destination_ip
 
 	// sending_ipv6 = "fe80::1407:e249:c329:99e2"; //LOCAL VERSION
 	// sending_interface = "wlp2s0"; //LOCAL VERSION
-	const char *sending_ipv6 = network_manager_ipv6; //"2001:660:5307:3000::64";
-	const char *sending_interface = "eth0";
-	std::cout << "Sending to network_manager: " << sending_ipv6 << std::endl;
+	const char *sending_ipv6 = destination_ipv6.c_str(); //"2001:660:5307:3000::64";
+	const char *sending_interface = destination_interface.c_str();
+	std::cout << "Sending to network_manager: " << sending_ipv6 << " interface: " << destination_interface << std::endl;
 
     inet_pton(AF_INET6,sending_ipv6, (void *)&socket_struct.sin6_addr.s6_addr);
     socket_struct.sin6_scope_id = if_nametoindex(sending_interface);
 	socket_struct.sin6_port = htons(8080);
 
-	char content[] = "This is the message content.";
+	const char *content = payload.c_str();
 
-	if (sendto(socket_file_descriptor, content, sizeof(content), 0, (struct sockaddr *)&socket_struct, sizeof(socket_struct)) == -1) {
+	if (sendto(socket_file_descriptor, content, payload.size(), 0, (struct sockaddr *)&socket_struct, sizeof(socket_struct)) == -1) {
 	    std::cout << "Error in send_message: " << strerror(errno) << std::endl;
         exit(EXIT_FAILURE);
 	}
 
 	std::cout << "Sent message with content: " << content << std::endl;
+}
+
+std::string MessageHelper::listen_for_message(std::string receiving_ipv6, std::string receiving_interface) {
+	int socket_file_descriptor = socket(AF_INET6, SOCK_DGRAM, 0);
+
+	struct sockaddr_in6 socket_struct;
+	socket_struct.sin6_family = AF_INET6;
+
+	socket_struct.sin6_port = htons(8080);
+	socket_struct.sin6_scope_id = if_nametoindex(receiving_interface.c_str());
+	inet_pton(AF_INET6, receiving_ipv6.c_str(), (void *)&socket_struct.sin6_addr.s6_addr);
+
+	if (bind(socket_file_descriptor, (struct sockaddr*) &socket_struct, sizeof(socket_struct)) < 0) {
+        std::cout << "Error: " << strerror(errno) << std::endl;
+        exit(EXIT_FAILURE);
+    }
+
+    char receive_buffer[549];
+	struct sockaddr_storage src_addr;
+	socklen_t src_addr_len=sizeof(src_addr);
+
+	// Blocking to receive message
+	ssize_t count = recvfrom(socket_file_descriptor,receive_buffer, sizeof(receive_buffer), 0, (struct sockaddr*)&src_addr, &src_addr_len);
+
+	// while(count > 0) {
+	// 	count = recvfrom(socket_file_descriptor,receive_buffer, sizeof(receive_buffer), 0, (struct sockaddr*)&src_addr, &src_addr_len);			
+	// 	std::cout << "Received another bit, current message: " << receive_buffer << " count: " << count << std::endl;
+	// }
+
+	std::string result(receive_buffer);
+	return result;
 }
 
 std::tuple<std::string, std::string> MessageHelper::unpack_message(std::string message) {

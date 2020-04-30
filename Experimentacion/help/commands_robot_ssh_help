@@ -60,10 +60,10 @@ python ./live_imu.py --port 20000 --sensor Gyr --nodeid m3-96
 ip -6 addr
 
 Lugares con IPv6 global:
-grenoble, strasbourg, (?)
+strasbourg, saclay, (?)
 
 Lugares sin IPv6 global:
-paris, lyon, (?)
+lyon, grenoble, (?), paris no se, todos suspect
 
 IPs:
 grenoble 
