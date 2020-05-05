@@ -1,4 +1,4 @@
-- Armar red con un nodo organizador_de_red que siempre es el mismo y actuamos como que tiene siempre misma IPv6 harcodeada.
+- Armar red con un nodo organizador_de_red que siempre es el mismo y actuamos como que tiene siempre misma IPv6 harcodeada. LISTO
 	- En el caso que haya cambiado, nos vamos a dar cuenta rapido y es solo cambiar un valor en el codigo.
 - Todos los nodos envian su ip al nodo organizador_de_red, ademas contandole cual rol cumplen (si worker o coordinator).
 - El nodo organizador_de_red crea la red a emular con todas las ips que necesita y luego publica a cada nodo su posicion en la red.

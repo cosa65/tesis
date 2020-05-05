@@ -21,7 +21,8 @@ public:
 	};
 
 	static void send_message(std::string payload, std::string destination_ipv6, std::string destination_interface, int payload_size);
-	static MessageData listen_for_message(std::string receiving_ipv6, std::string receiving_interface);
+	static int bind_listen(std::string receiving_ipv6, std::string receiving_interface);
+	static MessageData listen_for_message(int socket_file_descriptor);
 	static std::tuple<std::string, std::string> unpack_message(std::string message);
 	// map payload shape is "flops:%s;map_index:%s"
 	static std::tuple<std::string, std::string> unpack_task_payload(std::string payload);

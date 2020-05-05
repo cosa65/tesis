@@ -6,7 +6,7 @@ const char *network_manager_interface = "eth0";
 int default_payload_size = 10;
 
 int main(int argc, char *argv[]) {
-	MessageHelper::send_message("payload", network_manager_ipv6, network_manager_interface, default_payload_size);
+	MessageHelper::send_message(argv[1], network_manager_ipv6, network_manager_interface, default_payload_size);
 
 	return 0;
 }

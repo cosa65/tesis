@@ -28,7 +28,8 @@ void MessageHelper::send_message(std::string payload, std::string destination_ip
 	std::cout << "Sent message with content: " << content << std::endl;
 }
 
-MessageHelper::MessageData MessageHelper::listen_for_message(std::string receiving_ipv6, std::string receiving_interface) {
+// Returns socket_file_descriptor for created socket
+int MessageHelper::bind_listen(std::string receiving_ipv6, std::string receiving_interface) {
 	int socket_file_descriptor = socket(AF_INET6, SOCK_DGRAM, 0);
 
 	struct sockaddr_in6 socket_struct;
@@ -39,10 +40,14 @@ MessageHelper::MessageData MessageHelper::listen_for_message(std::string receivi
 	inet_pton(AF_INET6, receiving_ipv6.c_str(), (void *)&socket_struct.sin6_addr.s6_addr);
 
 	if (bind(socket_file_descriptor, (struct sockaddr*) &socket_struct, sizeof(socket_struct)) < 0) {
-        std::cout << "Error: " << strerror(errno) << std::endl;
-        exit(EXIT_FAILURE);
-    }
+		std::cout << "Error: " << strerror(errno) << std::endl;
+		exit(EXIT_FAILURE);
+	}
 
+	return socket_file_descriptor;
+}
+
+MessageHelper::MessageData MessageHelper::listen_for_message(int socket_file_descriptor) {
     char receive_buffer[549];
 	struct sockaddr src_addr;
 	socklen_t src_addr_len=sizeof(src_addr);
@@ -87,9 +92,9 @@ std::tuple<std::string, std::string> MessageHelper::unpack_task_payload(std::str
 
 // https://stackoverflow.com/a/37722395
 std::string MessageHelper::to_string(sockaddr sockaddr, socklen_t address_length) {
-	char address_chars[address_length];
+	char address_chars[INET6_ADDRSTRLEN];
 
-	inet_ntop(AF_INET6, &(((struct sockaddr_in *)&sockaddr)->sin_addr), address_chars, address_length);
+	inet_ntop(AF_INET6, &(((struct sockaddr_in6 *)&sockaddr)->sin6_addr), address_chars, sizeof(address_chars));
 
 	// struct sockaddr_in *sin = (struct sockaddr_in *)&s;
 	// char ip[address_length];
