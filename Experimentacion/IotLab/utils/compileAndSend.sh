@@ -1,8 +1,8 @@
 
 echo "-----------------------------------------Compiling receivingNode--------------------------------------------"
-arm-linux-gnueabi-g++ receivingNode.cpp message_helper.cpp network_organizer.cpp -g -static -o receivingNodeArm
+arm-linux-gnueabi-g++ receivingNode.cpp message_helper.cpp network_organizer.cpp emulated_nodes/coordinator_node.cpp emulated_nodes/worker_node.cpp -g -static -o receivingNodeArm
 echo "------------------------------------------Compiling sendingNode---------------------------------------------"
-arm-linux-gnueabi-g++ sendingNode.cpp message_helper.cpp network_organizer.cpp -g -static -o sendingNodeArm
+arm-linux-gnueabi-g++ sendingNode.cpp message_helper.cpp network_organizer.cpp emulated_nodes/coordinator_node.cpp emulated_nodes/worker_node.cpp -g -static -o sendingNodeArm
 echo "<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<Everything compiled successfully!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>"
 
 scp receivingNodeArm fosco@saclay.iot-lab.info:/senslab/users/fosco

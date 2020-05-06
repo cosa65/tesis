@@ -1,6 +1,6 @@
 #include "message_helper.h"
 
-void MessageHelper::send_message(std::string payload, std::string destination_ipv6, std::string destination_interface, int payload_size) {
+void MessageHelper::send_message(std::string payload, std::string destination_ipv6, std::string destination_interface) {
 
 	// SOCK_DGRAM = UDP, SOCK_STREAM = TCP
 	int socket_file_descriptor = socket(AF_INET6, SOCK_DGRAM, 0);
@@ -20,7 +20,8 @@ void MessageHelper::send_message(std::string payload, std::string destination_ip
 
 	const char *content = payload.c_str();
 
-	if (sendto(socket_file_descriptor, content, payload.size(), 0, (struct sockaddr *)&socket_struct, sizeof(socket_struct)) == -1) {
+	// Sending with size = payload.size() + 1 because we want to send the end of line character so the recipient knows when to stop reading
+	if (sendto(socket_file_descriptor, content, payload.size() + 1, 0, (struct sockaddr *)&socket_struct, sizeof(socket_struct)) == -1) {
 	    std::cout << "Error in send_message: " << strerror(errno) << std::endl;
         exit(EXIT_FAILURE);
 	}
@@ -41,7 +42,8 @@ int MessageHelper::bind_listen(std::string receiving_ipv6, std::string receiving
 
 	if (bind(socket_file_descriptor, (struct sockaddr*) &socket_struct, sizeof(socket_struct)) < 0) {
 		std::cout << "Error: " << strerror(errno) << std::endl;
-		exit(EXIT_FAILURE);
+		// exit(EXIT_FAILURE);
+		return socket_file_descriptor;
 	}
 
 	return socket_file_descriptor;
@@ -68,17 +70,6 @@ MessageHelper::MessageData MessageHelper::listen_for_message(int socket_file_des
 	return message;
 }
 
-std::tuple<std::string, std::string> MessageHelper::unpack_message(std::string message) {
-	// int sender_start = 5; //5 = "from:" length();
-	// int sender_end = message.find(";") - 5;
-	// int payload_start = message.find("payload:") + 8; // 8 = "payload:" length
-
-	// std::string sender = message.substr(sender_start, sender_end);
-	// std::string payload = message.substr(payload_start, (message.length()) - payload_start);
-
-	return std::make_tuple("sender", "payload");
-}
-
 std::tuple<std::string, std::string> MessageHelper::unpack_task_payload(std::string payload) {
 	// int flops_start = 6;
 	// int flops_end = payload.find(";") - 6;
@@ -88,6 +79,16 @@ std::tuple<std::string, std::string> MessageHelper::unpack_task_payload(std::str
 	// std::string map_index = payload.substr(map_index_start, (payload.length()) - map_index_start);
 
 	return std::make_tuple("flops", "map_index"); 
+}
+
+// https://stackoverflow.com/a/5607650
+std::list<std::string> MessageHelper::split_by_spaces(std::string string_with_spaces) {
+	std::stringstream ss(string_with_spaces);
+	std::istream_iterator<std::string> begin(ss);
+	std::istream_iterator<std::string> end;
+	std::list<std::string> strings_list(begin, end);
+	
+	return strings_list;
 }
 
 // https://stackoverflow.com/a/37722395
@@ -105,4 +106,17 @@ std::string MessageHelper::to_string(sockaddr sockaddr, socklen_t address_length
 
 	std::string address_str(address_chars);
 	return address_str;
+}
+
+std::tuple<std::string, std::string> MessageHelper::MessageData::unpack_message(std::string first_separator, std::string second_separator) {
+	std::string raw_message = this -> content;
+
+	int first_start = first_separator.length();
+	int first_end = raw_message.find(second_separator) - first_separator.length();
+	int second_start = raw_message.find(second_separator) + second_separator.length();
+
+	std::string first_msg = raw_message.substr(first_start, first_end);
+	std::string second_msg = raw_message.substr(second_start, (raw_message.length()) - second_start);
+
+	return std::make_tuple(first_msg, second_msg);
 }

@@ -18,3 +18,16 @@ void NetworkOrganizer::listen_for_worker_ips(int workers_size) {
 
 	std::cout << "Received all workers! I have now " << this -> workers.size() << " workers available" << std::endl;
 }
+
+void NetworkOrganizer::create_network_and_send_links() {
+	// For now, just connect all nodes to the coordinator (default coordinator is the same as network_organizer)
+	for (std::string worker : this -> workers) {
+		std::string message_content = "role:worker," + network_organizer_ipv6;
+		std::cout << "Sending message with content: " << message_content << std::endl;
+		MessageHelper::send_message(message_content, worker, "eth0");		
+	}
+
+// std::copy(strings_list.begin(), strings_list.end(), std::ostream_iterator<std::string>(std::cout, "\n"));
+	MessageHelper::send_message("role:coordinator", network_organizer_ipv6, network_organizer_interface);
+	
+}

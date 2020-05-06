@@ -1,12 +1,37 @@
 #include "message_helper.h"
+#include "emulated_nodes/coordinator_node.h"
+#include "emulated_nodes/worker_node.h"
 
-const char *network_manager_ipv6 = "2001:660:3207:400::1";
-const char *network_manager_interface = "eth0";
-
-int default_payload_size = 10;
+const char *network_organizer_ipv6 = "2001:660:3207:400::1";
+const char *network_organizer_interface = "eth0";
 
 int main(int argc, char *argv[]) {
-	MessageHelper::send_message(argv[1], network_manager_ipv6, network_manager_interface, default_payload_size);
+	std::string host_ip = argv[1];
+
+	MessageHelper::send_message(host_ip, network_organizer_ipv6, network_organizer_interface);
+
+	int socket_file_descriptor = MessageHelper::bind_listen(host_ip, "eth0");
+	MessageHelper::MessageData message_data = MessageHelper::listen_for_message(socket_file_descriptor);
+
+	std::cout << "Received message: " << message_data.content << std::endl;
+
+	auto message_tuple = message_data.unpack_message("role:", ",");
+	std::string role = std::get<0>(message_tuple), ip = std::get<1>(message_tuple);
+
+	if (role == "worker") {
+		// ip is the address to which to send the responses to coordinator
+		WorkerNode worker(ip);
+	} else if (role == "coordinator") {
+		// ip is a list of ips separated by space representing all workers
+		std::list<std::string> worker_ips = MessageHelper::split_by_spaces(ip);
+		
+		CoordinatorNode coordinator(worker_ips);
+	} else {
+		std::cout << "Role didn't match any expected value, received role: " << role << " received ip: " << ip << std::endl;
+		return 0;
+	}
+	
+	std::cout << "My role is " << role << " and the ip through which I connect to the coordinator is: " << ip << std::endl;
 
 	return 0;
 }
