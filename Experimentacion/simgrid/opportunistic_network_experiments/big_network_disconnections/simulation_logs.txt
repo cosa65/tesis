@@ -1,0 +1,240 @@
+Execution with redundancy: 0, threshold: 0
+Map reduce execution time: 126.338
+
+host: 	Node0		 idle_time: 		100.000000		 performance_value: 		no_responses
+host: 	Node1		 idle_time: 		100.000000		 performance_value: 		no_responses
+host: 	Node2		 idle_time: 		100.000000		 performance_value: 		no_responses
+host: 	Node3		 idle_time: 		100.000000		 performance_value: 		no_responses
+host: 	Node4		 idle_time: 		100.000000		 performance_value: 		no_responses
+host: 	Node5		 idle_time: 		100.000000		 performance_value: 		no_responses
+host: 	Node6		 idle_time: 		100.000000		 performance_value: 		no_responses
+host: 	Node7		 idle_time: 		100.000000		 performance_value: 		no_responses
+host: 	Node8		 idle_time: 		100.000000		 performance_value: 		no_responses
+host: 	Node9		 idle_time: 		100.000000		 performance_value: 		no_responses
+host: 	Node10		 idle_time: 		0.309152		 performance_value: 		no_responses
+host: 	Node11		 idle_time: 		59.643622		 performance_value: 		62.609310
+host: 	Node12		 idle_time: 		55.878006		 performance_value: 		91.251819
+host: 	Node13		 idle_time: 		59.080976		 performance_value: 		93.541206
+host: 	Node14		 idle_time: 		51.165025		 performance_value: 		50.283802
+host: 	Node15		 idle_time: 		59.861556		 performance_value: 		62.609310
+host: 	Node16		 idle_time: 		0.391535		 performance_value: 		no_responses
+host: 	Node17		 idle_time: 		52.070297		 performance_value: 		88.122877
+host: 	Node18		 idle_time: 		0.463619		 performance_value: 		no_responses
+host: 	Node19		 idle_time: 		39.139520		 performance_value: 		31.359963
+host: 	Node20		 idle_time: 		43.950115		 performance_value: 		95.763141
+host: 	Node21		 idle_time: 		51.544326		 performance_value: 		99.744810
+host: 	Node22		 idle_time: 		29.901160		 performance_value: 		70.841901
+host: 	Node23		 idle_time: 		43.800942		 performance_value: 		95.673854
+host: 	Node24		 idle_time: 		39.242024		 performance_value: 		31.359963
+host: 	Node25		 idle_time: 		49.765443		 performance_value: 		47.516227
+host: 	Node26		 idle_time: 		0.576895		 performance_value: 		no_responses
+host: 	Node27		 idle_time: 		52.311159		 performance_value: 		51.311133
+host: 	Node28		 idle_time: 		51.264758		 performance_value: 		99.319241
+host: 	Node29		 idle_time: 		0.638702		 performance_value: 		no_responses
+host: 	Node30		 idle_time: 		59.771322		 performance_value: 		93.218971
+host: 	Node31		 idle_time: 		0.690210		 performance_value: 		no_responses
+host: 	Node32		 idle_time: 		41.012872		 performance_value: 		33.766519
+host: 	Node33		 idle_time: 		51.308925		 performance_value: 		86.660198
+host: 	Node34		 idle_time: 		44.472951		 performance_value: 		95.591198
+host: 	Node35		 idle_time: 		0.731417		 performance_value: 		no_responses
+host: 	Node36		 idle_time: 		51.723291		 performance_value: 		86.693512
+host: 	Node37		 idle_time: 		63.121743		 performance_value: 		95.400712
+host: 	Node38		 idle_time: 		59.047798		 performance_value: 		92.257184
+host: 	Node39		 idle_time: 		19.179068		 performance_value: 		0.000000
+host: 	Node40		 idle_time: 		59.950603		 performance_value: 		62.132839
+host: 	Node41		 idle_time: 		52.615582		 performance_value: 		50.737664
+host: 	Node42		 idle_time: 		62.168559		 performance_value: 		94.169083
+host: 	Node43		 idle_time: 		51.040755		 performance_value: 		98.072330
+host: 	Node44		 idle_time: 		46.297561		 performance_value: 		81.950930
+host: 	Node45		 idle_time: 		60.530266		 performance_value: 		62.609310
+host: 	Node46		 idle_time: 		38.760477		 performance_value: 		76.098997
+host: 	Node47		 idle_time: 		55.865629		 performance_value: 		89.134038
+host: 	Node48		 idle_time: 		1.030165		 performance_value: 		no_responses
+
+idle_time_mean: 25.6032
+
+# no_responses: 18
+
+
+
+
+Execution with redundancy: 0, threshold: 1
+Map reduce execution time: 100.786
+
+host: 	Node0		 idle_time: 		100.000000		 performance_value: 		no_responses
+host: 	Node1		 idle_time: 		100.000000		 performance_value: 		no_responses
+host: 	Node2		 idle_time: 		100.000000		 performance_value: 		no_responses
+host: 	Node3		 idle_time: 		100.000000		 performance_value: 		no_responses
+host: 	Node4		 idle_time: 		100.000000		 performance_value: 		no_responses
+host: 	Node5		 idle_time: 		100.000000		 performance_value: 		no_responses
+host: 	Node6		 idle_time: 		100.000000		 performance_value: 		no_responses
+host: 	Node7		 idle_time: 		100.000000		 performance_value: 		no_responses
+host: 	Node8		 idle_time: 		100.000000		 performance_value: 		no_responses
+host: 	Node9		 idle_time: 		100.000000		 performance_value: 		no_responses
+host: 	Node10		 idle_time: 		0.387532		 performance_value: 		no_responses
+host: 	Node11		 idle_time: 		4.939439		 performance_value: 		45.698249
+host: 	Node12		 idle_time: 		44.691758		 performance_value: 		87.492825
+host: 	Node13		 idle_time: 		48.706778		 performance_value: 		90.833453
+host: 	Node14		 idle_time: 		38.783896		 performance_value: 		27.713112
+host: 	Node15		 idle_time: 		5.290078		 performance_value: 		45.698249
+host: 	Node16		 idle_time: 		0.490801		 performance_value: 		no_responses
+host: 	Node17		 idle_time: 		39.544620		 performance_value: 		82.594514
+host: 	Node18		 idle_time: 		0.581161		 performance_value: 		no_responses
+host: 	Node19		 idle_time: 		23.709566		 performance_value: 		0.000000
+host: 	Node20		 idle_time: 		15.480301		 performance_value: 		94.006431
+host: 	Node21		 idle_time: 		24.761778		 performance_value: 		99.667606
+host: 	Node22		 idle_time: 		13.651047		 performance_value: 		59.064504
+host: 	Node23		 idle_time: 		20.780622		 performance_value: 		93.459526
+host: 	Node24		 idle_time: 		23.838056		 performance_value: 		0.000000
+host: 	Node25		 idle_time: 		37.029478		 performance_value: 		23.674722
+host: 	Node26		 idle_time: 		0.723155		 performance_value: 		no_responses
+host: 	Node27		 idle_time: 		40.220610		 performance_value: 		29.212173
+host: 	Node28		 idle_time: 		24.961300		 performance_value: 		99.303780
+host: 	Node29		 idle_time: 		0.800632		 performance_value: 		no_responses
+host: 	Node30		 idle_time: 		49.572147		 performance_value: 		90.363254
+host: 	Node31		 idle_time: 		0.865199		 performance_value: 		no_responses
+host: 	Node32		 idle_time: 		26.057868		 performance_value: 		3.611423
+host: 	Node33		 idle_time: 		38.784491		 performance_value: 		80.632954
+host: 	Node34		 idle_time: 		18.503951		 performance_value: 		93.559624
+host: 	Node35		 idle_time: 		0.916853		 performance_value: 		no_responses
+host: 	Node36		 idle_time: 		40.075252		 performance_value: 		81.367452
+host: 	Node37		 idle_time: 		18.892802		 performance_value: 		93.543184
+host: 	Node38		 idle_time: 		48.665188		 performance_value: 		88.959834
+host: 	Node39		 idle_time: 		1.033074		 performance_value: 		no_responses
+host: 	Node40		 idle_time: 		49.796881		 performance_value: 		45.002991
+host: 	Node41		 idle_time: 		40.602212		 performance_value: 		28.375378
+host: 	Node42		 idle_time: 		29.585082		 performance_value: 		92.176210
+host: 	Node43		 idle_time: 		25.331420		 performance_value: 		97.594697
+host: 	Node44		 idle_time: 		32.818757		 performance_value: 		74.042418
+host: 	Node45		 idle_time: 		6.915751		 performance_value: 		45.698249
+host: 	Node46		 idle_time: 		24.191778		 performance_value: 		66.233424
+host: 	Node47		 idle_time: 		44.985902		 performance_value: 		84.677954
+host: 	Node48		 idle_time: 		1.291342		 performance_value: 		no_responses
+
+idle_time_mean: 19.0826
+
+# no_responses: 19
+
+
+
+
+Execution with redundancy: 1, threshold: 0
+Map reduce execution time: 163.105
+
+host: 	Node0		 idle_time: 		100.000000		 performance_value: 		no_responses
+host: 	Node1		 idle_time: 		100.000000		 performance_value: 		no_responses
+host: 	Node2		 idle_time: 		100.000000		 performance_value: 		no_responses
+host: 	Node3		 idle_time: 		100.000000		 performance_value: 		no_responses
+host: 	Node4		 idle_time: 		100.000000		 performance_value: 		no_responses
+host: 	Node5		 idle_time: 		100.000000		 performance_value: 		no_responses
+host: 	Node6		 idle_time: 		100.000000		 performance_value: 		no_responses
+host: 	Node7		 idle_time: 		100.000000		 performance_value: 		no_responses
+host: 	Node8		 idle_time: 		100.000000		 performance_value: 		no_responses
+host: 	Node9		 idle_time: 		100.000000		 performance_value: 		no_responses
+host: 	Node10		 idle_time: 		0.239463		 performance_value: 		no_responses
+host: 	Node11		 idle_time: 		39.656873		 performance_value: 		46.427521
+host: 	Node12		 idle_time: 		33.700830		 performance_value: 		87.152703
+host: 	Node13		 idle_time: 		39.102987		 performance_value: 		91.154752
+host: 	Node14		 idle_time: 		26.844433		 performance_value: 		27.121392
+host: 	Node15		 idle_time: 		39.150043		 performance_value: 		45.236727
+host: 	Node16		 idle_time: 		0.303274		 performance_value: 		no_responses
+host: 	Node17		 idle_time: 		27.935078		 performance_value: 		82.662802
+host: 	Node18		 idle_time: 		0.359109		 performance_value: 		no_responses
+host: 	Node19		 idle_time: 		9.350273		 performance_value: 		0.411269
+host: 	Node20		 idle_time: 		9.530405		 performance_value: 		94.176613
+host: 	Node21		 idle_time: 		20.499264		 performance_value: 		99.735435
+host: 	Node22		 idle_time: 		48.019116		 performance_value: 		58.487147
+host: 	Node23		 idle_time: 		9.527169		 performance_value: 		94.092643
+host: 	Node24		 idle_time: 		9.074838		 performance_value: 		0.000000
+host: 	Node25		 idle_time: 		25.465324		 performance_value: 		24.575230
+host: 	Node26		 idle_time: 		0.446850		 performance_value: 		no_responses
+host: 	Node27		 idle_time: 		26.914817		 performance_value: 		26.676778
+host: 	Node28		 idle_time: 		20.694898		 performance_value: 		99.500230
+host: 	Node29		 idle_time: 		0.494724		 performance_value: 		no_responses
+host: 	Node30		 idle_time: 		38.760877		 performance_value: 		90.180688
+host: 	Node31		 idle_time: 		0.534622		 performance_value: 		no_responses
+host: 	Node32		 idle_time: 		10.560994		 performance_value: 		1.941208
+host: 	Node33		 idle_time: 		26.924075		 performance_value: 		81.235113
+host: 	Node34		 idle_time: 		16.208679		 performance_value: 		93.919337
+host: 	Node35		 idle_time: 		0.566539		 performance_value: 		no_responses
+host: 	Node36		 idle_time: 		27.359867		 performance_value: 		81.346526
+host: 	Node37		 idle_time: 		16.164159		 performance_value: 		93.901107
+host: 	Node38		 idle_time: 		38.717193		 performance_value: 		89.836961
+host: 	Node39		 idle_time: 		0.638354		 performance_value: 		no_responses
+host: 	Node40		 idle_time: 		39.724211		 performance_value: 		45.236727
+host: 	Node41		 idle_time: 		27.779412		 performance_value: 		27.183638
+host: 	Node42		 idle_time: 		16.124732		 performance_value: 		93.500963
+host: 	Node43		 idle_time: 		21.120938		 performance_value: 		98.534378
+host: 	Node44		 idle_time: 		22.732636		 performance_value: 		75.222896
+host: 	Node45		 idle_time: 		40.061621		 performance_value: 		45.431620
+host: 	Node46		 idle_time: 		17.162267		 performance_value: 		66.763261
+host: 	Node47		 idle_time: 		33.862632		 performance_value: 		85.671326
+host: 	Node48		 idle_time: 		0.797943		 performance_value: 		no_responses
+
+idle_time_mean: 17.8311
+
+# no_responses: 19
+
+
+
+
+Execution with redundancy: 1, threshold: 1
+Map reduce execution time: 169.171
+
+host: 	Node0		 idle_time: 		100.000000		 performance_value: 		no_responses
+host: 	Node1		 idle_time: 		100.000000		 performance_value: 		no_responses
+host: 	Node2		 idle_time: 		100.000000		 performance_value: 		no_responses
+host: 	Node3		 idle_time: 		100.000000		 performance_value: 		no_responses
+host: 	Node4		 idle_time: 		100.000000		 performance_value: 		no_responses
+host: 	Node5		 idle_time: 		100.000000		 performance_value: 		no_responses
+host: 	Node6		 idle_time: 		100.000000		 performance_value: 		no_responses
+host: 	Node7		 idle_time: 		100.000000		 performance_value: 		no_responses
+host: 	Node8		 idle_time: 		100.000000		 performance_value: 		no_responses
+host: 	Node9		 idle_time: 		100.000000		 performance_value: 		no_responses
+host: 	Node10		 idle_time: 		0.230876		 performance_value: 		no_responses
+host: 	Node11		 idle_time: 		1.481095		 performance_value: 		46.427521
+host: 	Node12		 idle_time: 		20.742446		 performance_value: 		87.279352
+host: 	Node13		 idle_time: 		25.240502		 performance_value: 		90.717070
+host: 	Node14		 idle_time: 		29.467661		 performance_value: 		27.121392
+host: 	Node15		 idle_time: 		1.038582		 performance_value: 		45.236727
+host: 	Node16		 idle_time: 		0.292399		 performance_value: 		no_responses
+host: 	Node17		 idle_time: 		29.886113		 performance_value: 		82.170539
+host: 	Node18		 idle_time: 		0.346232		 performance_value: 		no_responses
+host: 	Node19		 idle_time: 		12.600811		 performance_value: 		0.652168
+host: 	Node20		 idle_time: 		12.114531		 performance_value: 		94.399858
+host: 	Node21		 idle_time: 		14.202107		 performance_value: 		99.927983
+host: 	Node22		 idle_time: 		9.697292		 performance_value: 		58.487147
+host: 	Node23		 idle_time: 		11.195318		 performance_value: 		93.691713
+host: 	Node24		 idle_time: 		12.335252		 performance_value: 		0.000000
+host: 	Node25		 idle_time: 		28.138005		 performance_value: 		24.575230
+host: 	Node26		 idle_time: 		0.430827		 performance_value: 		no_responses
+host: 	Node27		 idle_time: 		29.535522		 performance_value: 		26.676778
+host: 	Node28		 idle_time: 		14.249095		 performance_value: 		99.612073
+host: 	Node29		 idle_time: 		0.476984		 performance_value: 		no_responses
+host: 	Node30		 idle_time: 		25.811550		 performance_value: 		90.264110
+host: 	Node31		 idle_time: 		0.515451		 performance_value: 		no_responses
+host: 	Node32		 idle_time: 		13.768118		 performance_value: 		1.941208
+host: 	Node33		 idle_time: 		29.353990		 performance_value: 		81.087021
+host: 	Node34		 idle_time: 		12.790444		 performance_value: 		94.094744
+host: 	Node35		 idle_time: 		0.546224		 performance_value: 		no_responses
+host: 	Node36		 idle_time: 		30.800392		 performance_value: 		81.996396
+host: 	Node37		 idle_time: 		12.634652		 performance_value: 		93.908862
+host: 	Node38		 idle_time: 		25.279179		 performance_value: 		89.461444
+host: 	Node39		 idle_time: 		0.615464		 performance_value: 		no_responses
+host: 	Node40		 idle_time: 		26.786862		 performance_value: 		45.236727
+host: 	Node41		 idle_time: 		15.316525		 performance_value: 		27.183638
+host: 	Node42		 idle_time: 		15.516057		 performance_value: 		93.434635
+host: 	Node43		 idle_time: 		14.954233		 performance_value: 		98.798818
+host: 	Node44		 idle_time: 		22.294690		 performance_value: 		74.928182
+host: 	Node45		 idle_time: 		2.386589		 performance_value: 		45.431620
+host: 	Node46		 idle_time: 		16.126672		 performance_value: 		66.763261
+host: 	Node47		 idle_time: 		32.835216		 performance_value: 		85.698946
+host: 	Node48		 idle_time: 		0.769330		 performance_value: 		no_responses
+
+idle_time_mean: 15.528
+
+# no_responses: 19
+
+
+
+

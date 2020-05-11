@@ -1,7 +1,6 @@
 #pragma once
 
 #include <simgrid/s4u.hpp>
-#include <chrono>
 #include <string>
 #include <map>
 

@@ -71,7 +71,7 @@ void MapReduceCoordinator::setup_map_reduce_coordinator_in_this_host(std::list<l
 void MapReduceCoordinator::distribute_and_send_maps(std::list<long> map_tasks_in_flops, std::list<std::string> workers, int initial_threshold) {
 	int amount_of_partitions = workers.size();
 
-	std::list<std::list<long>*> partitioned_tasks_in_flops = Utils::separate_in_partitions(map_tasks_in_flops, amount_of_partitions);
+	std::list<std::list<long>*> partitioned_tasks_in_flops = Utils::separate_in_partitions<long>(map_tasks_in_flops, amount_of_partitions);
 	
 	if (MapReduceCoordinator::partitioned_redundancy_mode_enabled) {
 		// This index is used to know where to insert the empty list that matches the current partition 
@@ -80,7 +80,7 @@ void MapReduceCoordinator::distribute_and_send_maps(std::list<long> map_tasks_in
 		int index_of_current_partition = 0;
 
 		// Each list in this list corresponds to one partition
-		std::list<std::list<long>*> redundancy_tasks_to_distribute = Utils::generate_list_with_empty_lists(amount_of_partitions);
+		std::list<std::list<long>*> redundancy_tasks_to_distribute = Utils::generate_list_with_empty_lists<long>(amount_of_partitions);
 		
 		// If map_tasks_in_flops aren´t perfectly split by amount_of_redundancy_partitions, then we should vary the brunt of redundancy in different partitions
 		// We can do this by having each partition_to_make_redundant_separated's redundancy tasks begin in different indexes
@@ -434,4 +434,4 @@ void MapReduceCoordinator::update_nodes_state_and_performance_history(PendingMap
 	
 	MapReduceCoordinator::idle_workers.push_back(*worker_performance);
 	push_heap(MapReduceCoordinator::idle_workers.begin(), MapReduceCoordinator::idle_workers.end());
-}
+}	

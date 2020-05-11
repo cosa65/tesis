@@ -48,10 +48,10 @@ RM = /usr/bin/cmake -E remove -f
 EQUALS = =
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = /home/martin/Documents/tesis/Experimentacion/simgrid/opportunistic_network_experiments
+CMAKE_SOURCE_DIR = /home/martin/Documents/repos/tesis/Experimentacion/simgrid/opportunistic_network_experiments
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = /home/martin/Documents/tesis/Experimentacion/simgrid/opportunistic_network_experiments
+CMAKE_BINARY_DIR = /home/martin/Documents/repos/tesis/Experimentacion/simgrid/opportunistic_network_experiments
 
 #=============================================================================
 # Targets provided globally by CMake.
@@ -80,9 +80,9 @@ edit_cache/fast: edit_cache
 
 # The main all target
 all: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/martin/Documents/tesis/Experimentacion/simgrid/opportunistic_network_experiments/CMakeFiles /home/martin/Documents/tesis/Experimentacion/simgrid/opportunistic_network_experiments/CMakeFiles/progress.marks
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/martin/Documents/repos/tesis/Experimentacion/simgrid/opportunistic_network_experiments/CMakeFiles /home/martin/Documents/repos/tesis/Experimentacion/simgrid/opportunistic_network_experiments/CMakeFiles/progress.marks
 	$(MAKE) -f CMakeFiles/Makefile2 all
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/martin/Documents/tesis/Experimentacion/simgrid/opportunistic_network_experiments/CMakeFiles 0
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/martin/Documents/repos/tesis/Experimentacion/simgrid/opportunistic_network_experiments/CMakeFiles 0
 .PHONY : all
 
 # The main clean target
