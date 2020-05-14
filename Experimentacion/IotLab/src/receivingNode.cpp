@@ -24,7 +24,7 @@ std::string begin_handler_for_role_receipt(std::string listener_ip, std::string 
 		CoordinatorNode coordinator;
 		std::cout << "I'm the coordinator" << std::endl;
 
-		std::list<long> map_tasks_in_flops = {1,1,1,1,1,1};
+		std::list<long> map_tasks_in_flops = {1};
 		int initial_threshold = 75;
 		int timeout = 10;
 		bool partitioned_redundancy_mode_enabled = 0;

@@ -46,8 +46,8 @@ void CoordinatorNode::start(std::list<long> map_tasks_in_flops, std::list<std::s
 	// IMPORTANT
 	std::async(std::launch::async, [this, map_tasks_in_flops, workers, initial_threshold]() { return this -> distribute_and_send_maps(map_tasks_in_flops, workers, initial_threshold); });
 
-	// IMPORTANT
 	// CoordinatorNode::resend_on_timeout_actor = simgrid::s4u::Actor::create("resend_pending_tasks_on_timeout", my_host, CoordinatorNode::resend_pending_tasks_on_timeout);
+	std::async(std::launch::async, [this]() { this -> resend_pending_tasks_on_timeout(); });
 
 	// IMPORTANT
 	// CoordinatorNode::map_reduce_start_point = new PointInTime();
@@ -324,67 +324,63 @@ void CoordinatorNode::reset_timeout_resend_actor() {
 }
 
 void CoordinatorNode::resend_pending_tasks_on_timeout() {
-	// while (true) {
-	// 	simgrid::s4u::this_actor::sleep_for(CoordinatorNode::timeout);
-	// 	CoordinatorNode::resend_pending_tasks();
-	// }
+	while (true) {
+		std::this_thread::sleep_for(std::chrono::seconds(CoordinatorNode::timeout));
+		CoordinatorNode::resend_pending_tasks();
+	}
 }
 
 // Returns true if this resend was successful or false if it was cancelled because another resend was already taking place
 bool CoordinatorNode::resend_pending_tasks() {
+	std::cout << "Resending pending tasks" << std::endl;
 // If we failed to capture the lock, then that means a resend operation is already taking place, so we don't need to perform the resend_pending_task again
 	// if (!CoordinatorNode::resending_map_lock -> try_lock()) {
 	// 	XBT_INFO("Another actor is sending pending tasks, so this resend execution will be cancelled");
 	// 	return false;
 	// }
 
-	// XBT_INFO("Begun resending tasks");
+	std::cout << "Begun resending tasks" << std::endl; 
 
-	// auto pending_maps_it = CoordinatorNode::pending_maps.begin();
+	auto pending_maps_it = CoordinatorNode::pending_maps.begin();
 
 	// std::vector<simgrid::s4u::CommPtr> resend_comms;
 
-	// while(pending_maps_it != CoordinatorNode::pending_maps.end() && !CoordinatorNode::idle_workers.empty()) { //&& idle_worker_it != CoordinatorNode::idle_workers.end()) {
-	// 	// std::string idle_worker_id = *idle_worker_it;
-	// 	PendingMapTask* map_task = *pending_maps_it;
+	while(pending_maps_it != CoordinatorNode::pending_maps.end() && !CoordinatorNode::idle_workers.empty()) {
+		PendingMapTask* map_task = *pending_maps_it;
 
-	// 	if (map_task -> finished) {
-	// 		pending_maps_it++;
-	// 		continue;
-	// 	}
+		if (map_task -> finished) {
+			pending_maps_it++;
+			continue;
+		}
 
-	// 	NodePerformance idle_worker_performance = CoordinatorNode::idle_workers.front();
-	// 	std::string idle_worker_id = idle_worker_performance.get_node_id();
-	// 	pop_heap(CoordinatorNode::idle_workers.begin(), CoordinatorNode::idle_workers.end());
-	// 	CoordinatorNode::idle_workers.pop_back();
+		NodePerformance idle_worker_performance = CoordinatorNode::idle_workers.front();
+		std::string idle_worker_id = idle_worker_performance.get_node_id();
+		pop_heap(CoordinatorNode::idle_workers.begin(), CoordinatorNode::idle_workers.end());
+		CoordinatorNode::idle_workers.pop_back();
 
-	// 	std::string mailbox_name = idle_worker_id + "-worker";
-	// 	simgrid::s4u::Mailbox* mailbox = simgrid::s4u::Mailbox::by_name(mailbox_name);
+		std::string task_data = map_task -> task_data;
+		map_task -> add_new_worker(idle_worker_id);
 
-	// 	std::string task_data = map_task -> task_data;
-	// 	map_task -> add_new_worker(idle_worker_id);
-	// 	// PendingMapTask *new_resent_task = map_tasks.front() -> copy_task(idle_worker_id);
+		MapIndex map_index = map_task -> map_index;
 
-	// 	MapIndex map_index = map_task -> map_index;
+		std::cout << "Resending task " << map_index << " to idle worker " << idle_worker_id << ". Performance value: " << idle_worker_performance.get_node_performance() << ", performance mean: " << idle_worker_performance.response_time_mean() << std::endl;
 
-	// 	XBT_INFO("Resending task %i to idle worker %s. Performance value: %f, performance mean: %f", map_index, idle_worker_id.c_str(), idle_worker_performance.get_node_performance(), idle_worker_performance.response_time_mean());
+		MessageHelper::send_message(map_task -> task_data, idle_worker_id, "eth0");
 
-	// 	resend_comms.push_back(MessageHelper::send_message(map_task -> task_data, mailbox, 5));
+		pending_maps_it++;
+	}
 
-	// 	pending_maps_it++;
-	// }
+	// Remove workers that are no longer idle, remove this
+	// CoordinatorNode::idle_workers.erase(CoordinatorNode::idle_workers.begin(), idle_worker_it);
 
-	// // Remove workers that are no longer idle, remove this
-	// // CoordinatorNode::idle_workers.erase(CoordinatorNode::idle_workers.begin(), idle_worker_it);
-
-	// // Move all maps that have just been resent to the back so that next time not the same tasks are picked
-	// CoordinatorNode::pending_maps.splice(pending_maps.end(), CoordinatorNode::pending_maps, pending_maps.begin(), pending_maps_it);
+	// Move all maps that have just been resent to the back so that next time not the same tasks are picked
+	CoordinatorNode::pending_maps.splice(pending_maps.end(), CoordinatorNode::pending_maps, pending_maps.begin(), pending_maps_it);
 
 	// simgrid::s4u::Comm::wait_all(&resend_comms);
 
 	// CoordinatorNode::resending_map_lock -> unlock();
 
-	// XBT_INFO("Finished resending tasks, pending maps size is: %i", CoordinatorNode::pending_maps_count);
+	std::cout << "Finished resending tasks, pending maps size is: " << CoordinatorNode::pending_maps_count << std::endl;
 	return true;
 }
 
