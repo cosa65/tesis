@@ -24,10 +24,10 @@ std::string begin_handler_for_role_receipt(std::string listener_ip, std::string 
 		CoordinatorNode coordinator(socket_file_descriptor);
 		std::cout << "I'm the coordinator" << std::endl;
 
-		std::list<long> map_tasks_in_flops = {1};
+		std::list<long> map_tasks_in_flops = {1,2,3,4,5,6,7,8,9,10,11,12,13,14,15};
 		int initial_threshold = 75;
 		int timeout = 10;
-		bool partitioned_redundancy_mode_enabled = 0;
+		bool partitioned_redundancy_mode_enabled = 1;
 		bool threshold_of_execution_mode_enabled = 0;
 
 		// Antes de arrancar, el coordinator deberia recibir un ack mas de todos los worker para saber que estan todos escuchando como workers
@@ -42,13 +42,15 @@ std::string begin_handler_for_role_receipt(std::string listener_ip, std::string 
 
 // Al uso del socket_file_descriptor deberia agregarle un mutex para evitar que lo use mas de un thread al mismo tiempo (a menos que imite los mutexes de simgrid, que se supone que garantizan eso)
 int main(int argc, char *argv[]) {
+	int amount_of_worker_nodes = std::stoi(argv[1]);
+
 	std::string network_organizer_ipv6 = "2001:660:3207:400::1";
 	std::string network_organizer_interface = "eth0";
 	int socket_file_descriptor = MessageHelper::bind_listen(network_organizer_ipv6, network_organizer_interface);
 
 	NetworkOrganizer network_organizer = NetworkOrganizer(network_organizer_ipv6, network_organizer_interface);
 
-	network_organizer.listen_for_worker_ips(2, socket_file_descriptor);
+	network_organizer.listen_for_worker_ips(amount_of_worker_nodes, socket_file_descriptor);
 
 	auto role = std::async(std::launch::async, begin_handler_for_role_receipt, network_organizer_ipv6, network_organizer_interface, socket_file_descriptor);
 

@@ -19,7 +19,7 @@ void WorkerNode::start(int socket_file_descriptor) {
 		int op_result = run_operation(iterations);
 			
 		std::stringstream ss;
-		ss << "map_index:" << map_index << "," << this -> ip_to_coordinator;
+		ss << "map_index:" << map_index << "," << this -> worker_ip;
 		std::string message = ss.str();
 
 		MessageHelper::send_message(message, this -> ip_to_coordinator, "eth0");

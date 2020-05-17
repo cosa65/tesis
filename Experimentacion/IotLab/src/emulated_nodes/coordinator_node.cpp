@@ -43,39 +43,46 @@ void CoordinatorNode::start(std::list<long> map_tasks_in_flops, std::list<std::s
 	CoordinatorNode::workers = workers;
 
 	this -> finished = false;
+	this -> finished_execution_mutex.lock();
+	this -> finished_initial_distribution_mutex.lock();
 
 	// CoordinatorNode::resending_map_lock = simgrid::s4u::Mutex::create();
 	// CoordinatorNode::workers_and_data_update_lock = simgrid::s4u::Mutex::create();
 
 	// IMPORTANT
+	// CoordinatorNode::map_reduce_start_point = new PointInTime();
+	// *CoordinatorNode::map_reduce_start_point = simgrid::s4u::Engine::get_instance() -> get_clock();
+
+
+	// Begin listening before sending maps
+	auto map_results_listener_thread = std::async(std::launch::async, [this, map_tasks_in_flops, workers, initial_threshold]() { 
+		std::list<std::future<int>> threads;
+		while(true && !(this -> finished.load())) {
+			std::cout << "[COORDINATOR] Listening for map result" << std::endl;
+			// Blocking get, actor is blocked until it receives message
+			MessageHelper::MessageData message_data = MessageHelper::listen_for_message(socket_file_descriptor);
+			std::cout << "[COORDINATOR] message_data: " << message_data.content << std::endl;
+
+			std::future<int> map_handle_thread = std::async(std::launch::async, [this, message_data]() { 
+				int maps_left = this -> handle_map_result_received(message_data);
+				if (maps_left == 0) {
+					this -> finished = true;
+					this -> finished_execution_mutex.unlock();
+				}
+
+				return maps_left;
+			});
+
+			threads.push_back(std::move(map_handle_thread));
+		}
+	});
+
 	auto distribution_task_thread = std::async(std::launch::async, [this, map_tasks_in_flops, workers, initial_threshold]() { return this -> distribute_and_send_maps(map_tasks_in_flops, workers, initial_threshold); });
 
 	// CoordinatorNode::resend_on_timeout_actor = simgrid::s4u::Actor::create("resend_pending_tasks_on_timeout", my_host, CoordinatorNode::resend_pending_tasks_on_timeout);
 	auto timeout_task_thread = std::async(std::launch::async, [this]() { this -> resend_pending_tasks_on_timeout(); });
 
-	// IMPORTANT
-	// CoordinatorNode::map_reduce_start_point = new PointInTime();
-	// *CoordinatorNode::map_reduce_start_point = simgrid::s4u::Engine::get_instance() -> get_clock();
-
-	std::list<std::future<int>> threads;
-
-	while(true && !(this -> finished.load())) {
-		std::cout << "[COORDINATOR] Listening for map result" << std::endl;
-		// Blocking get, actor is blocked until it receives message
-		MessageHelper::MessageData message_data = MessageHelper::listen_for_message(socket_file_descriptor);
-		std::cout << "[COORDINATOR] message_data: " << message_data.content << std::endl;
-
-		auto map_handle_thread = std::async(std::launch::async, [this, message_data]() { 
-			int maps_left = this -> handle_map_result_received(message_data);
-			if (maps_left == 0) {
-				this -> finished = true;
-			}
-
-			return maps_left;
-		});
-
-		threads.push_back(std::move(map_handle_thread));
-	}
+	this -> finished_execution_mutex.lock();
 }
 
 void CoordinatorNode::distribute_and_send_maps(std::list<long> map_tasks_in_flops, std::list<std::string> workers, int initial_threshold) {
@@ -84,70 +91,71 @@ void CoordinatorNode::distribute_and_send_maps(std::list<long> map_tasks_in_flop
 	std::list<std::list<long>*> partitioned_tasks_in_flops = Utils::separate_in_partitions(map_tasks_in_flops, amount_of_partitions);
 
 	// IMPORTANTE
-	// if (CoordinatorNode::partitioned_redundancy_mode_enabled) {
-	// 	// This index is used to know where to insert the empty list that matches the current partition 
-	// 	// (we don't want redundancy of a task list in its own list)
-	// 	int amount_of_redundancy_partitions = amount_of_partitions - 1;
-	// 	int index_of_current_partition = 0;
+	if (CoordinatorNode::partitioned_redundancy_mode_enabled) {
 
-	// 	// Each list in this list corresponds to one partition
+		// This index is used to know where to insert the empty list that matches the current partition 
+		// (we don't want redundancy of a task list in its own list)
+		int amount_of_redundancy_partitions = amount_of_partitions - 1;
+		int index_of_current_partition = 0;
+
+		// Each list in this list corresponds to one partition
 		
-		// std::list<std::list<long>*> redundancy_tasks_to_distribute = Utils::generate_list_with_empty_lists<long>(amount_of_partitions);
+		std::list<std::list<long>*> redundancy_tasks_to_distribute = Utils::generate_list_with_empty_lists<long>(amount_of_partitions);
 		
-	// 	// If map_tasks_in_flops aren´t perfectly split by amount_of_redundancy_partitions, then we should vary the brunt of redundancy in different partitions
-	// 	// We can do this by having each partition_to_make_redundant_separated's redundancy tasks begin in different indexes
-	// 	// (with splice looking at the % of the partitioned_tasks_in_flops, which we will call remainder_of_tasks)
-	// 	int remainder_of_tasks = amount_of_redundancy_partitions - (map_tasks_in_flops.size() % amount_of_redundancy_partitions);
+		// If map_tasks_in_flops aren´t perfectly split by amount_of_redundancy_partitions, then we should vary the brunt of redundancy in different partitions
+		// We can do this by having each partition_to_make_redundant_separated's redundancy tasks begin in different indexes
+		// (with splice looking at the % of the partitioned_tasks_in_flops, which we will call remainder_of_tasks)
+		int remainder_of_tasks = amount_of_redundancy_partitions - (map_tasks_in_flops.size() % amount_of_redundancy_partitions);
 
-	// 	int index_redundancy_splice = remainder_of_tasks % amount_of_redundancy_partitions;
+		int index_redundancy_splice = remainder_of_tasks % amount_of_redundancy_partitions;
 
-	// 	// We will iterate over all partitions, separating each one into subpartitions to be ditributed into the rest of the partitions
-	// 	for (std::list<long> *partition_to_make_redundant : partitioned_tasks_in_flops) {
-	// 		// Begin distributing redundancy subpartitions at the index where the partitions end,
-	// 		// This is to avoid stacking all subpartitions on only a few partitions
-	// 		// Each iteration we change the index from which to begin distributing subpartitions with this same logic
-	// 		int partition_to_make_redundant_size = partition_to_make_redundant -> size();
+		// We will iterate over all partitions, separating each one into subpartitions to be ditributed into the rest of the partitions
+		for (std::list<long> *partition_to_make_redundant : partitioned_tasks_in_flops) {
+			// Begin distributing redundancy subpartitions at the index where the partitions end,
+			// This is to avoid stacking all subpartitions on only a few partitions
+			// Each iteration we change the index from which to begin distributing subpartitions with this same logic
+			int partition_to_make_redundant_size = partition_to_make_redundant -> size();
 
-	// 		// Separate the current partition in subpartitions to distribute in each of the other partitions
-	// 		std::list<std::list<long>*> partition_to_make_redundant_separated = Utils::separate_in_partitions(*partition_to_make_redundant, amount_of_redundancy_partitions);
+			// Separate the current partition in subpartitions to distribute in each of the other partitions
+			std::list<std::list<long>*> partition_to_make_redundant_separated = Utils::separate_in_partitions(*partition_to_make_redundant, amount_of_redundancy_partitions);
 
-	// 		auto start_it = std::next(partition_to_make_redundant_separated.begin(), amount_of_redundancy_partitions - index_redundancy_splice);
+			auto start_it = std::next(partition_to_make_redundant_separated.begin(), amount_of_redundancy_partitions - index_redundancy_splice);
 
-	// 		std::list<std::list<long>*> partition_to_make_redundant_separated_temp;
-	// 		// First take the part that goes in the beginning
-	// 		partition_to_make_redundant_separated_temp.splice(
-	// 			partition_to_make_redundant_separated_temp.begin(),
-	// 			partition_to_make_redundant_separated,
-	// 			start_it,
-	// 			partition_to_make_redundant_separated.end()
-	// 		);
+			std::list<std::list<long>*> partition_to_make_redundant_separated_temp;
+			// First take the part that goes in the beginning
+			partition_to_make_redundant_separated_temp.splice(
+				partition_to_make_redundant_separated_temp.begin(),
+				partition_to_make_redundant_separated,
+				start_it,
+				partition_to_make_redundant_separated.end()
+			);
 
-	// 		// Then add the rest of the list in the end
-	// 		partition_to_make_redundant_separated_temp.splice(
-	// 			partition_to_make_redundant_separated_temp.end(),
-	// 			partition_to_make_redundant_separated
-	// 		);
+			// Then add the rest of the list in the end
+			partition_to_make_redundant_separated_temp.splice(
+				partition_to_make_redundant_separated_temp.end(),
+				partition_to_make_redundant_separated
+			);
 
-	// 		// This splice had to be done in two steps with a temp variable because in one in the same list it doesn't have expected behaviour
-	// 		partition_to_make_redundant_separated = partition_to_make_redundant_separated_temp;
+			// This splice had to be done in two steps with a temp variable because in one in the same list it doesn't have expected behaviour
+			partition_to_make_redundant_separated = partition_to_make_redundant_separated_temp;
 
-	// 		// Insert empty subpartition at current partition to make list sizes match when calling join_lists()
-	// 		partition_to_make_redundant_separated.insert(std::next(partition_to_make_redundant_separated.begin(), index_of_current_partition), new std::list<long>());
+			// Insert empty subpartition at current partition to make list sizes match when calling join_lists()
+			partition_to_make_redundant_separated.insert(std::next(partition_to_make_redundant_separated.begin(), index_of_current_partition), new std::list<long>());
 
-	// 		Utils::join_lists(redundancy_tasks_to_distribute, partition_to_make_redundant_separated);
+			Utils::join_lists(redundancy_tasks_to_distribute, partition_to_make_redundant_separated);
 
-	// 		index_of_current_partition++;
+			index_of_current_partition++;
 
-	// 		int nonempty_amount_of_redundancy_subpartitions = std::max((partition_to_make_redundant_size / amount_of_redundancy_partitions), 1);
+			int nonempty_amount_of_redundancy_subpartitions = std::max((partition_to_make_redundant_size / amount_of_redundancy_partitions), 1);
 			
-	// 		// Sizes may not be perfectly split due to redundancy distribution of partitions that weren't perfectly divided
-	// 		index_redundancy_splice += nonempty_amount_of_redundancy_subpartitions;
-	// 		index_redundancy_splice = index_redundancy_splice % amount_of_redundancy_partitions;
-	// 	}
+			// Sizes may not be perfectly split due to redundancy distribution of partitions that weren't perfectly divided
+			index_redundancy_splice += nonempty_amount_of_redundancy_subpartitions;
+			index_redundancy_splice = index_redundancy_splice % amount_of_redundancy_partitions;
+		}
 
 		// Now each list in redundancy_tasks_to_distribute should be joined with its corresponding list in partitioned_tasks_in_flops
-		// Utils::join_lists(partitioned_tasks_in_flops, redundancy_tasks_to_distribute);
-	// }
+		Utils::join_lists(partitioned_tasks_in_flops, redundancy_tasks_to_distribute);
+	}
 
 	// create bundled version of map_tasks_in_flops, with each element corresponding with the summed up and distributed workload of tasks for each worker
 	std::list<int> bundled_up_map_tasks_in_flops;
@@ -209,7 +217,7 @@ void CoordinatorNode::distribute_and_send_maps(std::list<long> map_tasks_in_flop
 		current_task_to_send -> add_new_worker(*workers_it);
 
 		CoordinatorNode::pending_maps.push_back(current_task_to_send);
-
+		CoordinatorNode::pending_maps_count++;
 		// IMPORTANTE
 		// pending_map_comms_to_send.push_back(message_send_task);
 		current_task_bundle_index++;
@@ -217,13 +225,14 @@ void CoordinatorNode::distribute_and_send_maps(std::list<long> map_tasks_in_flop
 
 	// XBT_INFO("Sending all %i prepared map tasks", CoordinatorNode::pending_maps.size());
 	std::cout << "Sending all " << CoordinatorNode::pending_maps.size() << " prepared map tasks" << std::endl;
-	CoordinatorNode::pending_maps_count = CoordinatorNode::pending_maps.size();
 
 	// for (auto pending_map_comm : pending_map_comms_to_send) {
 	// 	int success = pending_map_comm.get();
 
 	// 	//IMPORTANTE agregar checqueo
 	// }
+
+	this -> finished_initial_distribution_mutex.unlock();
 }
 
 // CoordinatorNode::CoordinatorNode(void *message_raw, simgrid::s4u::Mailbox* receive_mailbox) {
@@ -232,10 +241,17 @@ void CoordinatorNode::distribute_and_send_maps(std::list<long> map_tasks_in_flop
 // }
 
 int CoordinatorNode::handle_map_result_received(MessageHelper::MessageData message_data) {
+	// This lock unlock will block first thread to arrive
+	// Once it is allowed to pass by distribute_and_send_maps, it will allow every other thread to pass too 
+	
+	finished_initial_distribution_mutex.lock();
+	finished_initial_distribution_mutex.unlock();
+
 	auto message_tuple = message_data.unpack_message("map_index:", ",");
 	std::string index_str = std::get<0>(message_tuple), sender = std::get<1>(message_tuple);
 
 	int index = std::stoi(index_str);
+
 
 	// IMPORTANTE
 	// if(CoordinatorNode::mailboxes_manager -> is_disconnected(sender)) {

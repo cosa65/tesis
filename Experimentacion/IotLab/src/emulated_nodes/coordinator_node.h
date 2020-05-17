@@ -9,6 +9,8 @@
 
 #include <thread>
 #include <future>
+#include <mutex>
+#include <condition_variable>
 
 #include "pending_map_task.h"
 #include "node_performance.h"
@@ -73,7 +75,13 @@ private:
 	// static simgrid::s4u::ActorPtr resend_on_timeout_actor;
 
 	static double *map_reduce_start_point;
-	
+
+	// To avoid racing conditions on maps handler before finishing with initial distribution
+	// Stops all map handler processing until finished sending initial maps
+	std::mutex finished_initial_distribution_mutex;
+
+	// Locks main thread so that all stored threads aren't lost when main thread exits
+	std::mutex finished_execution_mutex;
 	std::atomic<bool> finished;
 
 	int socket_file_descriptor;

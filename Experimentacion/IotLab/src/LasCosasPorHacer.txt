@@ -16,10 +16,11 @@
 	<LISTO> - Coordinador reenvia cuando hay timeout.
 	<LISTO> - Coordinador recibe maps, cuando tiene todos los maps "reduce" (operacion filler) y avisa que termino.
 		<QUEDA PARA DESPUES> - Cuando el coordinador updatea estado y reenvia tiene un mutex para que no hayan varios threads updateando al mismo tiempo.
-	- Redundancia.
+	<LISTO> - Redundancia.
 	- Threshold.
 
 - El coordinador puede ser cualquier nodo, no necesariamente el organizador de la network.
 
 - Una vez terminado el MapReduce, los nodos worker envian al coordinador la informacion relevante para el experimento y esta info queda guardada en un archivo en el coordinador.
 - Logging
+
