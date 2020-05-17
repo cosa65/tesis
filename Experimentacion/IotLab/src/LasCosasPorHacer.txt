@@ -3,8 +3,9 @@
 <LISTO> - Todos los nodos envian su ip al nodo organizador_de_red, ademas contandole cual rol cumplen (si worker o coordinator). 
  - El nodo organizador_de_red crea la red a emular con todas las ips que necesita y luego publica a cada nodo su posicion en la red.
 	- En un primer experimento todos los nodos estan conectados con el coordinador directamente.
-<LISTO> - El nodo coordinador, ya sabiendo cuantos nodos tiene a su disposicion (info recibida del organizador_de_red) y como es la tarea a resolver, separa en las aprticiones y envia la info.
+<LISTO> - El nodo coordinador, ya sabiendo cuantos nodos tiene a su disposicion (info recibida del organizador_de_red) y como es la tarea a resolver, separa en las particiones y envia la info.
 
+<QUEDA PARA DESPUES> - Desconexiones hardcodeables, pensar con que grado de fidelidad implementarlas.
 <QUEDA PARA DESPUES> - Existe una historia de desconexiones que se puede escribir en un .txt aparte y se envia a cada nodo su parte (diciendole cuando desconectarse y cuando volver).
 
 <QUEDA PARA DESPUES> - Antes de que el coordinador empiece a  correr el experimento espera a recibir un ack de todos los nodos worker diciendole que saben que son worker y estan empezando a actuar como su rol.
@@ -13,10 +14,12 @@
 	<LISTO> - Coordinador separa tasks y las envia a todos los nodos workers.
 	<LISTO> - Workers "hacen maps" (operacion filler) y envian resultado al coordinador.
 	<LISTO> - Coordinador reenvia cuando hay timeout.
-	- Coordinador recibe maps, cuando tiene todos los maps "reduce" (operacion filler) y avisa que termino.
+	<LISTO> - Coordinador recibe maps, cuando tiene todos los maps "reduce" (operacion filler) y avisa que termino.
+		<QUEDA PARA DESPUES> - Cuando el coordinador updatea estado y reenvia tiene un mutex para que no hayan varios threads updateando al mismo tiempo.
 	- Redundancia.
 	- Threshold.
 
 - El coordinador puede ser cualquier nodo, no necesariamente el organizador de la network.
 
 - Una vez terminado el MapReduce, los nodos worker envian al coordinador la informacion relevante para el experimento y esta info queda guardada en un archivo en el coordinador.
+- Logging

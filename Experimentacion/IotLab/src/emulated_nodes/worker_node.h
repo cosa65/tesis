@@ -12,7 +12,7 @@
 
 class WorkerNode {
 public:
-	WorkerNode(std::string ip_to_coordinator);
+	WorkerNode(std::string ip_to_coordinator, std::string worker_ip);
 
 	void start(int socket_file_descriptor);
 	void handle_map_task();
@@ -20,5 +20,6 @@ public:
 private:
 	int run_operation(int iterations);
 
+	std::string worker_ip;
 	std::string ip_to_coordinator;
 };

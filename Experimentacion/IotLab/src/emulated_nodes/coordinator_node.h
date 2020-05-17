@@ -21,7 +21,7 @@ typedef double TimeSpan;
 
 class CoordinatorNode {
 public:
-	CoordinatorNode();
+	CoordinatorNode(int socket_file_descriptor);
 
 	void start(
 		std::list<long> map_tasks_in_flops,
@@ -34,7 +34,7 @@ public:
 
 	void distribute_and_send_maps(std::list<long> map_tasks_in_flops, std::list<std::string> workers, int initial_threshold);
 
-	void operator()();
+	int handle_map_result_received(MessageHelper::MessageData message_data);
 
 	void check_completion_threshold_and_resend_if_necessary();
 	void reset_timeout_resend_actor();
@@ -73,5 +73,9 @@ private:
 	// static simgrid::s4u::ActorPtr resend_on_timeout_actor;
 
 	static double *map_reduce_start_point;
+	
+	std::atomic<bool> finished;
+
+	int socket_file_descriptor;
 	std::list<std::string> worker_ips;
 };

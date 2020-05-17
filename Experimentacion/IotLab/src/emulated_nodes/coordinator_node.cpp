@@ -30,7 +30,9 @@ bool CoordinatorNode::initial_threshold_of_execution_mode_enabled;
 PointInTime *CoordinatorNode::map_reduce_start_point;
 
 
-CoordinatorNode::CoordinatorNode() {}
+CoordinatorNode::CoordinatorNode(int socket_file_descriptor) {
+	this -> socket_file_descriptor = socket_file_descriptor;
+}
 
 void CoordinatorNode::start(std::list<long> map_tasks_in_flops, std::list<std::string> workers, int initial_threshold, int timeout, bool partitioned_redundancy_mode_enabled, bool threshold_of_execution_mode_enabled) {
 	// CoordinatorNode::mailboxes_manager = mailboxes_manager;
@@ -40,34 +42,40 @@ void CoordinatorNode::start(std::list<long> map_tasks_in_flops, std::list<std::s
 	CoordinatorNode::initial_threshold_of_execution_mode_enabled = threshold_of_execution_mode_enabled;
 	CoordinatorNode::workers = workers;
 
+	this -> finished = false;
+
 	// CoordinatorNode::resending_map_lock = simgrid::s4u::Mutex::create();
 	// CoordinatorNode::workers_and_data_update_lock = simgrid::s4u::Mutex::create();
 
 	// IMPORTANT
-	std::async(std::launch::async, [this, map_tasks_in_flops, workers, initial_threshold]() { return this -> distribute_and_send_maps(map_tasks_in_flops, workers, initial_threshold); });
+	auto distribution_task_thread = std::async(std::launch::async, [this, map_tasks_in_flops, workers, initial_threshold]() { return this -> distribute_and_send_maps(map_tasks_in_flops, workers, initial_threshold); });
 
 	// CoordinatorNode::resend_on_timeout_actor = simgrid::s4u::Actor::create("resend_pending_tasks_on_timeout", my_host, CoordinatorNode::resend_pending_tasks_on_timeout);
-	std::async(std::launch::async, [this]() { this -> resend_pending_tasks_on_timeout(); });
+	auto timeout_task_thread = std::async(std::launch::async, [this]() { this -> resend_pending_tasks_on_timeout(); });
 
 	// IMPORTANT
 	// CoordinatorNode::map_reduce_start_point = new PointInTime();
 	// *CoordinatorNode::map_reduce_start_point = simgrid::s4u::Engine::get_instance() -> get_clock();
 
-	// while(true) {
-		// TODO ESTO ES IMPORTANTE! Recepcion de resultados de maps
+	std::list<std::future<int>> threads;
 
-		// std::string mailbox_name = my_host -> get_name() + "-coordinator";
-
+	while(true && !(this -> finished.load())) {
+		std::cout << "[COORDINATOR] Listening for map result" << std::endl;
 		// Blocking get, actor is blocked until it receives message
-		// auto message = mailbox -> get();
+		MessageHelper::MessageData message_data = MessageHelper::listen_for_message(socket_file_descriptor);
+		std::cout << "[COORDINATOR] message_data: " << message_data.content << std::endl;
 
-		// CoordinatorNode map_reduce_coordinator_actor(message, mailbox);
-		// actor = simgrid::s4u::Actor::create("map_reduce_coordinator_actor", my_host, map_reduce_coordinator_actor);
+		auto map_handle_thread = std::async(std::launch::async, [this, message_data]() { 
+			int maps_left = this -> handle_map_result_received(message_data);
+			if (maps_left == 0) {
+				this -> finished = true;
+			}
 
-		// actor = simgrid::s4u::Actor::create("handle_reduce_mapped_elements_task", my_host, &handle_reduce_mapped_elements_task, mailbox);
-		// THIS MAKES ACTOR HAVE TO BE MANUALLY ENABLED TO BE GARBAGE COLLECTED WITH set_receiver(null)
-		// mailbox -> set_recei1ver(actor); 
-	// }
+			return maps_left;
+		});
+
+		threads.push_back(std::move(map_handle_thread));
+	}
 }
 
 void CoordinatorNode::distribute_and_send_maps(std::list<long> map_tasks_in_flops, std::list<std::string> workers, int initial_threshold) {
@@ -193,7 +201,6 @@ void CoordinatorNode::distribute_and_send_maps(std::list<long> map_tasks_in_flop
 
 		std::cout << "Preparing to send map task: " << message.c_str() << std::endl;
 
-
 		std::string *message_to_send = new std::string(message);
 
 		std::async(std::launch::async, MessageHelper::send_message, message, *workers_it, "eth0");
@@ -224,75 +231,72 @@ void CoordinatorNode::distribute_and_send_maps(std::list<long> map_tasks_in_flop
 // 	this -> receive_mailbox = receive_mailbox;
 // }
 
-void CoordinatorNode::operator()() {
-	// std::string* message = static_cast<std::string*>(message_raw);
+int CoordinatorNode::handle_map_result_received(MessageHelper::MessageData message_data) {
+	auto message_tuple = message_data.unpack_message("map_index:", ",");
+	std::string index_str = std::get<0>(message_tuple), sender = std::get<1>(message_tuple);
+
+	int index = std::stoi(index_str);
 
 	// IMPORTANTE
-	// auto message_tuple = MessageHelper::unpack_message(*message);
-	// std::string sender = std::get<0>(message_tuple), payload = std::get<1>(message_tuple);
-
-	// auto payload_tuple = MessageHelper::unpack_task_payload(payload);
-	// std::string flops_str = std::get<0>(payload_tuple), index_str = std::get<1>(payload_tuple);
-
-	// int flops = std::stoi(flops_str);
-	// int index = std::stoi(index_str);
-
 	// if(CoordinatorNode::mailboxes_manager -> is_disconnected(sender)) {
-	// 	XBT_INFO("Reducer in host %s couldn't receive finished map from %s because it is disconnected from the network", (my_host -> get_name()).c_str(), sender);
-	// 	return;
+		// XBT_INFO("Reducer in host %s couldn't receive finished map from %s because it is disconnected from the network", (my_host -> get_name()).c_str(), sender);
+		// return;
 	// }
 
 	// CoordinatorNode::workers_and_data_update_lock -> lock();
 
-	// auto finished_task_it = std::find_if(
-	// 							CoordinatorNode::pending_maps.begin(),
-	// 							CoordinatorNode::pending_maps.end(), 
-	// 							[index](PendingMapTask* pending_task) {
-	// 								return pending_task -> map_index == index; 
-	// 							}
-	// 						);
+	auto finished_task_it = std::find_if(
+								CoordinatorNode::pending_maps.begin(),
+								CoordinatorNode::pending_maps.end(), 
+								[index](PendingMapTask* pending_task) {
+									return pending_task -> map_index == index; 
+								}
+							);
 
-	// CoordinatorNode::update_nodes_state_and_performance_history(*finished_task_it, sender);
+	CoordinatorNode::update_nodes_state_and_performance_history(*finished_task_it, sender);
 
-	// if ((*finished_task_it) -> finished) {
-	// 	// This task is actually finished (already received result from another node), so ignore
+	if ((*finished_task_it) -> finished) {
+		// This task is actually finished (already received result from another node), so ignore
 
-	// 	CoordinatorNode::workers_and_data_update_lock -> unlock();
-	// 	return;
-	// }
+		// IMPORTANTE
+		// 	CoordinatorNode::workers_and_data_update_lock -> unlock();
+		return 1;
+	}
 
-	// // We mark the task as finished but keep it because we want to still use the start_times of other nodes it might have been resent to
-	// // With the start_times we can learn more of the nodes that complete the task later on
-	// // CoordinatorNode::pending_maps.erase(finished_task_it);
-	// (*finished_task_it) -> mark_as_finished();
-	// CoordinatorNode::pending_maps_count--;
+	// We mark the task as finished but keep it because we want to still use the start_times of other nodes it might have been resent to
+	// With the start_times we can learn more of the nodes that complete the task later on
+	// CoordinatorNode::pending_maps.erase(finished_task_it);
+	(*finished_task_it) -> mark_as_finished();
+	CoordinatorNode::pending_maps_count--;
 
-	// XBT_INFO("Host %s received map result from %s and will begin executing reduce of %i flops", (my_host -> get_name()).c_str(), sender.c_str(), flops);
-	// XBT_INFO("MapReduce pending task groups count is: %i", CoordinatorNode::pending_maps_count);
+	std::cout << "Received map result from " << sender << std::endl;
+	std::cout << "MapReduce pending task groups count is: " << CoordinatorNode::pending_maps_count << std::endl;
 
-	// if (CoordinatorNode::pending_maps_count == 0 ||
-	// 	CoordinatorNode::pending_maps_count == 1 && CoordinatorNode::partitioned_redundancy_mode_enabled)
-	// {
-	// 	int reduce_execution_time = 100000;
-	// 	simgrid::s4u::this_actor::execute(reduce_execution_time);
+	if (CoordinatorNode::pending_maps_count == 0 ||
+		CoordinatorNode::pending_maps_count == 1 && CoordinatorNode::partitioned_redundancy_mode_enabled)
+	{
+		//IMPORTANTE
+		// int reduce_execution_time = 100000;
 
-	// 	XBT_INFO("MapReduce has finished successfully!! Ending simulation");
 
-	// 	simgrid::s4u::Actor::kill_all();
+		std::cout << "MapReduce has finished successfully!! Ending simulation" << std::endl;
 
-	// 	CoordinatorNode::save_logs();
+		// simgrid::s4u::Actor::kill_all();
 
-	// 	simgrid::s4u::this_actor::exit();
-		
-	// 	// simgrid::s4u::Engine::get_instance() -> shutdown();
-	// 	return;
-	// }
+		// IMPORTANTE
+		// CoordinatorNode::save_logs();
+
+		// FIN	
+		return 0;
+	}
 
 	// CoordinatorNode::workers_and_data_update_lock -> unlock();
 
- //  	if (threshold_of_execution_mode_enabled) {
-	// 	check_completion_threshold_and_resend_if_necessary();
- //  	}
+	//IMPORTANTE
+	//if (threshold_of_execution_mode_enabled) {
+	//	check_completion_threshold_and_resend_if_necessary();
+	//}
+	return 1;
 }
 
 void CoordinatorNode::check_completion_threshold_and_resend_if_necessary() {
@@ -324,7 +328,7 @@ void CoordinatorNode::reset_timeout_resend_actor() {
 }
 
 void CoordinatorNode::resend_pending_tasks_on_timeout() {
-	while (true) {
+	while (true && !(this -> finished.load())) {
 		std::this_thread::sleep_for(std::chrono::seconds(CoordinatorNode::timeout));
 		CoordinatorNode::resend_pending_tasks();
 	}

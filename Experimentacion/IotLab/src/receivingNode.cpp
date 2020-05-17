@@ -15,13 +15,13 @@ std::string begin_handler_for_role_receipt(std::string listener_ip, std::string 
 
 	if (role == "worker") {
 		// ip is the address to which to send the responses to coordinator
-		WorkerNode worker(ip);
-		std::cout << "I'm a worker" << std::endl;
+		// WorkerNode worker(ip);
+		std::cout << "I'm a worker, NOT IMPLEMENTED YET" << std::endl;
 	} else if (role == "coordinator") {
 		// ip is a list of ips separated by space representing all workers
 		std::list<std::string> worker_ips = MessageHelper::split_by_spaces(ip);
 		
-		CoordinatorNode coordinator;
+		CoordinatorNode coordinator(socket_file_descriptor);
 		std::cout << "I'm the coordinator" << std::endl;
 
 		std::list<long> map_tasks_in_flops = {1};
