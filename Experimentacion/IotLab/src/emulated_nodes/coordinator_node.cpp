@@ -46,6 +46,8 @@ void CoordinatorNode::start(std::list<long> map_tasks_in_flops, std::list<std::s
 	this -> finished_execution_mutex.lock();
 	this -> finished_initial_distribution_mutex.lock();
 
+	this -> timeout_has_been_reset = false;
+
 	// CoordinatorNode::resending_map_lock = simgrid::s4u::Mutex::create();
 	// CoordinatorNode::workers_and_data_update_lock = simgrid::s4u::Mutex::create();
 
@@ -309,44 +311,55 @@ int CoordinatorNode::handle_map_result_received(MessageHelper::MessageData messa
 	// CoordinatorNode::workers_and_data_update_lock -> unlock();
 
 	//IMPORTANTE
-	//if (threshold_of_execution_mode_enabled) {
-	//	check_completion_threshold_and_resend_if_necessary();
-	//}
+	if (threshold_of_execution_mode_enabled) {
+		check_completion_threshold_and_resend_if_necessary();
+	}
 	return 1;
 }
 
 void CoordinatorNode::check_completion_threshold_and_resend_if_necessary() {
-	// int percentage_pending = (float)CoordinatorNode::pending_maps_count / (float)CoordinatorNode::total_maps * 100;
+	int percentage_pending = (float)CoordinatorNode::pending_maps_count / (float)CoordinatorNode::total_maps * 100;
 
-	// XBT_INFO("Percentage of pending tasks is %i vs threshold to begin resending tasks of: %i", percentage_pending, CoordinatorNode::threshold);
+	std::cout << "[THRESHOLD] Percentage of pending tasks is " << percentage_pending << " vs threshold to begin resending tasks of: " << CoordinatorNode::threshold << std::endl;
 
-	// if (CoordinatorNode::threshold >= percentage_pending) {
-	// 	XBT_INFO("Threshold on pending map tasks reached! Checking and resending tasks that haven't been received yet");
-	// 	bool did_resend_pending_tasks = CoordinatorNode::resend_pending_tasks();
+	if (CoordinatorNode::threshold >= percentage_pending) {
+		std::cout << "[THRESHOLD] Threshold on pending map tasks reached! Checking and resending tasks that haven't been received yet" << std::endl;
+		bool did_resend_pending_tasks = CoordinatorNode::resend_pending_tasks();
 
-	// 	if (did_resend_pending_tasks) {
-	// 		// Timeout counter for resending tasks needs to be reset because pending tasks have just been resent
-	// 		CoordinatorNode::reset_timeout_resend_actor();
-	// 	}
+		if (did_resend_pending_tasks) {
+			// Timeout counter for resending tasks needs to be reset because pending tasks have just been resent
+			setup_resend_on_timeout();
+		}
 
-	// 	// Update threshold once it has been used
-	// 	if (CoordinatorNode::threshold >= 2 && CoordinatorNode::pending_maps.size() >= 1) {
-	// 		threshold = threshold / 2;
-	// 	} else {
-	// 		XBT_INFO("Threshold execution mode disabled");
-	// 		threshold_of_execution_mode_enabled = false;
-	// 	}
-	// }
+		// Update threshold once it has been used
+		if (CoordinatorNode::threshold >= 2 && CoordinatorNode::pending_maps.size() >= 1) {
+			threshold = threshold / 2;
+		} else {
+			std::cout << "[THRESHOLD] Threshold execution mode disabled" << std::endl;
+			threshold_of_execution_mode_enabled = false;
+		}
+	}
 }
 
-void CoordinatorNode::reset_timeout_resend_actor() {
-	// CoordinatorNode::resend_on_timeout_actor = CoordinatorNode::resend_on_timeout_actor -> restart();
+void CoordinatorNode::setup_resend_on_timeout() {
+	std::cout << "[TIMEOUT RESET]" << std::endl;
+	this -> timeout_resend_time_point = std::chrono::system_clock::now() + std::chrono::seconds(CoordinatorNode::timeout);
 }
 
 void CoordinatorNode::resend_pending_tasks_on_timeout() {
+	setup_resend_on_timeout();
+
 	while (true && !(this -> finished.load())) {
-		std::this_thread::sleep_for(std::chrono::seconds(CoordinatorNode::timeout));
-		CoordinatorNode::resend_pending_tasks();
+		std::this_thread::sleep_until(timeout_resend_time_point);
+
+		// If threshold already triggered a resend, then it has also reset the timeout point, so this thread should wait until the new time point
+		if ( this -> timeout_has_been_reset.load() ) { 
+			this -> timeout_has_been_reset = false;
+			continue;
+		}
+		
+		resend_pending_tasks();
+		setup_resend_on_timeout();
 	}
 }
 

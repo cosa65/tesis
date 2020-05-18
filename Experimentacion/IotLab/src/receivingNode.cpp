@@ -24,11 +24,11 @@ std::string begin_handler_for_role_receipt(std::string listener_ip, std::string 
 		CoordinatorNode coordinator(socket_file_descriptor);
 		std::cout << "I'm the coordinator" << std::endl;
 
-		std::list<long> map_tasks_in_flops = {1,2,3,4,5,6,7,8,9,10,11,12,13,14,15};
+		std::list<long> map_tasks_in_flops = {1000,2,3,4,5,6,7,8,9,10,11,12,13,14,1500};
 		int initial_threshold = 75;
 		int timeout = 10;
 		bool partitioned_redundancy_mode_enabled = 1;
-		bool threshold_of_execution_mode_enabled = 0;
+		bool threshold_of_execution_mode_enabled = 1;
 
 		// Antes de arrancar, el coordinator deberia recibir un ack mas de todos los worker para saber que estan todos escuchando como workers
 		// (sino podria terminar enviando la task sin que esten ya en modo worker escuchando)

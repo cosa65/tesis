@@ -39,7 +39,7 @@ public:
 	int handle_map_result_received(MessageHelper::MessageData message_data);
 
 	void check_completion_threshold_and_resend_if_necessary();
-	void reset_timeout_resend_actor();
+	void setup_resend_on_timeout();
 	void resend_pending_tasks_on_timeout();
 	bool resend_pending_tasks();
 	void save_logs();
@@ -86,4 +86,8 @@ private:
 
 	int socket_file_descriptor;
 	std::list<std::string> worker_ips;
+
+
+	std::chrono::system_clock::time_point timeout_resend_time_point;
+	std::atomic<bool> timeout_has_been_reset;
 };
