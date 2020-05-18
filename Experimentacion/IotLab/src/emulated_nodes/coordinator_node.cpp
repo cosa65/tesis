@@ -254,14 +254,13 @@ int CoordinatorNode::handle_map_result_received(MessageHelper::MessageData messa
 
 	int index = std::stoi(index_str);
 
-
 	// IMPORTANTE
 	// if(CoordinatorNode::mailboxes_manager -> is_disconnected(sender)) {
 		// XBT_INFO("Reducer in host %s couldn't receive finished map from %s because it is disconnected from the network", (my_host -> get_name()).c_str(), sender);
 		// return;
 	// }
 
-	// CoordinatorNode::workers_and_data_update_lock -> lock();
+	this -> workers_and_data_update_mutex.lock();
 
 	auto finished_task_it = std::find_if(
 								CoordinatorNode::pending_maps.begin(),
@@ -305,10 +304,11 @@ int CoordinatorNode::handle_map_result_received(MessageHelper::MessageData messa
 		// CoordinatorNode::save_logs();
 
 		// FIN	
+		this -> workers_and_data_update_mutex.unlock();
 		return 0;
 	}
 
-	// CoordinatorNode::workers_and_data_update_lock -> unlock();
+	this -> workers_and_data_update_mutex.unlock();
 
 	//IMPORTANTE
 	if (threshold_of_execution_mode_enabled) {

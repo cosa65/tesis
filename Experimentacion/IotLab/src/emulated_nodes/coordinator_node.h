@@ -80,6 +80,9 @@ private:
 	// Stops all map handler processing until finished sending initial maps
 	std::mutex finished_initial_distribution_mutex;
 
+	std::mutex workers_and_data_update_mutex;
+
+
 	// Locks main thread so that all stored threads aren't lost when main thread exits
 	std::mutex finished_execution_mutex;
 	std::atomic<bool> finished;
