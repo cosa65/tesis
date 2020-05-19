@@ -8,6 +8,7 @@
 #include <thread>
 #include <future>
 
+#include "connection_interference_manager.h"
 #include "../message_helper.h"
 
 class WorkerNode {
@@ -22,4 +23,6 @@ private:
 
 	std::string worker_ip;
 	std::string ip_to_coordinator;
+	
+	ConnectionInterferenceManager connection_interference_manager;
 };

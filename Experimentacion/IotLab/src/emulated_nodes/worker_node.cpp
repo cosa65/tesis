@@ -6,9 +6,17 @@ WorkerNode::WorkerNode(std::string ip_to_coordinator, std::string worker_ip) {
 }
 
 void WorkerNode::start(int socket_file_descriptor) {
+	this -> connection_interference_manager = ConnectionInterferenceManager({std::make_tuple(0.0, 10000000.0)});
+
 	while(true) {
 		std::cout << "[WORKER] listening for task" << std::endl;
 		MessageHelper::MessageData message_data = MessageHelper::listen_for_message(socket_file_descriptor);
+
+		if (!(this -> connection_interference_manager.can_receive_message(message_data))) {
+			std::cout << "[CONNECTION_INTERFERENCE_MANAGER] blocked message: " << message_data.content << std::endl; 
+			continue;
+		}
+
 		auto message_tuple = message_data.unpack_message("iterations:", ",");
 		
 		std::string iterations_str = std::get<0>(message_tuple), map_index = std::get<1>(message_tuple);

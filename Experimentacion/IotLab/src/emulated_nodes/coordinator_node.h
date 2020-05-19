@@ -6,6 +6,7 @@
 
 #include <list>
 #include <vector>
+#include <tuple>
 
 #include <thread>
 #include <future>
@@ -14,6 +15,7 @@
 
 #include "pending_map_task.h"
 #include "node_performance.h"
+#include "connection_interference_manager.h"
 #include "../message_helper.h"
 #include "../../../simgrid/opportunistic_network_experiments/utils/utils.cpp"
 
@@ -90,7 +92,8 @@ private:
 	int socket_file_descriptor;
 	std::list<std::string> worker_ips;
 
-
 	std::chrono::system_clock::time_point timeout_resend_time_point;
 	std::atomic<bool> timeout_has_been_reset;
+
+	ConnectionInterferenceManager connection_interference_manager;
 };

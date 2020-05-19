@@ -55,6 +55,8 @@ void CoordinatorNode::start(std::list<long> map_tasks_in_flops, std::list<std::s
 	// CoordinatorNode::map_reduce_start_point = new PointInTime();
 	// *CoordinatorNode::map_reduce_start_point = simgrid::s4u::Engine::get_instance() -> get_clock();
 
+	std::list< std::tuple<double, double> > disconnections_history;
+	this -> connection_interference_manager = ConnectionInterferenceManager(disconnections_history);
 
 	// Begin listening before sending maps
 	auto map_results_listener_thread = std::async(std::launch::async, [this, map_tasks_in_flops, workers, initial_threshold]() { 
@@ -246,6 +248,11 @@ int CoordinatorNode::handle_map_result_received(MessageHelper::MessageData messa
 	// This lock unlock will block first thread to arrive
 	// Once it is allowed to pass by distribute_and_send_maps, it will allow every other thread to pass too 
 	
+	if (!(this -> connection_interference_manager.can_receive_message(message_data))) {
+		std::cout << "[CONNECTION_INTERFERENCE_MANAGER] blocked message: " << message_data.content << std::endl; 
+		return 1;
+	}
+
 	finished_initial_distribution_mutex.lock();
 	finished_initial_distribution_mutex.unlock();
 
