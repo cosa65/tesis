@@ -25,7 +25,7 @@ typedef double TimeSpan;
 
 class CoordinatorNode {
 public:
-	CoordinatorNode(int socket_file_descriptor);
+	CoordinatorNode(int socket_file_descriptor, ConnectionInterferenceManager connection_interference_manager);
 
 	void start(
 		std::list<long> map_tasks_in_flops,
@@ -53,6 +53,7 @@ private:
 	static std::list<std::string> workers;
 
 	static std::vector<NodePerformance> idle_workers;
+	static std::list<std::string> potentially_lost_workers;
 
 	
 	// Used to aid guessing which worker to pick when resending

@@ -13,7 +13,7 @@
 
 class WorkerNode {
 public:
-	WorkerNode(std::string ip_to_coordinator, std::string worker_ip);
+	WorkerNode(std::string ip_to_coordinator, std::string worker_ip, ConnectionInterferenceManager connection_interference_manager);
 
 	void start(int socket_file_descriptor);
 	void handle_map_task();

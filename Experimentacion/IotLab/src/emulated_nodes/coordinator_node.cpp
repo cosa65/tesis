@@ -30,8 +30,10 @@ bool CoordinatorNode::initial_threshold_of_execution_mode_enabled;
 PointInTime *CoordinatorNode::map_reduce_start_point;
 
 
-CoordinatorNode::CoordinatorNode(int socket_file_descriptor) {
+CoordinatorNode::CoordinatorNode(int socket_file_descriptor, ConnectionInterferenceManager connection_interference_manager) {
 	this -> socket_file_descriptor = socket_file_descriptor;
+	this -> connection_interference_manager = connection_interference_manager;
+
 }
 
 void CoordinatorNode::start(std::list<long> map_tasks_in_flops, std::list<std::string> workers, int initial_threshold, int timeout, bool partitioned_redundancy_mode_enabled, bool threshold_of_execution_mode_enabled) {
@@ -48,15 +50,14 @@ void CoordinatorNode::start(std::list<long> map_tasks_in_flops, std::list<std::s
 
 	this -> timeout_has_been_reset = false;
 
+	this -> connection_interference_manager.start();
+
 	// CoordinatorNode::resending_map_lock = simgrid::s4u::Mutex::create();
 	// CoordinatorNode::workers_and_data_update_lock = simgrid::s4u::Mutex::create();
 
 	// IMPORTANT
 	// CoordinatorNode::map_reduce_start_point = new PointInTime();
 	// *CoordinatorNode::map_reduce_start_point = simgrid::s4u::Engine::get_instance() -> get_clock();
-
-	std::list< std::tuple<double, double> > disconnections_history;
-	this -> connection_interference_manager = ConnectionInterferenceManager(disconnections_history);
 
 	// Begin listening before sending maps
 	auto map_results_listener_thread = std::async(std::launch::async, [this, map_tasks_in_flops, workers, initial_threshold]() { 

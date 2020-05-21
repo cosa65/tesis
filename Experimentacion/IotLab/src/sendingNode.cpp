@@ -1,4 +1,5 @@
 #include "message_helper.h"
+#include "emulated_nodes/connection_interference_manager.h"
 #include "emulated_nodes/coordinator_node.h"
 #include "emulated_nodes/worker_node.h"
 
@@ -7,6 +8,10 @@ const char *network_organizer_interface = "eth0";
 
 int main(int argc, char *argv[]) {
 	std::string host_ip = argv[1];
+	int disconnections_line_number = std::stoi(argv[2]);
+
+	ConnectionInterferenceManager connection_interference_manager;
+	connection_interference_manager.load_disconnection_intervals(disconnections_line_number);
 
 	MessageHelper::send_message(host_ip, network_organizer_ipv6, network_organizer_interface);
 
@@ -18,16 +23,17 @@ int main(int argc, char *argv[]) {
 	auto message_tuple = message_data.unpack_message("role:", ",");
 	std::string role = std::get<0>(message_tuple), ip = std::get<1>(message_tuple);
 
+
 	if (role == "worker") {
 		// ip is the address to which to send the responses to coordinator
-		WorkerNode worker(ip, host_ip);
+		WorkerNode worker(ip, host_ip, connection_interference_manager);
 		worker.start(socket_file_descriptor);
 
 	} else if (role == "coordinator") {
 		// ip is a list of ips separated by space representing all workers
 		std::list<std::string> worker_ips = MessageHelper::split_by_spaces(ip);
 		
-		CoordinatorNode coordinator(socket_file_descriptor);
+		CoordinatorNode coordinator(socket_file_descriptor, connection_interference_manager);
 
 		std::cout << "ERROR Yo no puedo ser coordinator todavia" << ip << std::endl;
 		// coordinator.start()

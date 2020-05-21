@@ -7,10 +7,10 @@
 
 - Desconexiones pensar con que grado de fidelidad implementarlas.
 	<LISTO> - Si la desconexion tiene lugar cuando el mensaje deberia llegar al receptor, entonces no se recibe.
-	- El coordinador reenvia tasks a nodos que no respondieron durante mucho tiempo de manera duplicada para ver si antes no estaban accesibles pero ahora si.
+	<QUEDA PARA DESPUES> - El coordinador reenvia tasks a nodos que no respondieron durante mucho tiempo de manera duplicada para ver si antes no estaban accesibles pero ahora si.
 	<QUEDA PARA DESPUES> - Si la desconexion tiene lugar durante el tiempo entre que se envia el mensaje y se recibe, entonces no se recibe.
 
-<QUEDA PARA DESPUES> - Existe una historia de desconexiones que se puede escribir en un .txt aparte y se envia a cada nodo su parte (diciendole cuando desconectarse y cuando volver).
+<LISTO> - Existe una historia de desconexiones que se puede escribir en un .txt aparte y se envia a cada nodo su parte (diciendole cuando desconectarse y cuando volver).
 
 <QUEDA PARA DESPUES> - Antes de que el coordinador empiece a  correr el experimento espera a recibir un ack de todos los nodos worker diciendole que saben que son worker y estan empezando a actuar como su rol.
 
@@ -27,3 +27,5 @@
 
 - Una vez terminado el MapReduce, los nodos worker envian al coordinador la informacion relevante para el experimento y esta info queda guardada en un archivo en el coordinador.
 - Logging
+
+- Para interferencias podria hacer que linea con mucha interferencia pueda recibir/enviar mensajes con % de probabilidad segun su calidad de conexion

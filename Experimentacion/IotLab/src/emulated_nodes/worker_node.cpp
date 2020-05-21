@@ -1,12 +1,13 @@
 #include "worker_node.h"
 
-WorkerNode::WorkerNode(std::string ip_to_coordinator, std::string worker_ip) {
+WorkerNode::WorkerNode(std::string ip_to_coordinator, std::string worker_ip, ConnectionInterferenceManager connection_interference_manager) {
 	this -> ip_to_coordinator = ip_to_coordinator;
 	this -> worker_ip = worker_ip;
+	this -> connection_interference_manager = connection_interference_manager;
 }
 
 void WorkerNode::start(int socket_file_descriptor) {
-	this -> connection_interference_manager = ConnectionInterferenceManager({std::make_tuple(0.0, 10000000.0)});
+	this -> connection_interference_manager.start();
 
 	while(true) {
 		std::cout << "[WORKER] listening for task" << std::endl;

@@ -2,10 +2,11 @@
 #include <future>
 
 #include "network_organizer.h"
+#include "emulated_nodes/connection_interference_manager.h"
 #include "emulated_nodes/coordinator_node.h"
 #include "emulated_nodes/worker_node.h"
 
-std::string begin_handler_for_role_receipt(std::string listener_ip, std::string listener_interface, int socket_file_descriptor) {
+std::string begin_handler_for_role_receipt(std::string listener_ip, std::string listener_interface, int socket_file_descriptor, ConnectionInterferenceManager connection_interference_manager) {
 	MessageHelper::MessageData message_data = MessageHelper::listen_for_message(socket_file_descriptor);
 
 	std::cout << "Received message: " << message_data.content << std::endl;
@@ -21,7 +22,7 @@ std::string begin_handler_for_role_receipt(std::string listener_ip, std::string 
 		// ip is a list of ips separated by space representing all workers
 		std::list<std::string> worker_ips = MessageHelper::split_by_spaces(ip);
 		
-		CoordinatorNode coordinator(socket_file_descriptor);
+		CoordinatorNode coordinator(socket_file_descriptor, connection_interference_manager);
 		std::cout << "I'm the coordinator" << std::endl;
 
 		std::list<long> map_tasks_in_flops = {1000,2,3,4,5,6,7,8,9,10,11,12,13,14,1500};
@@ -43,6 +44,10 @@ std::string begin_handler_for_role_receipt(std::string listener_ip, std::string 
 // Al uso del socket_file_descriptor deberia agregarle un mutex para evitar que lo use mas de un thread al mismo tiempo (a menos que imite los mutexes de simgrid, que se supone que garantizan eso)
 int main(int argc, char *argv[]) {
 	int amount_of_worker_nodes = std::stoi(argv[1]);
+	int disconnections_line_number = std::stoi(argv[2]);
+
+	ConnectionInterferenceManager connection_interference_manager;
+	connection_interference_manager.load_disconnection_intervals(disconnections_line_number);
 
 	std::string network_organizer_ipv6 = "2001:660:3207:400::1";
 	std::string network_organizer_interface = "eth0";
@@ -52,7 +57,7 @@ int main(int argc, char *argv[]) {
 
 	network_organizer.listen_for_worker_ips(amount_of_worker_nodes, socket_file_descriptor);
 
-	auto role = std::async(std::launch::async, begin_handler_for_role_receipt, network_organizer_ipv6, network_organizer_interface, socket_file_descriptor);
+	auto role = std::async(std::launch::async, begin_handler_for_role_receipt, network_organizer_ipv6, network_organizer_interface, socket_file_descriptor, connection_interference_manager);
 
 	network_organizer.create_network_and_send_links();
 
