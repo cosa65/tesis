@@ -12,14 +12,14 @@
 
 <LISTO> - Existe una historia de desconexiones que se puede escribir en un .txt aparte y se envia a cada nodo su parte (diciendole cuando desconectarse y cuando volver).
 
-<QUEDA PARA DESPUES> - Antes de que el coordinador empiece a  correr el experimento espera a recibir un ack de todos los nodos worker diciendole que saben que son worker y estan empezando a actuar como su rol.
+<QUEDA PARA DESPUES?> - Antes de que el coordinador empiece a  correr el experimento espera a recibir un ack de todos los nodos worker diciendole que saben que son worker y estan empezando a actuar como su rol.
 
 - El experimento se maneja igual que en simgrid hasta resolverse el MapReduce simulado.
 	<LISTO> - Coordinador separa tasks y las envia a todos los nodos workers.
 	<LISTO> - Workers "hacen maps" (operacion filler) y envian resultado al coordinador.
 	<LISTO> - Coordinador reenvia cuando hay timeout.
 	<LISTO> - Coordinador recibe maps, cuando tiene todos los maps "reduce" (operacion filler) y avisa que termino.
-		<QUEDA PARA DESPUES> - Cuando el coordinador updatea estado y reenvia tiene un mutex para que no hayan varios threads updateando al mismo tiempo.
+		<LISTO> - Cuando el coordinador updatea estado y reenvia tiene un mutex para que no hayan varios threads updateando al mismo tiempo.
 	<LISTO> - Redundancia.
 	<LISTO> - Threshold.
 

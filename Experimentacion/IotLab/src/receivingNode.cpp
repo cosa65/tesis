@@ -2,6 +2,7 @@
 #include <future>
 
 #include "network_organizer.h"
+#include "emulated_nodes/node_timer.h"
 #include "emulated_nodes/connection_interference_manager.h"
 #include "emulated_nodes/coordinator_node.h"
 #include "emulated_nodes/worker_node.h"
@@ -46,7 +47,8 @@ int main(int argc, char *argv[]) {
 	int amount_of_worker_nodes = std::stoi(argv[1]);
 	int disconnections_line_number = std::stoi(argv[2]);
 
-	ConnectionInterferenceManager connection_interference_manager;
+	NodeTimer node_timer;
+	ConnectionInterferenceManager connection_interference_manager(node_timer);
 	connection_interference_manager.load_disconnection_intervals(disconnections_line_number);
 
 	std::string network_organizer_ipv6 = "2001:660:3207:400::1";

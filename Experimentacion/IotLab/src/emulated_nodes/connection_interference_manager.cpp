@@ -1,6 +1,8 @@
 #include "connection_interference_manager.h"
 
-ConnectionInterferenceManager::ConnectionInterferenceManager() {}
+ConnectionInterferenceManager::ConnectionInterferenceManager(NodeTimer node_timer):
+	node_timer(node_timer) 
+	{}
 
 void ConnectionInterferenceManager::load_disconnection_intervals(std::list< std::tuple<double, double> > disconnection_intervals) {
 	this -> disconnection_intervals = disconnection_intervals;
@@ -42,23 +44,15 @@ void ConnectionInterferenceManager::load_disconnection_intervals(int disconnecti
 	file.close();
 }
 
-void ConnectionInterferenceManager::start() {
-	std::chrono::time_point<std::chrono::system_clock> now = std::chrono::system_clock::now();
-	auto duration = now.time_since_epoch();
-	this -> begin_time_in_ms = std::chrono::duration_cast<std::chrono::milliseconds>(duration).count();
-}
+void ConnectionInterferenceManager::start() {}
 
 bool ConnectionInterferenceManager::can_receive_message(MessageHelper::MessageData received_message) {
-	std::chrono::time_point<std::chrono::system_clock> now = std::chrono::system_clock::now();
-	auto duration = now.time_since_epoch();
-	double now_in_ms = std::chrono::duration_cast<std::chrono::milliseconds>(duration).count();
+	double time_of_receipt_message = this -> node_timer.current_time_in_ms();
 
-	double relative_time_of_receipt_message = now_in_ms - (this -> begin_time_in_ms);
-
-	return is_connected_at_relative_time_in_ms(relative_time_of_receipt_message);
+	return is_connected_now(time_of_receipt_message);
 }
 
-bool ConnectionInterferenceManager::is_connected_at_relative_time_in_ms(double time_point) {
+bool ConnectionInterferenceManager::is_connected_now(double time_point) {
 	for (auto interval : this -> disconnection_intervals) {
 		if (time_point >= std::get<0>(interval) && time_point <= std::get<1>(interval)) {
 			return false;

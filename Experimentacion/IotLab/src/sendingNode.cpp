@@ -10,7 +10,8 @@ int main(int argc, char *argv[]) {
 	std::string host_ip = argv[1];
 	int disconnections_line_number = std::stoi(argv[2]);
 
-	ConnectionInterferenceManager connection_interference_manager;
+	NodeTimer node_timer;
+	ConnectionInterferenceManager connection_interference_manager(node_timer);
 	connection_interference_manager.load_disconnection_intervals(disconnections_line_number);
 
 	MessageHelper::send_message(host_ip, network_organizer_ipv6, network_organizer_interface);

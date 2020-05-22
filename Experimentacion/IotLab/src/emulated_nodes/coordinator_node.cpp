@@ -30,11 +30,10 @@ bool CoordinatorNode::initial_threshold_of_execution_mode_enabled;
 PointInTime *CoordinatorNode::map_reduce_start_point;
 
 
-CoordinatorNode::CoordinatorNode(int socket_file_descriptor, ConnectionInterferenceManager connection_interference_manager) {
-	this -> socket_file_descriptor = socket_file_descriptor;
-	this -> connection_interference_manager = connection_interference_manager;
-
-}
+CoordinatorNode::CoordinatorNode(int socket_file_descriptor, ConnectionInterferenceManager connection_interference_manager) :
+	socket_file_descriptor(socket_file_descriptor),
+	connection_interference_manager(connection_interference_manager)
+	{}
 
 void CoordinatorNode::start(std::list<long> map_tasks_in_flops, std::list<std::string> workers, int initial_threshold, int timeout, bool partitioned_redundancy_mode_enabled, bool threshold_of_execution_mode_enabled) {
 	// CoordinatorNode::mailboxes_manager = mailboxes_manager;
