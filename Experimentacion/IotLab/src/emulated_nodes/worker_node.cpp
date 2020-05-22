@@ -1,9 +1,10 @@
 #include "worker_node.h"
 
-WorkerNode::WorkerNode(std::string ip_to_coordinator, std::string worker_ip, ConnectionInterferenceManager connection_interference_manager):
+WorkerNode::WorkerNode(std::string ip_to_coordinator, std::string worker_ip, ConnectionInterferenceManager connection_interference_manager, LogKeeper log_keeper):
 	ip_to_coordinator(ip_to_coordinator),
 	worker_ip(worker_ip),
-	connection_interference_manager(connection_interference_manager)
+	connection_interference_manager(connection_interference_manager),
+	log_keeper(log_keeper)
 	{}
 
 void WorkerNode::start(int socket_file_descriptor) {

@@ -1,12 +1,15 @@
 #include "node_timer.h"
 
-NodeTimer::NodeTimer() {}
+NodeTimer::NodeTimer(): started(false) {}
 
 void NodeTimer::start() {
 	this -> begin_time_in_ms = now_since_epoch();
+	this -> started = true;
 }
 
 double NodeTimer::current_time_in_ms() {
+	if (!this -> started) { return -1; }
+
 	return now_since_epoch() - (this -> begin_time_in_ms);
 }
 

@@ -5,7 +5,7 @@
 
 
 #include "node_timer.h"
-#include "../message_helper.h"
+#include "message_helper.h"
 
 class ConnectionInterferenceManager {
 public:

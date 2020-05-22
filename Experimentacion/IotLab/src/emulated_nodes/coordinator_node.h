@@ -1,7 +1,7 @@
 #pragma once
 
 #include <string.h>
-#include <iostream>
+#include <sstream>
 #include <numeric>
 
 #include <list>
@@ -13,11 +13,12 @@
 #include <mutex>
 #include <condition_variable>
 
-#include "pending_map_task.h"
-#include "node_performance.h"
-#include "connection_interference_manager.h"
+#include "../log_keeper.h"
+#include "../connection_interference_manager.h"
 #include "../message_helper.h"
 #include "../../../simgrid/opportunistic_network_experiments/utils/utils.cpp"
+#include "pending_map_task.h"
+#include "node_performance.h"
 
 typedef int MapIndex;
 typedef double PointInTime;
@@ -25,7 +26,7 @@ typedef double TimeSpan;
 
 class CoordinatorNode {
 public:
-	CoordinatorNode(int socket_file_descriptor, ConnectionInterferenceManager connection_interference_manager);
+	CoordinatorNode(int socket_file_descriptor, ConnectionInterferenceManager connection_interference_manager, LogKeeper log_keeper);
 
 	void start(
 		std::list<long> map_tasks_in_flops,
@@ -96,5 +97,6 @@ private:
 	std::chrono::system_clock::time_point timeout_resend_time_point;
 	std::atomic<bool> timeout_has_been_reset;
 
+	LogKeeper log_keeper;
 	ConnectionInterferenceManager connection_interference_manager;
 };

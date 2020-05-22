@@ -11,5 +11,6 @@ public:
 private:
 	double now_since_epoch();
 
+	bool started;
 	double begin_time_in_ms;
 };

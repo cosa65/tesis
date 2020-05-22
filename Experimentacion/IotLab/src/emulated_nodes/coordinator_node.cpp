@@ -30,9 +30,10 @@ bool CoordinatorNode::initial_threshold_of_execution_mode_enabled;
 PointInTime *CoordinatorNode::map_reduce_start_point;
 
 
-CoordinatorNode::CoordinatorNode(int socket_file_descriptor, ConnectionInterferenceManager connection_interference_manager) :
+CoordinatorNode::CoordinatorNode(int socket_file_descriptor, ConnectionInterferenceManager connection_interference_manager, LogKeeper log_keeper) :
 	socket_file_descriptor(socket_file_descriptor),
-	connection_interference_manager(connection_interference_manager)
+	connection_interference_manager(connection_interference_manager),
+	log_keeper(log_keeper)
 	{}
 
 void CoordinatorNode::start(std::list<long> map_tasks_in_flops, std::list<std::string> workers, int initial_threshold, int timeout, bool partitioned_redundancy_mode_enabled, bool threshold_of_execution_mode_enabled) {
@@ -373,6 +374,8 @@ void CoordinatorNode::resend_pending_tasks_on_timeout() {
 // Returns true if this resend was successful or false if it was cancelled because another resend was already taking place
 bool CoordinatorNode::resend_pending_tasks() {
 	std::cout << "Resending pending tasks" << std::endl;
+
+	// IMPORTANTE
 // If we failed to capture the lock, then that means a resend operation is already taking place, so we don't need to perform the resend_pending_task again
 	// if (!CoordinatorNode::resending_map_lock -> try_lock()) {
 	// 	XBT_INFO("Another actor is sending pending tasks, so this resend execution will be cancelled");

@@ -1,13 +1,20 @@
 #include <thread>
 #include <future>
 
+#include "log_keeper.h"
 #include "network_organizer.h"
-#include "emulated_nodes/node_timer.h"
-#include "emulated_nodes/connection_interference_manager.h"
+#include "connection_interference_manager.h"
+#include "node_timer.h"
 #include "emulated_nodes/coordinator_node.h"
 #include "emulated_nodes/worker_node.h"
 
-std::string begin_handler_for_role_receipt(std::string listener_ip, std::string listener_interface, int socket_file_descriptor, ConnectionInterferenceManager connection_interference_manager) {
+std::string begin_handler_for_role_receipt(
+	std::string listener_ip,
+	std::string listener_interface, 
+	int socket_file_descriptor, 
+	ConnectionInterferenceManager connection_interference_manager, 
+	LogKeeper log_keeper)
+{
 	MessageHelper::MessageData message_data = MessageHelper::listen_for_message(socket_file_descriptor);
 
 	std::cout << "Received message: " << message_data.content << std::endl;
@@ -23,7 +30,7 @@ std::string begin_handler_for_role_receipt(std::string listener_ip, std::string 
 		// ip is a list of ips separated by space representing all workers
 		std::list<std::string> worker_ips = MessageHelper::split_by_spaces(ip);
 		
-		CoordinatorNode coordinator(socket_file_descriptor, connection_interference_manager);
+		CoordinatorNode coordinator(socket_file_descriptor, connection_interference_manager, log_keeper);
 		std::cout << "I'm the coordinator" << std::endl;
 
 		std::list<long> map_tasks_in_flops = {1000,2,3,4,5,6,7,8,9,10,11,12,13,14,1500};
@@ -48,6 +55,7 @@ int main(int argc, char *argv[]) {
 	int disconnections_line_number = std::stoi(argv[2]);
 
 	NodeTimer node_timer;
+	LogKeeper log_keeper(node_timer);
 	ConnectionInterferenceManager connection_interference_manager(node_timer);
 	connection_interference_manager.load_disconnection_intervals(disconnections_line_number);
 
@@ -59,7 +67,7 @@ int main(int argc, char *argv[]) {
 
 	network_organizer.listen_for_worker_ips(amount_of_worker_nodes, socket_file_descriptor);
 
-	auto role = std::async(std::launch::async, begin_handler_for_role_receipt, network_organizer_ipv6, network_organizer_interface, socket_file_descriptor, connection_interference_manager);
+	auto role = std::async(std::launch::async, begin_handler_for_role_receipt, network_organizer_ipv6, network_organizer_interface, socket_file_descriptor, connection_interference_manager, log_keeper);
 
 	network_organizer.create_network_and_send_links();
 
