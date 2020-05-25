@@ -13,7 +13,8 @@ std::string begin_handler_for_role_receipt(
 	std::string listener_interface, 
 	int socket_file_descriptor, 
 	ConnectionInterferenceManager connection_interference_manager, 
-	LogKeeper log_keeper)
+	LogKeeper log_keeper,
+	NodeTimer node_timer)
 {
 	MessageHelper::MessageData message_data = MessageHelper::listen_for_message(socket_file_descriptor);
 
@@ -30,7 +31,7 @@ std::string begin_handler_for_role_receipt(
 		// ip is a list of ips separated by space representing all workers
 		std::list<std::string> worker_ips = MessageHelper::split_by_spaces(ip);
 		
-		CoordinatorNode coordinator(socket_file_descriptor, connection_interference_manager, log_keeper);
+		CoordinatorNode coordinator(socket_file_descriptor, connection_interference_manager, log_keeper, node_timer);
 		std::cout << "I'm the coordinator" << std::endl;
 
 		std::list<long> map_tasks_in_flops = {1000,2,3,4,5,6,7,8,9,10,11,12,13,14,1500};
@@ -67,7 +68,16 @@ int main(int argc, char *argv[]) {
 
 	network_organizer.listen_for_worker_ips(amount_of_worker_nodes, socket_file_descriptor);
 
-	auto role = std::async(std::launch::async, begin_handler_for_role_receipt, network_organizer_ipv6, network_organizer_interface, socket_file_descriptor, connection_interference_manager, log_keeper);
+	auto role = std::async(
+		std::launch::async, 
+		begin_handler_for_role_receipt, 
+		network_organizer_ipv6, 
+		network_organizer_interface, 
+		socket_file_descriptor, 
+		connection_interference_manager, 
+		log_keeper, 
+		node_timer
+	);
 
 	network_organizer.create_network_and_send_links();
 

@@ -30,14 +30,14 @@ int main(int argc, char *argv[]) {
 
 	if (role == "worker") {
 		// ip is the address to which to send the responses to coordinator
-		WorkerNode worker(ip, host_ip, connection_interference_manager, log_keeper);
+		WorkerNode worker(ip, host_ip, connection_interference_manager, log_keeper, node_timer);
 		worker.start(socket_file_descriptor);
 
 	} else if (role == "coordinator") {
 		// ip is a list of ips separated by space representing all workers
 		std::list<std::string> worker_ips = MessageHelper::split_by_spaces(ip);
 		
-		CoordinatorNode coordinator(socket_file_descriptor, connection_interference_manager, log_keeper);
+		CoordinatorNode coordinator(socket_file_descriptor, connection_interference_manager, log_keeper, node_timer);
 
 		std::cout << "ERROR Yo no puedo ser coordinator todavia" << ip << std::endl;
 		// coordinator.start()

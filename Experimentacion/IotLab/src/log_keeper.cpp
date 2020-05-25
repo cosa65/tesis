@@ -1,7 +1,5 @@
 #include "log_keeper.h"
 
-LogKeeper::LogKeeper(NodeTimer node_timer): node_timer(node_timer) {}
-
 void LogKeeper::log(std::string message) {
 	double current_time = node_timer.current_time_in_ms();
 

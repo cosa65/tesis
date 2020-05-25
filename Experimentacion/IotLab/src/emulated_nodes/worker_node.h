@@ -14,7 +14,7 @@
 
 class WorkerNode {
 public:
-	WorkerNode(std::string ip_to_coordinator, std::string worker_ip, ConnectionInterferenceManager connection_interference_manager, LogKeeper log_keeper);
+	WorkerNode(std::string ip_to_coordinator, std::string worker_ip, ConnectionInterferenceManager connection_interference_manager, LogKeeper log_keeper, NodeTimer node_timer);
 
 	void start(int socket_file_descriptor);
 	void handle_map_task();
@@ -25,6 +25,7 @@ private:
 	std::string worker_ip;
 	std::string ip_to_coordinator;
 
+	NodeTimer node_timer;
 	LogKeeper log_keeper;
 	ConnectionInterferenceManager connection_interference_manager;
 };

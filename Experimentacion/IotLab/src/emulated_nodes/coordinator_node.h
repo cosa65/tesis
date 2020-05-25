@@ -26,7 +26,7 @@ typedef double TimeSpan;
 
 class CoordinatorNode {
 public:
-	CoordinatorNode(int socket_file_descriptor, ConnectionInterferenceManager connection_interference_manager, LogKeeper log_keeper);
+	CoordinatorNode(int socket_file_descriptor, ConnectionInterferenceManager connection_interference_manager, LogKeeper log_keeper, NodeTimer node_timer);
 
 	void start(
 		std::list<long> map_tasks_in_flops,
@@ -97,6 +97,7 @@ private:
 	std::chrono::system_clock::time_point timeout_resend_time_point;
 	std::atomic<bool> timeout_has_been_reset;
 
+	NodeTimer node_timer;
 	LogKeeper log_keeper;
 	ConnectionInterferenceManager connection_interference_manager;
 };
