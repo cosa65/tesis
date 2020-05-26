@@ -12,7 +12,7 @@ int MessageHelper::send_message(std::string payload, std::string destination_ipv
 	// sending_interface = "wlp2s0"; //LOCAL VERSION
 	const char *sending_ipv6 = destination_ipv6.c_str(); //"2001:660:5307:3000::64";
 	const char *sending_interface = destination_interface.c_str();
-	std::cout << "Sending to network_manager: " << sending_ipv6 << " interface: " << destination_interface << std::endl;
+	std::cout << "Sending to: " << sending_ipv6 << " interface: " << destination_interface << std::endl;
 
     inet_pton(AF_INET6,sending_ipv6, (void *)&socket_struct.sin6_addr.s6_addr);
     socket_struct.sin6_scope_id = if_nametoindex(sending_interface);
@@ -71,17 +71,6 @@ MessageHelper::MessageData MessageHelper::listen_for_message(int socket_file_des
 	return message;
 }
 
-std::tuple<std::string, std::string> MessageHelper::unpack_task_payload(std::string payload) {
-	// int flops_start = 6;
-	// int flops_end = payload.find(";") - 6;
-	// int map_index_start = payload.find("map_index:") + 10;
-
-	// std::string flops = payload.substr(flops_start, flops_end);
-	// std::string map_index = payload.substr(map_index_start, (payload.length()) - map_index_start);
-
-	return std::make_tuple("flops", "map_index"); 
-}
-
 // https://stackoverflow.com/a/5607650
 std::list<std::string> MessageHelper::split_by_spaces(std::string string_with_spaces) {
 	std::stringstream ss(string_with_spaces);
@@ -132,14 +121,57 @@ std::string MessageHelper::to_string(sockaddr sockaddr, socklen_t address_length
 }
 
 std::tuple<std::string, std::string> MessageHelper::MessageData::unpack_message(std::string first_separator, std::string second_separator) {
-	std::string raw_message = this -> content;
+	std::string message = content_without_final_destination();
 
 	int first_start = first_separator.length();
-	int first_end = raw_message.find(second_separator) - first_separator.length();
-	int second_start = raw_message.find(second_separator) + second_separator.length();
+	int first_size = message.find(second_separator) - first_separator.length();
+	int second_start = message.find(second_separator) + second_separator.length();
 
-	std::string first_msg = raw_message.substr(first_start, first_end);
-	std::string second_msg = raw_message.substr(second_start, (raw_message.length()) - second_start);
+	std::string first_msg = message.substr(first_start, first_size);
+	std::string second_msg = message.substr(second_start, (message.length()) - second_start);
 
 	return std::make_tuple(first_msg, second_msg);
+}
+
+std::tuple<std::string, std::string, std::string> MessageHelper::MessageData::unpack_message(std::string first_separator, std::string second_separator, std::string third_separator) {
+	std::string message = content_without_final_destination();
+
+	int first_start = first_separator.length();
+	int first_size = message.find(second_separator) - first_separator.length();
+	int second_start = message.find(second_separator) + second_separator.length();
+	int second_size = message.find(third_separator) - second_start;
+	int third_start = message.find(third_separator) + third_separator.length();
+
+	std::string first_msg = message.substr(first_start, first_size);
+	std::string second_msg = message.substr(second_start, second_size);
+	std::string third_msg = message.substr(third_start, (message.length()) - third_start);
+
+	return std::make_tuple(first_msg, second_msg, third_msg);
+}
+
+std::string MessageHelper::MessageData::get_final_destination() {
+	std::string raw_message = this -> content;
+
+	std::string destination_ip_string_literal = "destination_ip:";
+
+	// This counts both as the starting position and the size at which we want to cut our raw_message
+	int destination_start = raw_message.find("destination_ip:") + destination_ip_string_literal.length();
+	int destination_size = raw_message.length() - destination_start;
+	
+	return raw_message.substr(destination_start, destination_size);
+}
+
+std::string MessageHelper::MessageData::content_without_final_destination() {
+	std::string raw_message = this -> content;
+
+	// This counts both as the starting position and the size at which we want to cut our raw_message
+	int cut_raw_message_size = raw_message.find(",destination_ip:");
+
+	if (cut_raw_message_size == std::string::npos) {
+		return raw_message;
+	}
+
+	std::string message = raw_message.substr(0, cut_raw_message_size);
+
+	return message;
 }

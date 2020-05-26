@@ -21,12 +21,16 @@ public:
 		}
 		
 		std::tuple<std::string, std::string> unpack_message(std::string first_separator, std::string second_separator);
+		std::tuple<std::string, std::string, std::string> unpack_message(std::string first_separator, std::string second_separator, std::string third_separator);
+		std::string get_final_destination();
+		std::string content_without_final_destination();
 
 		std::string content;
 		std::string sender_ipv6_address;
 	};
 
 	static int send_message(std::string payload, std::string destination_ipv6, std::string destination_interface);
+
 	static int bind_listen(std::string receiving_ipv6, std::string receiving_interface);
 	static MessageData listen_for_message(int socket_file_descriptor);
 	// map payload shape is "flops:%s;map_index:%s"

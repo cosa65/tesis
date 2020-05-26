@@ -3,12 +3,15 @@
 NodeTimer::NodeTimer(): started(false) {}
 
 void NodeTimer::start() {
-	this -> begin_time_in_ms = now_since_epoch();
+	std::cout << "[NODE_TIMER] Started timer now" << std::endl;
 	this -> started = true;
+	this -> begin_time_in_ms = now_since_epoch();
 }
 
 double NodeTimer::current_time_in_ms() {
-	if (!this -> started) { return -1; }
+	if (!this -> started) { 
+		return -1;
+	}
 
 	return now_since_epoch() - (this -> begin_time_in_ms);
 }
@@ -19,7 +22,7 @@ std::string NodeTimer::time_log() {
 	std::ostringstream ostr;
 	ostr.precision(12);
 
-	std::string current_time_str = current_time > 0.0 ? std::to_string(current_time) : "EXPERIMENT NOT YET STARTED";
+	std::string current_time_str = this -> started ? std::to_string(current_time) : "EXPERIMENT NOT YET STARTED";
 
 	ostr << "[" << std::fixed << current_time_str << "] ";
 

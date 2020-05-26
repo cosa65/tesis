@@ -7,10 +7,10 @@
 
 class LogKeeper {
 public:
-	LogKeeper(NodeTimer node_timer): node_timer(node_timer)  {}
+	LogKeeper(NodeTimer *node_timer): node_timer(node_timer)  {}
 
 	void log(std::string message);
 
 private:
-	NodeTimer node_timer;
+	NodeTimer *node_timer;
 };

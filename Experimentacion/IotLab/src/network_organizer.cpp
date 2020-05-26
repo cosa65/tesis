@@ -5,30 +5,108 @@ NetworkOrganizer::NetworkOrganizer(std::string network_organizer_ipv6, std::stri
 	this -> network_organizer_interface = network_organizer_interface;
 }
 
-void NetworkOrganizer::listen_for_worker_ips(int workers_size, int socket_file_descriptor) {
+// stores all workers ips and return a map linking each worker index with its corresponding ip
+std::map<int, std::string> NetworkOrganizer::listen_for_worker_ips(int workers_size, int socket_file_descriptor) {
+	std::map<int, std::string> workers_index_to_ip_map;
+
 	for (int i = 0; i < workers_size; i++) {
 		MessageHelper::MessageData message_data = MessageHelper::listen_for_message(socket_file_descriptor);
-		
-		this -> workers.push_back(message_data.content);
-		
+	
 		std::cout << "Received message: " << message_data.content << " from address: " << message_data.sender_ipv6_address <<  std::endl;
+
+		auto message_tuple = message_data.unpack_message("ip:", ",node_line_number:");
+
+		std::string ip = std::get<0>(message_tuple), node_line_number_str = std::get<1>(message_tuple);
+
+		int node_line_number = stoi(node_line_number_str);
+
+		workers_index_to_ip_map[node_line_number] = ip;
 	}
 
-	std::cout << "Received all workers! I have now " << this -> workers.size() << " workers available" << std::endl;
+	std::cout << "Received all workers! I have now " << workers_index_to_ip_map.size() << " workers available" << std::endl;
+
+	return workers_index_to_ip_map;
 }
 
-void NetworkOrganizer::create_network_and_send_links() {
+void NetworkOrganizer::create_network_and_send_links(std::vector<std::string> workers_connections_as_index, std::map<int, std::string> index_to_ip_map) {
 	// For now, just connect all nodes to the coordinator (default coordinator is the same as network_organizer)
-	for (std::string worker : this -> workers) {
-		std::string message_content = "role:worker," + network_organizer_ipv6;
+
+	std::cout << "workers_connections_as_index: " << std::endl;
+	for (auto worker : workers_connections_as_index) {
+		std::cout << worker;
+	}
+	std::cout << std::endl;
+
+	std::list<std::string> worker_ips;
+
+	for (auto const& index_ip_tuple : index_to_ip_map) {
+		int worker_index = index_ip_tuple.first;
+		std::string worker_ip = index_ip_tuple.second;
+
+		worker_ips.push_back(worker_ip);
+
+		std::string one_worker_connections_as_index;
+
+		if (worker_index < workers_connections_as_index.size()) {
+			one_worker_connections_as_index = workers_connections_as_index[worker_index];
+		} else {
+			// If there is no value here then it this node can be considered adjacent to everyone
+			one_worker_connections_as_index = "";
+		}
+
+		std::string worker_connections_as_ip = translate_worker_indexes_to_ip(one_worker_connections_as_index, index_to_ip_map);
+
+		std::string message_content = "role:worker,ip:" + network_organizer_ipv6 + ",ip_translations:" + worker_connections_as_ip;
 		std::cout << "Sending message with content: " << message_content << std::endl;
-		MessageHelper::send_message(message_content, worker, "eth0");		
+		MessageHelper::send_message(message_content, worker_ip, "eth0");		
 	}
 
-	std::string worker_ips_split_by_space = MessageHelper::concatenate_with_separator(this -> workers, " ");
+	std::string worker_ips_split_by_space = MessageHelper::concatenate_with_separator(worker_ips, " ");
 
 // std::copy(strings_list.begin(), strings_list.end(), std::ostream_iterator<std::string>(std::cout, "\n"));
-	MessageHelper::send_message("role:coordinator," + worker_ips_split_by_space, this -> network_organizer_ipv6, this -> network_organizer_interface);
-	
+	MessageHelper::send_message("role:coordinator,ip:" + worker_ips_split_by_space + ",ip_translations:" + workers_connections_as_index[0], this -> network_organizer_ipv6, this -> network_organizer_interface);
 }
 
+std::string NetworkOrganizer::translate_worker_indexes_to_ip(std::string worker_connections_as_indexes, std::map<int, std::string> index_to_ip_map) {
+	if (worker_connections_as_indexes.empty()) {
+		return "";
+	}
+
+	std::istringstream ss_destination_mapping(worker_connections_as_indexes);
+
+	std::ostringstream oss_worker_indexes_as_ip;
+
+	int node_destination_index;
+	int node_step_index;
+
+	// while(ss_destination_mapping >> node_destination_index) {
+	// 	std::string delimiter;
+	// 	ss_destination_mapping.read(delimiter, 1);
+
+	// 	if (delimiter != ",") {
+	// 		throw std::runtime_error("[NODES_DESTINATION_TRANSLATOR] Error: network_topology.txt is not in a readable state");
+	// 	}
+
+	// 	ss_destination_mapping >> node_step_index;
+
+	// 	std::string node_destination_ip = index_to_ip_map[node_destination_index - 1];
+	// 	std::string node_step_ip = index_to_ip_map[node_step_index - 1];
+
+	// 	oss_worker_indexes_as_ip << node_destination_ip << " " << node_step_ip << " ";
+	// }
+
+	std::string token;
+	while(std::getline(ss_destination_mapping, token, ',')) {
+		std::istringstream ss_map(token);
+
+		ss_map >> node_destination_index;
+		ss_map >> node_step_index;
+
+		std::string node_destination_ip = index_to_ip_map[node_destination_index - 1];
+		std::string node_step_ip = index_to_ip_map[node_step_index - 1];
+
+		oss_worker_indexes_as_ip << node_destination_ip << " " << node_step_ip << " ";
+	}
+
+	return oss_worker_indexes_as_ip.str();
+}

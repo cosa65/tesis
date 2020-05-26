@@ -9,7 +9,7 @@
 
 class ConnectionInterferenceManager {
 public:
-	ConnectionInterferenceManager(NodeTimer node_timer);
+	ConnectionInterferenceManager(NodeTimer *node_timer);
 	void load_disconnection_intervals(std::list< std::tuple<double, double> > disconnection_intervals);
 	void load_disconnection_intervals(int disconnections_line_number);
 	
@@ -19,6 +19,6 @@ public:
 	bool is_connected_now(double time_point);
 
 private:
-	NodeTimer node_timer;
+	NodeTimer *node_timer;
 	std::list< std::tuple<double, double> > disconnection_intervals;
 };

@@ -3,6 +3,7 @@
 
 #include "log_keeper.h"
 #include "network_organizer.h"
+#include "nodes_destination_translator.h"
 #include "connection_interference_manager.h"
 #include "node_timer.h"
 #include "emulated_nodes/coordinator_node.h"
@@ -12,26 +13,27 @@ std::string begin_handler_for_role_receipt(
 	std::string listener_ip,
 	std::string listener_interface, 
 	int socket_file_descriptor, 
-	ConnectionInterferenceManager connection_interference_manager, 
-	LogKeeper log_keeper,
-	NodeTimer node_timer)
+	ConnectionInterferenceManager *connection_interference_manager, 
+	NodesDestinationTranslator *translator,
+	LogKeeper *log_keeper,
+	NodeTimer *node_timer)
 {
 	MessageHelper::MessageData message_data = MessageHelper::listen_for_message(socket_file_descriptor);
 
 	std::cout << "Received message: " << message_data.content << std::endl;
 
-	auto message_tuple = message_data.unpack_message("role:", ",");
-	std::string role = std::get<0>(message_tuple), ip = std::get<1>(message_tuple);
+	auto message_tuple = message_data.unpack_message("role:", ",ip:", ",ip_translations:");
+	std::string role = std::get<0>(message_tuple), ip = std::get<1>(message_tuple), ip_translations = std::get<2>(message_tuple);
 
 	if (role == "worker") {
-		// ip is the address to which to send the responses to coordinator
-		// WorkerNode worker(ip);
+		// ip is the address to which to create_network_and_send_links the responses to coordinator
+		// WorkerNode worker(ip, translator);
 		std::cout << "I'm a worker, NOT IMPLEMENTED YET" << std::endl;
 	} else if (role == "coordinator") {
 		// ip is a list of ips separated by space representing all workers
 		std::list<std::string> worker_ips = MessageHelper::split_by_spaces(ip);
 		
-		CoordinatorNode coordinator(socket_file_descriptor, connection_interference_manager, log_keeper, node_timer);
+		CoordinatorNode coordinator(socket_file_descriptor, connection_interference_manager, translator, log_keeper, node_timer);
 		std::cout << "I'm the coordinator" << std::endl;
 
 		std::list<long> map_tasks_in_flops = {1000,2,3,4,5,6,7,8,9,10,11,12,13,14,1500};
@@ -53,12 +55,12 @@ std::string begin_handler_for_role_receipt(
 // Al uso del socket_file_descriptor deberia agregarle un mutex para evitar que lo use mas de un thread al mismo tiempo (a menos que imite los mutexes de simgrid, que se supone que garantizan eso)
 int main(int argc, char *argv[]) {
 	int amount_of_worker_nodes = std::stoi(argv[1]);
-	int disconnections_line_number = std::stoi(argv[2]);
+	int disconnections_and_topology_line_number = std::stoi(argv[2]);
 
-	NodeTimer node_timer;
-	LogKeeper log_keeper(node_timer);
-	ConnectionInterferenceManager connection_interference_manager(node_timer);
-	connection_interference_manager.load_disconnection_intervals(disconnections_line_number);
+	NodeTimer *node_timer = new NodeTimer();
+	LogKeeper *log_keeper = new LogKeeper(node_timer);
+	ConnectionInterferenceManager *connection_interference_manager = new ConnectionInterferenceManager(node_timer);
+	connection_interference_manager -> load_disconnection_intervals(disconnections_and_topology_line_number);
 
 	std::string network_organizer_ipv6 = "2001:660:3207:400::1";
 	std::string network_organizer_interface = "eth0";
@@ -66,7 +68,10 @@ int main(int argc, char *argv[]) {
 
 	NetworkOrganizer network_organizer = NetworkOrganizer(network_organizer_ipv6, network_organizer_interface);
 
-	network_organizer.listen_for_worker_ips(amount_of_worker_nodes, socket_file_descriptor);
+	std::map<int, std::string> index_to_ip_map = network_organizer.listen_for_worker_ips(amount_of_worker_nodes, socket_file_descriptor);
+	
+	NodesDestinationTranslator *translator = new NodesDestinationTranslator();
+	std::vector<std::string> workers_connections = translator -> load_network_topology_from_file(1, index_to_ip_map);
 
 	auto role = std::async(
 		std::launch::async, 
@@ -75,11 +80,12 @@ int main(int argc, char *argv[]) {
 		network_organizer_interface, 
 		socket_file_descriptor, 
 		connection_interference_manager, 
+		translator,
 		log_keeper, 
 		node_timer
 	);
 
-	network_organizer.create_network_and_send_links();
+	network_organizer.create_network_and_send_links(workers_connections, index_to_ip_map);
 
 	// role.wait() will stop this function for the whole experiment's duration
 	role.wait();

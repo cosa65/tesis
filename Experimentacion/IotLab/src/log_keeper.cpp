@@ -1,7 +1,7 @@
 #include "log_keeper.h"
 
 void LogKeeper::log(std::string message) {
-	double current_time = node_timer.current_time_in_ms();
+	double current_time = node_timer -> current_time_in_ms();
 
 	std::string current_time_str = current_time > 0 ? std::to_string(current_time) : "EXPERIMENT NOT YET STARTED";
 

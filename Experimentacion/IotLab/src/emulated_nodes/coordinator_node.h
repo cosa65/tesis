@@ -15,6 +15,7 @@
 
 #include "../log_keeper.h"
 #include "../connection_interference_manager.h"
+#include "../nodes_destination_translator.h"
 #include "../message_helper.h"
 #include "../../../simgrid/opportunistic_network_experiments/utils/utils.cpp"
 #include "pending_map_task.h"
@@ -26,7 +27,7 @@ typedef double TimeSpan;
 
 class CoordinatorNode {
 public:
-	CoordinatorNode(int socket_file_descriptor, ConnectionInterferenceManager connection_interference_manager, LogKeeper log_keeper, NodeTimer node_timer);
+	CoordinatorNode(int socket_file_descriptor, ConnectionInterferenceManager *connection_interference_manager, NodesDestinationTranslator *translator, LogKeeper *log_keeper, NodeTimer *node_timer);
 
 	void start(
 		std::list<long> map_tasks_in_flops,
@@ -86,6 +87,7 @@ private:
 
 	std::mutex workers_and_data_update_mutex;
 
+	std::mutex resend_pending_maps_mutex;
 
 	// Locks main thread so that all stored threads aren't lost when main thread exits
 	std::mutex finished_execution_mutex;
@@ -97,7 +99,9 @@ private:
 	std::chrono::system_clock::time_point timeout_resend_time_point;
 	std::atomic<bool> timeout_has_been_reset;
 
-	NodeTimer node_timer;
-	LogKeeper log_keeper;
-	ConnectionInterferenceManager connection_interference_manager;
+
+	ConnectionInterferenceManager *connection_interference_manager;
+	NodesDestinationTranslator *translator;
+	NodeTimer *node_timer;
+	LogKeeper *log_keeper;
 };

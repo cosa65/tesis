@@ -30,9 +30,10 @@ bool CoordinatorNode::initial_threshold_of_execution_mode_enabled;
 PointInTime *CoordinatorNode::map_reduce_start_point;
 
 
-CoordinatorNode::CoordinatorNode(int socket_file_descriptor, ConnectionInterferenceManager connection_interference_manager, LogKeeper log_keeper, NodeTimer node_timer) :
+CoordinatorNode::CoordinatorNode(int socket_file_descriptor, ConnectionInterferenceManager *connection_interference_manager, NodesDestinationTranslator *translator, LogKeeper *log_keeper, NodeTimer *node_timer) :
 	socket_file_descriptor(socket_file_descriptor),
 	connection_interference_manager(connection_interference_manager),
+	translator(translator), 
 	log_keeper(log_keeper),
 	node_timer(node_timer)
 	{}
@@ -51,8 +52,8 @@ void CoordinatorNode::start(std::list<long> map_tasks_in_flops, std::list<std::s
 
 	this -> timeout_has_been_reset = false;
 
-	this -> node_timer.start();
-	this -> connection_interference_manager.start();
+	this -> node_timer -> start();
+	this -> connection_interference_manager -> start();
 
 	// CoordinatorNode::resending_map_lock = simgrid::s4u::Mutex::create();
 	// CoordinatorNode::workers_and_data_update_lock = simgrid::s4u::Mutex::create();
@@ -65,10 +66,10 @@ void CoordinatorNode::start(std::list<long> map_tasks_in_flops, std::list<std::s
 	auto map_results_listener_thread = std::async(std::launch::async, [this, map_tasks_in_flops, workers, initial_threshold]() { 
 		std::list<std::future<int>> threads;
 		while(true && !(this -> finished.load())) {
-			std::cout << node_timer.time_log() << "[COORDINATOR] Listening for map result" << std::endl;
+			std::cout << node_timer -> time_log() << "[COORDINATOR] Listening for map result" << std::endl;
 			// Blocking get, actor is blocked until it receives message
 			MessageHelper::MessageData message_data = MessageHelper::listen_for_message(socket_file_descriptor);
-			std::cout << node_timer.time_log() << "[COORDINATOR] message_data: " << message_data.content << std::endl;
+			std::cout << node_timer -> time_log() << "[COORDINATOR] message_data: " << message_data.content << std::endl;
 
 			std::future<int> map_handle_thread = std::async(std::launch::async, [this, message_data]() { 
 				int maps_left = this -> handle_map_result_received(message_data);
@@ -82,6 +83,7 @@ void CoordinatorNode::start(std::list<long> map_tasks_in_flops, std::list<std::s
 
 			threads.push_back(std::move(map_handle_thread));
 		}
+		std::cout << "[COORDINATOR] I left from the main threads while true for some reason, finished state is: " << this -> finished.load() << std::endl;
 	});
 
 	auto distribution_task_thread = std::async(std::launch::async, [this, map_tasks_in_flops, workers, initial_threshold]() { return this -> distribute_and_send_maps(map_tasks_in_flops, workers, initial_threshold); });
@@ -95,7 +97,15 @@ void CoordinatorNode::start(std::list<long> map_tasks_in_flops, std::list<std::s
 void CoordinatorNode::distribute_and_send_maps(std::list<long> map_tasks_in_flops, std::list<std::string> workers, int initial_threshold) {
 	int amount_of_partitions = workers.size();
 
+	std::cout << "amount_of_partitions: " << amount_of_partitions << std::endl;
+
 	std::list<std::list<long>*> partitioned_tasks_in_flops = Utils::separate_in_partitions(map_tasks_in_flops, amount_of_partitions);
+
+	std::cout << "map_tasks_in_flops: " << std::endl;
+	for (long task : map_tasks_in_flops) {
+		std::cout << task << " ";
+	}
+	std::cout << std::endl;
 
 	// IMPORTANTE
 	if (CoordinatorNode::partitioned_redundancy_mode_enabled) {
@@ -188,7 +198,7 @@ void CoordinatorNode::distribute_and_send_maps(std::list<long> map_tasks_in_flop
 	// std::vector<std::future<int>> pending_map_comms_to_send;
 	MapIndex current_task_bundle_index = 0;
 
-	std::cout << node_timer.time_log() << "partitioned_tasks_in_flops" << std::endl;
+	std::cout << node_timer -> time_log() << "partitioned_tasks_in_flops" << std::endl;
 	for (auto bundle : partitioned_tasks_in_flops) {
 		for (auto task : *bundle) {
 			std::cout << task << ", ";
@@ -196,7 +206,7 @@ void CoordinatorNode::distribute_and_send_maps(std::list<long> map_tasks_in_flop
 		std::cout << std::endl;
 	}
 
-	std::cout << node_timer.time_log() << "bundled_up_map_tasks_in_flops" << std::endl;
+	std::cout << node_timer -> time_log() << "bundled_up_map_tasks_in_flops" << std::endl;
 	for (auto task_bundle : bundled_up_map_tasks_in_flops) {
 		std::cout << task_bundle << ", ";
 		std::cout << std::endl;
@@ -212,16 +222,20 @@ void CoordinatorNode::distribute_and_send_maps(std::list<long> map_tasks_in_flop
 			continue;
 		}
 
-		std::string message = "iterations:" + std::to_string(*maps_it) + "," + std::to_string(current_task_bundle_index);
+		std::string final_destination_ip = *workers_it;
 
-		std::cout << node_timer.time_log() << "Preparing to send map task: " << message.c_str() << std::endl;
+		std::string task_data = "iterations:" + std::to_string(*maps_it) + ",index:" + std::to_string(current_task_bundle_index);
+		std::string message = task_data + ",destination_ip:" + final_destination_ip;
+
+		std::cout << node_timer -> time_log() << "Preparing to send map task: " << message.c_str() << std::endl;
 
 		std::string *message_to_send = new std::string(message);
+		std::string current_step_ip = this -> translator -> next_step_ip_to(final_destination_ip);
 
-		std::async(std::launch::async, MessageHelper::send_message, message, *workers_it, "eth0");
+		std::async(std::launch::async, MessageHelper::send_message, message, current_step_ip, "eth0");
 
-		PendingMapTask *current_task_to_send = new PendingMapTask(current_task_bundle_index, message);
-		current_task_to_send -> add_new_worker(*workers_it);
+		PendingMapTask *current_task_to_send = new PendingMapTask(current_task_bundle_index, task_data);
+		current_task_to_send -> add_new_worker(final_destination_ip);
 
 		CoordinatorNode::pending_maps.push_back(current_task_to_send);
 		CoordinatorNode::pending_maps_count++;
@@ -231,7 +245,7 @@ void CoordinatorNode::distribute_and_send_maps(std::list<long> map_tasks_in_flop
 	}
 
 	// XBT_INFO("Sending all %i prepared map tasks", CoordinatorNode::pending_maps.size());
-	std::cout << node_timer.time_log() << "Sending all " << CoordinatorNode::pending_maps.size() << " prepared map tasks" << std::endl;
+	std::cout << node_timer -> time_log() << "Sending all " << CoordinatorNode::pending_maps.size() << " prepared map tasks" << std::endl;
 
 	// for (auto pending_map_comm : pending_map_comms_to_send) {
 	// 	int success = pending_map_comm.get();
@@ -251,15 +265,15 @@ int CoordinatorNode::handle_map_result_received(MessageHelper::MessageData messa
 	// This lock unlock will block first thread to arrive
 	// Once it is allowed to pass by distribute_and_send_maps, it will allow every other thread to pass too 
 	
-	if (!(this -> connection_interference_manager.can_receive_message(message_data))) {
-		std::cout << node_timer.time_log() << "[CONNECTION_INTERFERENCE_MANAGER] blocked message: " << message_data.content << std::endl; 
+	if (!(this -> connection_interference_manager -> can_receive_message(message_data))) {
+		std::cout << node_timer -> time_log() << "[CONNECTION_INTERFERENCE_MANAGER] blocked message: " << message_data.content << std::endl; 
 		return 1;
 	}
 
 	finished_initial_distribution_mutex.lock();
 	finished_initial_distribution_mutex.unlock();
 
-	auto message_tuple = message_data.unpack_message("map_index:", ",");
+	auto message_tuple = message_data.unpack_message("map_index:", ",worker:");
 	std::string index_str = std::get<0>(message_tuple), sender = std::get<1>(message_tuple);
 
 	int index = std::stoi(index_str);
@@ -296,8 +310,8 @@ int CoordinatorNode::handle_map_result_received(MessageHelper::MessageData messa
 	(*finished_task_it) -> mark_as_finished();
 	CoordinatorNode::pending_maps_count--;
 
-	std::cout << node_timer.time_log() << "Received map result from " << sender << std::endl;
-	std::cout << node_timer.time_log() << "MapReduce pending task groups count is: " << CoordinatorNode::pending_maps_count << std::endl;
+	std::cout << node_timer -> time_log() << "Received map result from " << sender << std::endl;
+	std::cout << node_timer -> time_log() << "MapReduce pending task groups count is: " << CoordinatorNode::pending_maps_count << std::endl;
 
 	if (CoordinatorNode::pending_maps_count == 0 ||
 		CoordinatorNode::pending_maps_count == 1 && CoordinatorNode::partitioned_redundancy_mode_enabled)
@@ -306,7 +320,7 @@ int CoordinatorNode::handle_map_result_received(MessageHelper::MessageData messa
 		// int reduce_execution_time = 100000;
 
 
-		std::cout << node_timer.time_log() << "MapReduce has finished successfully!! Ending simulation" << std::endl;
+		std::cout << node_timer -> time_log() << "MapReduce has finished successfully!! Ending simulation" << std::endl;
 
 		// simgrid::s4u::Actor::kill_all();
 
@@ -330,10 +344,10 @@ int CoordinatorNode::handle_map_result_received(MessageHelper::MessageData messa
 void CoordinatorNode::check_completion_threshold_and_resend_if_necessary() {
 	int percentage_pending = (float)CoordinatorNode::pending_maps_count / (float)CoordinatorNode::total_maps * 100;
 
-	std::cout << node_timer.time_log() << "[THRESHOLD] Percentage of pending tasks is " << percentage_pending << " vs threshold to begin resending tasks of: " << CoordinatorNode::threshold << std::endl;
+	std::cout << node_timer -> time_log() << "[THRESHOLD] Percentage of pending tasks is " << percentage_pending << " vs threshold to begin resending tasks of: " << CoordinatorNode::threshold << std::endl;
 
 	if (CoordinatorNode::threshold >= percentage_pending) {
-		std::cout << node_timer.time_log() << "[THRESHOLD] Threshold on pending map tasks reached! Checking and resending tasks that haven't been received yet" << std::endl;
+		std::cout << node_timer -> time_log() << "[THRESHOLD] Threshold on pending map tasks reached! Checking and resending tasks that haven't been received yet" << std::endl;
 		bool did_resend_pending_tasks = CoordinatorNode::resend_pending_tasks();
 
 		if (did_resend_pending_tasks) {
@@ -345,14 +359,14 @@ void CoordinatorNode::check_completion_threshold_and_resend_if_necessary() {
 		if (CoordinatorNode::threshold >= 2 && CoordinatorNode::pending_maps.size() >= 1) {
 			threshold = threshold / 2;
 		} else {
-			std::cout << node_timer.time_log() << "[THRESHOLD] Threshold execution mode disabled" << std::endl;
+			std::cout << node_timer -> time_log() << "[THRESHOLD] Threshold execution mode disabled" << std::endl;
 			threshold_of_execution_mode_enabled = false;
 		}
 	}
 }
 
 void CoordinatorNode::setup_resend_on_timeout() {
-	std::cout << node_timer.time_log() << "[TIMEOUT RESET]" << std::endl;
+	std::cout << node_timer -> time_log() << "[TIMEOUT RESET]" << std::endl;
 	this -> timeout_resend_time_point = std::chrono::system_clock::now() + std::chrono::seconds(CoordinatorNode::timeout);
 }
 
@@ -375,20 +389,26 @@ void CoordinatorNode::resend_pending_tasks_on_timeout() {
 
 // Returns true if this resend was successful or false if it was cancelled because another resend was already taking place
 bool CoordinatorNode::resend_pending_tasks() {
-	std::cout << node_timer.time_log() << "Resending pending tasks" << std::endl;
+	std::cout << node_timer -> time_log() << "Resending pending tasks" << std::endl;
 
 	// IMPORTANTE
 // If we failed to capture the lock, then that means a resend operation is already taking place, so we don't need to perform the resend_pending_task again
-	// if (!CoordinatorNode::resending_map_lock -> try_lock()) {
-	// 	XBT_INFO("Another actor is sending pending tasks, so this resend execution will be cancelled");
-	// 	return false;
-	// }
+	if (!this -> workers_and_data_update_mutex.try_lock()) {
+		std::cout << "Another resend task is currently working so this resend execution will be cancelled" << std::endl;
+		return false;
+	}
 
-	std::cout << node_timer.time_log() << "Begun resending tasks" << std::endl; 
+	std::cout << node_timer -> time_log() << "Begun resending tasks" << std::endl; 
+
+	std::cout << "Idle workers to resend to: ";
+
+	for (auto idle_worker : CoordinatorNode::idle_workers) {
+		std::cout << idle_worker.get_node_id() << " ";
+	}
+	std::cout << std::endl;
+
 
 	auto pending_maps_it = CoordinatorNode::pending_maps.begin();
-
-	// std::vector<simgrid::s4u::CommPtr> resend_comms;
 
 	while(pending_maps_it != CoordinatorNode::pending_maps.end() && !CoordinatorNode::idle_workers.empty()) {
 		PendingMapTask* map_task = *pending_maps_it;
@@ -404,28 +424,25 @@ bool CoordinatorNode::resend_pending_tasks() {
 		CoordinatorNode::idle_workers.pop_back();
 
 		std::string task_data = map_task -> task_data;
+		std::string message = task_data + ",destination_ip:" + idle_worker_id;
 		map_task -> add_new_worker(idle_worker_id);
 
 		MapIndex map_index = map_task -> map_index;
 
-		std::cout << node_timer.time_log() << "Resending task " << map_index << " to idle worker " << idle_worker_id << ". Performance value: " << idle_worker_performance.get_node_performance() << ", performance mean: " << idle_worker_performance.response_time_mean() << std::endl;
+		std::cout << node_timer -> time_log() << "Resending task " << map_index << " to idle worker " << idle_worker_id << ". Performance value: " << idle_worker_performance.get_node_performance() << ", performance mean: " << idle_worker_performance.response_time_mean() << std::endl;
 
-		MessageHelper::send_message(map_task -> task_data, idle_worker_id, "eth0");
+		MessageHelper::send_message(message, idle_worker_id, "eth0");
 
 		pending_maps_it++;
 	}
 
-	// Remove workers that are no longer idle, remove this
-	// CoordinatorNode::idle_workers.erase(CoordinatorNode::idle_workers.begin(), idle_worker_it);
-
 	// Move all maps that have just been resent to the back so that next time not the same tasks are picked
 	CoordinatorNode::pending_maps.splice(pending_maps.end(), CoordinatorNode::pending_maps, pending_maps.begin(), pending_maps_it);
 
-	// simgrid::s4u::Comm::wait_all(&resend_comms);
+	this -> workers_and_data_update_mutex.unlock();
 
-	// CoordinatorNode::resending_map_lock -> unlock();
-
-	std::cout << node_timer.time_log() << node_timer.time_log() << "Finished resending tasks, pending maps size is: " << CoordinatorNode::pending_maps_count << std::endl;
+	std::cout << node_timer -> time_log() << node_timer -> time_log() << "Finished resending tasks, pending maps size is: " << CoordinatorNode::pending_maps_count << std::endl;
+	
 	return true;
 }
 
@@ -476,19 +493,19 @@ void CoordinatorNode::save_logs() {
 }
 
 void CoordinatorNode::update_nodes_state_and_performance_history(PendingMapTask *map_task, std::string worker_id) {
-	// double response_time = map_task -> time_since_creation(worker_id);
+	double response_time = map_task -> time_since_creation(worker_id);
 
-	// NodePerformance *worker_performance;
+	NodePerformance *worker_performance;
 
-	// if (CoordinatorNode::efficiency_by_worker_id.count(worker_id) == 0) {
-	// 	worker_performance = new NodePerformance(worker_id);
-	// 	CoordinatorNode::efficiency_by_worker_id[worker_id] = worker_performance;
-	// } else {
-	// 	worker_performance = CoordinatorNode::efficiency_by_worker_id[worker_id];
-	// }
+	if (CoordinatorNode::efficiency_by_worker_id.count(worker_id) == 0) {
+		worker_performance = new NodePerformance(worker_id);
+		CoordinatorNode::efficiency_by_worker_id[worker_id] = worker_performance;
+	} else {
+		worker_performance = CoordinatorNode::efficiency_by_worker_id[worker_id];
+	}
 
-	// worker_performance -> add_response_time(response_time);
+	worker_performance -> add_response_time(response_time);
 	
-	// CoordinatorNode::idle_workers.push_back(*worker_performance);
-	// push_heap(CoordinatorNode::idle_workers.begin(), CoordinatorNode::idle_workers.end());
+	CoordinatorNode::idle_workers.push_back(*worker_performance);
+	push_heap(CoordinatorNode::idle_workers.begin(), CoordinatorNode::idle_workers.end());
 }

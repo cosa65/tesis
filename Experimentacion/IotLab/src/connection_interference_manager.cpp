@@ -1,6 +1,6 @@
 #include "connection_interference_manager.h"
 
-ConnectionInterferenceManager::ConnectionInterferenceManager(NodeTimer node_timer):
+ConnectionInterferenceManager::ConnectionInterferenceManager(NodeTimer *node_timer):
 	node_timer(node_timer) 
 	{}
 
@@ -47,13 +47,15 @@ void ConnectionInterferenceManager::load_disconnection_intervals(int disconnecti
 void ConnectionInterferenceManager::start() {}
 
 bool ConnectionInterferenceManager::can_receive_message(MessageHelper::MessageData received_message) {
-	double time_of_receipt_message = this -> node_timer.current_time_in_ms();
+	std::cout << "My node_timer is: " << this -> node_timer << std::endl;
+	double time_of_receipt_message = this -> node_timer -> current_time_in_ms();
 
 	return is_connected_now(time_of_receipt_message);
 }
 
 bool ConnectionInterferenceManager::is_connected_now(double time_point) {
 	for (auto interval : this -> disconnection_intervals) {
+		std::cout << "[CONNECTION_INTERFERENCE_MANAGER] Checking checking if can receive time_point: " << time_point << " interval: " << std::get<0>(interval) << " " << std::get<1>(interval) << std::endl;
 		if (time_point >= std::get<0>(interval) && time_point <= std::get<1>(interval)) {
 			return false;
 		}
