@@ -2,7 +2,7 @@
 #include <future>
 
 #include "log_keeper.h"
-#include "network_organizer.h"
+#include "network_installer.h"
 #include "nodes_destination_translator.h"
 #include "connection_interference_manager.h"
 #include "node_timer.h"
@@ -62,22 +62,22 @@ int main(int argc, char *argv[]) {
 	ConnectionInterferenceManager *connection_interference_manager = new ConnectionInterferenceManager(node_timer);
 	connection_interference_manager -> load_disconnection_intervals(disconnections_and_topology_line_number);
 
-	std::string network_organizer_ipv6 = "2001:660:3207:400::1";
-	std::string network_organizer_interface = "eth0";
-	int socket_file_descriptor = MessageHelper::bind_listen(network_organizer_ipv6, network_organizer_interface);
+	std::string network_coordinator_ipv6 = "2001:660:3207:400::1";
+	std::string network_coordinator_interface = "eth0";
+	int socket_file_descriptor = MessageHelper::bind_listen(network_coordinator_ipv6, network_coordinator_interface);
 
-	NetworkOrganizer network_organizer = NetworkOrganizer(network_organizer_ipv6, network_organizer_interface);
+	NetworkInstaller network_installer = NetworkInstaller(network_coordinator_ipv6, network_coordinator_interface);
 
-	std::map<int, std::string> index_to_ip_map = network_organizer.listen_for_worker_ips(amount_of_worker_nodes, socket_file_descriptor);
+	std::map<int, std::string> index_to_ip_map = network_installer.listen_for_worker_ips(amount_of_worker_nodes, socket_file_descriptor);
 	
 	NodesDestinationTranslator *translator = new NodesDestinationTranslator();
-	std::vector<std::string> workers_connections = translator -> load_network_topology_from_file(1, index_to_ip_map);
+	std::vector<std::string> nodes_connections = translator -> load_network_topology_from_file(1, index_to_ip_map, network_coordinator_ipv6);
 
 	auto role = std::async(
 		std::launch::async, 
 		begin_handler_for_role_receipt, 
-		network_organizer_ipv6, 
-		network_organizer_interface, 
+		network_coordinator_ipv6, 
+		network_coordinator_interface, 
 		socket_file_descriptor, 
 		connection_interference_manager, 
 		translator,
@@ -85,7 +85,11 @@ int main(int argc, char *argv[]) {
 		node_timer
 	);
 
-	network_organizer.create_network_and_send_links(workers_connections, index_to_ip_map);
+	// if ("el coordinator no es worker tambien") {
+	// Entonces sacamos el coordinator a la lista de workers en index_to_ip_map
+	// }
+
+	network_installer.create_network_and_send_links(nodes_connections, index_to_ip_map);
 
 	// role.wait() will stop this function for the whole experiment's duration
 	role.wait();

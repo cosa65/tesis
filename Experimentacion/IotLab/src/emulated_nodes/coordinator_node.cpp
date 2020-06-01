@@ -407,7 +407,6 @@ bool CoordinatorNode::resend_pending_tasks() {
 	}
 	std::cout << std::endl;
 
-
 	auto pending_maps_it = CoordinatorNode::pending_maps.begin();
 
 	while(pending_maps_it != CoordinatorNode::pending_maps.end() && !CoordinatorNode::idle_workers.empty()) {

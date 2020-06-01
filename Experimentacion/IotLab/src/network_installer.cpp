@@ -1,12 +1,12 @@
-#include "network_organizer.h"
+#include "network_installer.h"
 
-NetworkOrganizer::NetworkOrganizer(std::string network_organizer_ipv6, std::string network_organizer_interface) {
+NetworkInstaller::NetworkInstaller(std::string network_organizer_ipv6, std::string network_organizer_interface) {
 	this -> network_organizer_ipv6 = network_organizer_ipv6;
 	this -> network_organizer_interface = network_organizer_interface;
 }
 
 // stores all workers ips and return a map linking each worker index with its corresponding ip
-std::map<int, std::string> NetworkOrganizer::listen_for_worker_ips(int workers_size, int socket_file_descriptor) {
+std::map<int, std::string> NetworkInstaller::listen_for_worker_ips(int workers_size, int socket_file_descriptor) {
 	std::map<int, std::string> workers_index_to_ip_map;
 
 	for (int i = 0; i < workers_size; i++) {
@@ -20,6 +20,7 @@ std::map<int, std::string> NetworkOrganizer::listen_for_worker_ips(int workers_s
 
 		int node_line_number = stoi(node_line_number_str);
 
+		// Add 1 because the node with index 1 is the coordinator
 		workers_index_to_ip_map[node_line_number] = ip;
 	}
 
@@ -28,14 +29,8 @@ std::map<int, std::string> NetworkOrganizer::listen_for_worker_ips(int workers_s
 	return workers_index_to_ip_map;
 }
 
-void NetworkOrganizer::create_network_and_send_links(std::vector<std::string> workers_connections_as_index, std::map<int, std::string> index_to_ip_map) {
-	// For now, just connect all nodes to the coordinator (default coordinator is the same as network_organizer)
-
-	std::cout << "workers_connections_as_index: " << std::endl;
-	for (auto worker : workers_connections_as_index) {
-		std::cout << worker;
-	}
-	std::cout << std::endl;
+void NetworkInstaller::create_network_and_send_links(std::vector<std::string> connections_as_index, std::map<int, std::string> index_to_ip_map) {
+	// For now, just connect all nodes to the coordinator (default coordinator is the same as network_installer)
 
 	std::list<std::string> worker_ips;
 
@@ -47,8 +42,11 @@ void NetworkOrganizer::create_network_and_send_links(std::vector<std::string> wo
 
 		std::string one_worker_connections_as_index;
 
-		if (worker_index < workers_connections_as_index.size()) {
-			one_worker_connections_as_index = workers_connections_as_index[worker_index];
+		std::cout << "<DEBUG> Im working on " << worker_index << std::endl;
+
+		if (worker_index < connections_as_index.size()) {
+			// worker_index is indexed from 1, connections_as_index getter is indexed from 0 so we have to put -1
+			one_worker_connections_as_index = connections_as_index[worker_index - 1];
 		} else {
 			// If there is no value here then it this node can be considered adjacent to everyone
 			one_worker_connections_as_index = "";
@@ -56,7 +54,7 @@ void NetworkOrganizer::create_network_and_send_links(std::vector<std::string> wo
 
 		std::string worker_connections_as_ip = translate_worker_indexes_to_ip(one_worker_connections_as_index, index_to_ip_map);
 
-		std::string message_content = "role:worker,ip:" + network_organizer_ipv6 + ",ip_translations:" + worker_connections_as_ip;
+		std::string message_content = "role:worker,ip:" + this -> network_organizer_ipv6 + ",ip_translations:" + worker_connections_as_ip;
 		std::cout << "Sending message with content: " << message_content << std::endl;
 		MessageHelper::send_message(message_content, worker_ip, "eth0");		
 	}
@@ -64,10 +62,10 @@ void NetworkOrganizer::create_network_and_send_links(std::vector<std::string> wo
 	std::string worker_ips_split_by_space = MessageHelper::concatenate_with_separator(worker_ips, " ");
 
 // std::copy(strings_list.begin(), strings_list.end(), std::ostream_iterator<std::string>(std::cout, "\n"));
-	MessageHelper::send_message("role:coordinator,ip:" + worker_ips_split_by_space + ",ip_translations:" + workers_connections_as_index[0], this -> network_organizer_ipv6, this -> network_organizer_interface);
+	MessageHelper::send_message("role:coordinator,ip:" + worker_ips_split_by_space + ",ip_translations:" + connections_as_index[0], this -> network_organizer_ipv6, this -> network_organizer_interface);
 }
 
-std::string NetworkOrganizer::translate_worker_indexes_to_ip(std::string worker_connections_as_indexes, std::map<int, std::string> index_to_ip_map) {
+std::string NetworkInstaller::translate_worker_indexes_to_ip(std::string worker_connections_as_indexes, std::map<int, std::string> index_to_ip_map) {
 	if (worker_connections_as_indexes.empty()) {
 		return "";
 	}
@@ -102,8 +100,8 @@ std::string NetworkOrganizer::translate_worker_indexes_to_ip(std::string worker_
 		ss_map >> node_destination_index;
 		ss_map >> node_step_index;
 
-		std::string node_destination_ip = index_to_ip_map[node_destination_index - 1];
-		std::string node_step_ip = index_to_ip_map[node_step_index - 1];
+		std::string node_destination_ip = node_destination_index != 1 ? index_to_ip_map[node_destination_index] : network_organizer_ipv6;
+		std::string node_step_ip = node_step_index != 1 ? index_to_ip_map[node_step_index] : network_organizer_ipv6;
 
 		oss_worker_indexes_as_ip << node_destination_ip << " " << node_step_ip << " ";
 	}

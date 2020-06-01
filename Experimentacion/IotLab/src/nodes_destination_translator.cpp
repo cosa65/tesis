@@ -2,8 +2,9 @@
 
 NodesDestinationTranslator::NodesDestinationTranslator() {}
 
+// Loads ip version of connections for node node_topology_index_number (indexed from 1)
 // Returns lines specifying connections for each node
-std::vector<std::string> NodesDestinationTranslator::load_network_topology_from_file(int node_topology_line_number, std::map<int, std::string> index_to_ip_map) {
+std::vector<std::string> NodesDestinationTranslator::load_network_topology_from_file(int node_topology_index_number, std::map<int, std::string> index_to_ip_map, std::string network_organizer_ipv6) {
 
 	std::cout << "[NODES_DESTINATION_TRANSLATOR] About to load stuff" << std::endl;
 
@@ -13,11 +14,15 @@ std::vector<std::string> NodesDestinationTranslator::load_network_topology_from_
 	std::vector<std::string> nodes_connections;
 
 	// Get line specified in line_number (indexed from 1)
+	int i = 1;
 	for(std::string line; getline(file, line);) {
+		std::cout << "node_connections_for_node " << i << ": " << line << std::endl;
+		i++;
 		nodes_connections.push_back(line);
 	}
 
-	std::string this_nodes_connections = nodes_connections[node_topology_line_number - 1];
+	// -1 Because node_topology_index_number is indexed from 1
+	std::string this_nodes_connections = nodes_connections[node_topology_index_number - 1];
 
 	std::istringstream ss_destination_mapping(this_nodes_connections);
 
@@ -33,8 +38,9 @@ std::vector<std::string> NodesDestinationTranslator::load_network_topology_from_
 		ss_map >> node_destination_index;
 		ss_map >> node_step_index;
 
-		std::string node_destination_ip = index_to_ip_map[node_destination_index - 1];
-		std::string node_step_ip = index_to_ip_map[node_step_index - 1];
+		
+		std::string node_destination_ip = node_destination_index != 1 ? index_to_ip_map[node_destination_index] : network_organizer_ipv6;
+		std::string node_step_ip = node_step_index != 1 ? index_to_ip_map[node_step_index] : network_organizer_ipv6;
 
 		std::cout << "[NODES_DESTINATION_TRANSLATOR] Added connection: " 
 			<< node_destination_ip

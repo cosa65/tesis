@@ -1,8 +1,8 @@
 
 echo "-----------------------------------------Compiling receivingNode--------------------------------------------"
-arm-linux-gnueabi-g++ -O0 -Wl,--whole-archive -lpthread -Wl,--no-whole-archive -Wno-psabi -std=c++11 -pthread -static receivingNode.cpp message_helper.cpp nodes_destination_translator.cpp network_organizer.cpp node_timer.cpp log_keeper.cpp connection_interference_manager.cpp emulated_nodes/node_performance.cpp emulated_nodes/coordinator_node.cpp emulated_nodes/worker_node.cpp -g -o receivingNodeArm
+arm-linux-gnueabi-g++ -O0 -Wl,--whole-archive -lpthread -Wl,--no-whole-archive -Wno-psabi -std=c++11 -pthread -static receivingNode.cpp message_helper.cpp nodes_destination_translator.cpp network_installer.cpp node_timer.cpp log_keeper.cpp connection_interference_manager.cpp emulated_nodes/node_performance.cpp emulated_nodes/coordinator_node.cpp emulated_nodes/worker_node.cpp -g -o receivingNodeArm
 echo "------------------------------------------Compiling sendingNode---------------------------------------------"
-arm-linux-gnueabi-g++ -O0 -Wl,--whole-archive -lpthread -Wl,--no-whole-archive -Wno-psabi -std=c++11 -pthread -static sendingNode.cpp message_helper.cpp nodes_destination_translator.cpp network_organizer.cpp node_timer.cpp log_keeper.cpp connection_interference_manager.cpp emulated_nodes/node_performance.cpp emulated_nodes/coordinator_node.cpp emulated_nodes/worker_node.cpp -g -o sendingNodeArm
+arm-linux-gnueabi-g++ -O0 -Wl,--whole-archive -lpthread -Wl,--no-whole-archive -Wno-psabi -std=c++11 -pthread -static sendingNode.cpp message_helper.cpp nodes_destination_translator.cpp network_installer.cpp node_timer.cpp log_keeper.cpp connection_interference_manager.cpp emulated_nodes/node_performance.cpp emulated_nodes/coordinator_node.cpp emulated_nodes/worker_node.cpp -g -o sendingNodeArm
 echo "<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<Everything compiled successfully!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>"
 
 rsync -avzhe ssh receivingNodeArm fosco@saclay.iot-lab.info:/senslab/users/fosco

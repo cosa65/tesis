@@ -12,6 +12,7 @@
 	<LISTO> - Si la desconexion tiene lugar cuando el mensaje deberia llegar al receptor, entonces no se recibe.
 	<QUEDA PARA DESPUES> [Falta en simgrid tambien] - El coordinador reenvia tasks a nodos que no respondieron durante mucho tiempo de manera duplicada para ver si antes no estaban accesibles pero ahora si.
 	<QUEDA PARA DESPUES> - Si la desconexion tiene lugar durante el tiempo entre que se envia el mensaje y se recibe, entonces no se recibe.
+	<QUEDA PARA DESPUES> - El coordinador puede ser != del nodo 1
 
 <LISTO> - Existe una historia de desconexiones que se puede escribir en un .txt aparte y se envia a cada nodo su parte (diciendole cuando desconectarse y cuando volver).
 
