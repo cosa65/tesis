@@ -18,9 +18,9 @@ public:
 	WorkerNode(std::string ip_to_coordinator, std::string worker_ip, ConnectionInterferenceManager *connection_interference_manager, NodesDestinationTranslator *translator, LogKeeper *log_keeper, NodeTimer *node_timer);
 
 	void start(int socket_file_descriptor);
-	void handle_map_task();
 
 private:
+	int handle_map_task(long iterations, std::string map_index);
 	int run_operation(long iterations);
 
 	std::string worker_ip;

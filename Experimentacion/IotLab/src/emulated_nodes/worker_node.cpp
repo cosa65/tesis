@@ -13,6 +13,7 @@ void WorkerNode::start(int socket_file_descriptor) {
 	this -> node_timer -> start();
 	this -> connection_interference_manager -> start();
 
+	std::list<std::future<void>> threads;
 	while(true) {
 		std::cout << node_timer -> time_log() << "Listening for task" << std::endl;
 		MessageHelper::MessageData message_data = MessageHelper::listen_for_message(socket_file_descriptor);
@@ -32,38 +33,41 @@ void WorkerNode::start(int socket_file_descriptor) {
 
 			MessageHelper::send_message(message_data.content, next_step_ip, "eth0");
 			continue;
+		} else {
+			std::cout << "Received message for me: " << message_data.content << std::endl;
+			auto message_tuple = message_data.unpack_message("iterations:", ",index:");
+			std::string iterations_str = std::get<0>(message_tuple), map_index = std::get<1>(message_tuple);
+			long iterations = std::stol(iterations_str);
+
+			std::future<void> map_handle_thread = std::async(std::launch::async, [this, iterations, map_index]() { 
+				std::cout << this -> node_timer -> time_log() << "Received map task. iterations: " << iterations << ", map_index: " << map_index << std::endl;
+				
+				int op_result = this -> handle_map_task(iterations, map_index);
+			});
+
+			threads.push_back(std::move(map_handle_thread));
 		}
 
-		std::cout << "Received message: " << message_data.content << std::endl;
-		std::cout << "Received message withotu final destination: " << message_data.content_without_final_destination() << std::endl;
-
-		auto message_tuple = message_data.unpack_message("iterations:", ",index:");
-		std::string iterations_str = std::get<0>(message_tuple), map_index = std::get<1>(message_tuple);
-		long iterations = std::stol(iterations_str);
-
-		std::cout << node_timer -> time_log() << "Received map task. iterations: " << iterations << ", map_index: " << map_index << std::endl;
-
-		
-		std::cout << "----------------------------RUNNING OPERATION----------------------------" << std::endl;
-		int op_result = run_operation(iterations);
-		std::cout << "____________________________FINISHED OPERATION___________________________" << std::endl;
-			
-		std::stringstream ss;
-		ss << "map_index:" << map_index << ",worker:" << this -> worker_ip << ",destination_ip:" << this -> ip_to_coordinator;
-		std::string message = ss.str();
-
-		std::string next_step_ip = this -> translator -> next_step_ip_to(this -> ip_to_coordinator);
-
-		MessageHelper::send_message(message, next_step_ip, "eth0");
-		std::cout << node_timer -> time_log() << "Finished map operation for map_index " << map_index << " and sent result" << std::endl;
 	}
 }
 
-void WorkerNode::handle_map_task() {
+int WorkerNode::handle_map_task(long iterations, std::string map_index) {
+	int op_result = run_operation(iterations);
 
+	std::stringstream ss;
+	ss << "map_index:" << map_index << ",worker:" << this -> worker_ip << ",destination_ip:" << this -> ip_to_coordinator;
+	std::string message = ss.str();
+
+	std::string next_step_ip = this -> translator -> next_step_ip_to(this -> ip_to_coordinator);
+
+	MessageHelper::send_message(message, next_step_ip, "eth0");
+	std::cout << node_timer -> time_log() << "Finished map operation for map_index " << map_index << " and sent result through: " << next_step_ip << std::endl;
+
+	return op_result;
 }
 
-int WorkerNode::run_operation(long iterations) {
+int WorkerNode::run_operation(const long iterations) {
+	std::cout << this -> node_timer -> time_log() << "----------------------------RUNNING OPERATION----------------------------" << std::endl;
 	int a;
 	
 	for (int j = 0; j < 1000000; j++) {
@@ -72,5 +76,6 @@ int WorkerNode::run_operation(long iterations) {
 		}
 	}
 
+	std::cout << this -> node_timer -> time_log() << "____________________________FINISHED OPERATION___________________________" << std::endl;
 	return a;
 }
