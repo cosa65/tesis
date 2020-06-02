@@ -107,7 +107,6 @@ void CoordinatorNode::distribute_and_send_maps(std::list<long> map_tasks_in_flop
 	}
 	std::cout << std::endl;
 
-	// IMPORTANTE
 	if (CoordinatorNode::partitioned_redundancy_mode_enabled) {
 
 		// This index is used to know where to insert the empty list that matches the current partition 
@@ -239,8 +238,6 @@ void CoordinatorNode::distribute_and_send_maps(std::list<long> map_tasks_in_flop
 
 		CoordinatorNode::pending_maps.push_back(current_task_to_send);
 		CoordinatorNode::pending_maps_count++;
-		// IMPORTANTE
-		// pending_map_comms_to_send.push_back(message_send_task);
 		current_task_bundle_index++;
 	}
 
@@ -278,12 +275,6 @@ int CoordinatorNode::handle_map_result_received(MessageHelper::MessageData messa
 
 	int index = std::stoi(index_str);
 
-	// IMPORTANTE
-	// if(CoordinatorNode::mailboxes_manager -> is_disconnected(sender)) {
-		// XBT_INFO("Reducer in host %s couldn't receive finished map from %s because it is disconnected from the network", (my_host -> get_name()).c_str(), sender);
-		// return;
-	// }
-
 	this -> workers_and_data_update_mutex.lock();
 
 	auto finished_task_it = std::find_if(
@@ -299,8 +290,7 @@ int CoordinatorNode::handle_map_result_received(MessageHelper::MessageData messa
 	if ((*finished_task_it) -> finished) {
 		// This task is actually finished (already received result from another node), so ignore
 
-		// IMPORTANTE
-		// 	CoordinatorNode::workers_and_data_update_lock -> unlock();
+		this -> workers_and_data_update_mutex.unlock();
 		return 1;
 	}
 
@@ -391,9 +381,8 @@ void CoordinatorNode::resend_pending_tasks_on_timeout() {
 bool CoordinatorNode::resend_pending_tasks() {
 	std::cout << node_timer -> time_log() << "Resending pending tasks" << std::endl;
 
-	// IMPORTANTE
-// If we failed to capture the lock, then that means a resend operation is already taking place, so we don't need to perform the resend_pending_task again
-	if (!this -> workers_and_data_update_mutex.try_lock()) {
+	// If we failed to capture the lock, then that means a resend operation is already taking place, so we don't need to perform the resend_pending_task again
+	if (!this -> resend_pending_maps_mutex.try_lock()) {
 		std::cout << "Another resend task is currently working so this resend execution will be cancelled" << std::endl;
 		return false;
 	}
@@ -438,7 +427,7 @@ bool CoordinatorNode::resend_pending_tasks() {
 	// Move all maps that have just been resent to the back so that next time not the same tasks are picked
 	CoordinatorNode::pending_maps.splice(pending_maps.end(), CoordinatorNode::pending_maps, pending_maps.begin(), pending_maps_it);
 
-	this -> workers_and_data_update_mutex.unlock();
+	this -> resend_pending_maps_mutex.unlock();
 
 	std::cout << node_timer -> time_log() << node_timer -> time_log() << "Finished resending tasks, pending maps size is: " << CoordinatorNode::pending_maps_count << std::endl;
 	

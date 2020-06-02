@@ -39,11 +39,14 @@ void WorkerNode::start(int socket_file_descriptor) {
 
 		auto message_tuple = message_data.unpack_message("iterations:", ",index:");
 		std::string iterations_str = std::get<0>(message_tuple), map_index = std::get<1>(message_tuple);
-		long iterations = std::stoi(iterations_str);
+		long iterations = std::stol(iterations_str);
 
 		std::cout << node_timer -> time_log() << "Received map task. iterations: " << iterations << ", map_index: " << map_index << std::endl;
 
+		
+		std::cout << "----------------------------RUNNING OPERATION----------------------------" << std::endl;
 		int op_result = run_operation(iterations);
+		std::cout << "____________________________FINISHED OPERATION___________________________" << std::endl;
 			
 		std::stringstream ss;
 		ss << "map_index:" << map_index << ",worker:" << this -> worker_ip << ",destination_ip:" << this -> ip_to_coordinator;
@@ -60,11 +63,13 @@ void WorkerNode::handle_map_task() {
 
 }
 
-int WorkerNode::run_operation(int iterations) {
+int WorkerNode::run_operation(long iterations) {
 	int a;
 	
-	for (int i = 0; i < iterations; i++) {
-		a = i * 200 + 100;
+	for (int j = 0; j < 1000000; j++) {
+		for (int i = 0; i < iterations; i++) {
+			a = i * 20 + 100;
+		}
 	}
 
 	return a;

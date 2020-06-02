@@ -42,10 +42,8 @@ void NetworkInstaller::create_network_and_send_links(std::vector<std::string> co
 
 		std::string one_worker_connections_as_index;
 
-		std::cout << "<DEBUG> Im working on " << worker_index << std::endl;
-
-		if (worker_index < connections_as_index.size()) {
-			// worker_index is indexed from 1, connections_as_index getter is indexed from 0 so we have to put -1
+		// worker_index is indexed from 1, connections_as_index getter is indexed from 0 so we have to put -1
+		if (worker_index - 1 < connections_as_index.size()) {
 			one_worker_connections_as_index = connections_as_index[worker_index - 1];
 		} else {
 			// If there is no value here then it this node can be considered adjacent to everyone
@@ -55,7 +53,6 @@ void NetworkInstaller::create_network_and_send_links(std::vector<std::string> co
 		std::string worker_connections_as_ip = translate_worker_indexes_to_ip(one_worker_connections_as_index, index_to_ip_map);
 
 		std::string message_content = "role:worker,ip:" + this -> network_organizer_ipv6 + ",ip_translations:" + worker_connections_as_ip;
-		std::cout << "Sending message with content: " << message_content << std::endl;
 		MessageHelper::send_message(message_content, worker_ip, "eth0");		
 	}
 

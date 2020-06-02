@@ -21,7 +21,7 @@ public:
 	void handle_map_task();
 
 private:
-	int run_operation(int iterations);
+	int run_operation(long iterations);
 
 	std::string worker_ip;
 	std::string ip_to_coordinator;

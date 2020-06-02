@@ -36,7 +36,7 @@ std::string begin_handler_for_role_receipt(
 		CoordinatorNode coordinator(socket_file_descriptor, connection_interference_manager, translator, log_keeper, node_timer);
 		std::cout << "I'm the coordinator" << std::endl;
 
-		std::list<long> map_tasks_in_flops = {1000,2,3,4,5,6,7,8,9,10,11,12,13,14,1500};
+		std::list<long> map_tasks_in_flops = {600,200,300,400,500,600,700,800,900,100,110,120,130,140,150};
 		int initial_threshold = 75;
 		int timeout = 10;
 		bool partitioned_redundancy_mode_enabled = 1;

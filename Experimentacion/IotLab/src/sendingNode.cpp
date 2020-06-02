@@ -16,6 +16,9 @@ int main(int argc, char *argv[]) {
 	std::string host_ip = argv[1];
 	int node_line_number = std::stoi(argv[2]);
 
+	std::cout << "node_index: " << node_line_number << std::endl;
+	std::cout << "node_ip: " << host_ip << std::endl;
+
 	NodeTimer *node_timer = new NodeTimer();
 	LogKeeper *log_keeper = new LogKeeper(node_timer);
 	ConnectionInterferenceManager *connection_interference_manager = new ConnectionInterferenceManager(node_timer);
