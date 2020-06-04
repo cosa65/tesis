@@ -4,6 +4,7 @@
 #include "../utils/pending_map_task.h"
 #include "../utils/map_reduce_worker.h"
 #include "../utils/map_reduce_coordinator.h"
+#include "../utils/nodes_destination_translator.h"
 
 #include <sstream>
 #include <stdexcept>
@@ -16,6 +17,7 @@
 #define KILOBYTE 1000
 
 MailboxesManager mailboxes_manager;
+NodesDestinationTranslator translator;
 
 XBT_LOG_EXTERNAL_DEFAULT_CATEGORY(logging);
 
@@ -63,13 +65,14 @@ static void mailboxes_manager_actor(std::vector<std::string> args) {
 }
 
 static void map_reduce_worker_host_setup(std::vector<std::string> args) {
-	MapReduceWorker::setup_map_worker_in_this_host(&mailboxes_manager);
+	MapReduceWorker::setup_map_worker_in_this_host(&mailboxes_manager, &translator);
 }
 
 static void map_reduce_coordinator_host_setup(std::vector<std::string> args) {
 	std::list<std::string> workers;
 
-// Worker mailbox names should always be hostname + "-worker", errors on logging idle times will take place if not
+// Worker mailbox names should always be hostname + "-worker", 
+// errors on logging idle times and node message mapping (destination_translator) will take place if not
 	// workers.push_back("NodeCoordinator");
 	workers.push_back("Node0");
 	workers.push_back("Node1");
@@ -121,13 +124,15 @@ static void map_reduce_coordinator_host_setup(std::vector<std::string> args) {
 	workers.push_back("Node47");
 	workers.push_back("Node48");
 
+	translator.load_nodes("NodeCoordinator", workers);
+
 	// Threshold of array execution completed to begin resending tasks
 	int initial_threshold = 75;
 
 	// Timeout in seconds before beginning to resend tasks
 	int timeout = 50;
 
-	MapReduceCoordinator::setup_map_reduce_coordinator_in_this_host(map_tasks_in_flops, workers, initial_threshold, timeout, &mailboxes_manager, partition_redundancy_mode_enabled_global, threshold_of_execution_mode_enabled_global);
+	MapReduceCoordinator::setup_map_reduce_coordinator_in_this_host(map_tasks_in_flops, workers, initial_threshold, timeout, &mailboxes_manager, &translator, partition_redundancy_mode_enabled_global, threshold_of_execution_mode_enabled_global);
 }
 ////////////////////////////End actors//////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
@@ -172,6 +177,9 @@ void run_simulation(int argc, char* argv[], bool partition_redundancy_mode_enabl
 
 int main(int argc, char* argv[]) {
 	read_tasks_from_file();
+
+	translator = NodesDestinationTranslator();
+	translator.load_network_topology_from_file();
 
 	if (argv[1] == NULL || argv[2] == NULL) {
 		XBT_INFO("Execution arguments are: '<redundancy/no_redundancy> <threshold/no_threshold>', cancelling simulation");

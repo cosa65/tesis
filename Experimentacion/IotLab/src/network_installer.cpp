@@ -11,7 +11,7 @@ std::map<int, std::string> NetworkInstaller::listen_for_worker_ips(int workers_s
 
 	for (int i = 0; i < workers_size; i++) {
 		MessageHelper::MessageData message_data = MessageHelper::listen_for_message(socket_file_descriptor);
-	
+
 		std::cout << "Received message: " << message_data.content << " from address: " << message_data.sender_ipv6_address <<  std::endl;
 
 		auto message_tuple = message_data.unpack_message("ip:", ",node_line_number:");
@@ -73,22 +73,6 @@ std::string NetworkInstaller::translate_worker_indexes_to_ip(std::string worker_
 
 	int node_destination_index;
 	int node_step_index;
-
-	// while(ss_destination_mapping >> node_destination_index) {
-	// 	std::string delimiter;
-	// 	ss_destination_mapping.read(delimiter, 1);
-
-	// 	if (delimiter != ",") {
-	// 		throw std::runtime_error("[NODES_DESTINATION_TRANSLATOR] Error: network_topology.txt is not in a readable state");
-	// 	}
-
-	// 	ss_destination_mapping >> node_step_index;
-
-	// 	std::string node_destination_ip = index_to_ip_map[node_destination_index - 1];
-	// 	std::string node_step_ip = index_to_ip_map[node_step_index - 1];
-
-	// 	oss_worker_indexes_as_ip << node_destination_ip << " " << node_step_ip << " ";
-	// }
 
 	std::string token;
 	while(std::getline(ss_destination_mapping, token, ',')) {

@@ -29,11 +29,11 @@ public:
 		int initial_threshold,
 		int timeout,
 		MailboxesManager *mailboxes_manager,
+		NodesDestinationTranslator *translator,
 		bool partitioned_redundancy_mode_enabled,
 		bool threshold_of_execution_mode_enabled
 	);
 
-	static MailboxesManager *mailboxes_manager;
 
 	MapReduceCoordinator(void *message_raw, simgrid::s4u::Mailbox* receive_mailbox);
 	void operator()();
@@ -44,6 +44,9 @@ private:
 	static bool resend_pending_tasks();
 	static void update_nodes_state_and_performance_history(PendingMapTask *map_task, std::string worker_id);
 	static void save_logs();
+
+	static MailboxesManager *mailboxes_manager;
+	static NodesDestinationTranslator *translator;
 
 	// To keep track of which maps can be resent to idle workers
 	// Is reordered so that maps that have already been resent have less priority in next resend

@@ -8,4 +8,6 @@ public:
 	static std::tuple<std::string, std::string> unpack_message(std::string message);
 	// map payload shape is "flops:%s;map_index:%s"
 	static std::tuple<std::string, std::string> unpack_task_payload(std::string payload);
+	static std::string without_final_destination(std::string message);
+	static std::string get_final_destination(std::string message);
 };

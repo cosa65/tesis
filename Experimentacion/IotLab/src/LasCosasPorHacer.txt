@@ -5,6 +5,7 @@
 	<LISTO> - En un primer experimento todos los nodos estan conectados con el coordinador directamente.
 	<LISTO> [Falta en simgrid tambien] - Los nodos pueden actuar de puente, conectando al coordinador con otros workers.
 	[Deberia ser toggleable][Falta en simgrid tambien] - Si se recibe una task finalizada el coordinador le envia un ack al worker para que este sepa que no tiene que reenviarlo.
+	<QUEDA PARA DESPUES> - El coordinador puede ser != del nodo 1
 
 <LISTO> - El nodo coordinador, ya sabiendo cuantos nodos tiene a su disposicion (info recibida del organizador_de_red) y como es la tarea a resolver, separa en las particiones y envia la info.
 
@@ -13,7 +14,6 @@
 	<QUEDA PARA DESPUES> [Falta en simgrid tambien] - El coordinador reenvia tasks a nodos que no respondieron durante mucho tiempo de manera duplicada para ver si antes no estaban accesibles pero ahora si.
 	<QUEDA PARA DESPUES> - Si la desconexion tiene lugar tampoco se pueden enviar mensajes
 	<QUEDA PARA DESPUES> - Si la desconexion tiene lugar durante el tiempo entre que se envia el mensaje y se recibe, entonces no se recibe.
-	<QUEDA PARA DESPUES> - El coordinador puede ser != del nodo 1
 
 <LISTO> - Existe una historia de desconexiones que se puede escribir en un .txt aparte y se envia a cada nodo su parte (diciendole cuando desconectarse y cuando volver).
 

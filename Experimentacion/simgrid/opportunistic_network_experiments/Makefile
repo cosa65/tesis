@@ -615,6 +615,51 @@ utils/node_performance.cpp.s:
 	$(MAKE) -f CMakeFiles/no_disconnection_network.dir/build.make CMakeFiles/no_disconnection_network.dir/utils/node_performance.cpp.s
 .PHONY : utils/node_performance.cpp.s
 
+utils/nodes_destination_translator.o: utils/nodes_destination_translator.cpp.o
+
+.PHONY : utils/nodes_destination_translator.o
+
+# target to build an object file
+utils/nodes_destination_translator.cpp.o:
+	$(MAKE) -f CMakeFiles/big_network_disconnections.dir/build.make CMakeFiles/big_network_disconnections.dir/utils/nodes_destination_translator.cpp.o
+	$(MAKE) -f CMakeFiles/master-workers.dir/build.make CMakeFiles/master-workers.dir/utils/nodes_destination_translator.cpp.o
+	$(MAKE) -f CMakeFiles/one_disconnection_network.dir/build.make CMakeFiles/one_disconnection_network.dir/utils/nodes_destination_translator.cpp.o
+	$(MAKE) -f CMakeFiles/ping-pong.dir/build.make CMakeFiles/ping-pong.dir/utils/nodes_destination_translator.cpp.o
+	$(MAKE) -f CMakeFiles/first_network.dir/build.make CMakeFiles/first_network.dir/utils/nodes_destination_translator.cpp.o
+	$(MAKE) -f CMakeFiles/big_network_no_disconnections.dir/build.make CMakeFiles/big_network_no_disconnections.dir/utils/nodes_destination_translator.cpp.o
+	$(MAKE) -f CMakeFiles/no_disconnection_network.dir/build.make CMakeFiles/no_disconnection_network.dir/utils/nodes_destination_translator.cpp.o
+.PHONY : utils/nodes_destination_translator.cpp.o
+
+utils/nodes_destination_translator.i: utils/nodes_destination_translator.cpp.i
+
+.PHONY : utils/nodes_destination_translator.i
+
+# target to preprocess a source file
+utils/nodes_destination_translator.cpp.i:
+	$(MAKE) -f CMakeFiles/big_network_disconnections.dir/build.make CMakeFiles/big_network_disconnections.dir/utils/nodes_destination_translator.cpp.i
+	$(MAKE) -f CMakeFiles/master-workers.dir/build.make CMakeFiles/master-workers.dir/utils/nodes_destination_translator.cpp.i
+	$(MAKE) -f CMakeFiles/one_disconnection_network.dir/build.make CMakeFiles/one_disconnection_network.dir/utils/nodes_destination_translator.cpp.i
+	$(MAKE) -f CMakeFiles/ping-pong.dir/build.make CMakeFiles/ping-pong.dir/utils/nodes_destination_translator.cpp.i
+	$(MAKE) -f CMakeFiles/first_network.dir/build.make CMakeFiles/first_network.dir/utils/nodes_destination_translator.cpp.i
+	$(MAKE) -f CMakeFiles/big_network_no_disconnections.dir/build.make CMakeFiles/big_network_no_disconnections.dir/utils/nodes_destination_translator.cpp.i
+	$(MAKE) -f CMakeFiles/no_disconnection_network.dir/build.make CMakeFiles/no_disconnection_network.dir/utils/nodes_destination_translator.cpp.i
+.PHONY : utils/nodes_destination_translator.cpp.i
+
+utils/nodes_destination_translator.s: utils/nodes_destination_translator.cpp.s
+
+.PHONY : utils/nodes_destination_translator.s
+
+# target to generate assembly for a file
+utils/nodes_destination_translator.cpp.s:
+	$(MAKE) -f CMakeFiles/big_network_disconnections.dir/build.make CMakeFiles/big_network_disconnections.dir/utils/nodes_destination_translator.cpp.s
+	$(MAKE) -f CMakeFiles/master-workers.dir/build.make CMakeFiles/master-workers.dir/utils/nodes_destination_translator.cpp.s
+	$(MAKE) -f CMakeFiles/one_disconnection_network.dir/build.make CMakeFiles/one_disconnection_network.dir/utils/nodes_destination_translator.cpp.s
+	$(MAKE) -f CMakeFiles/ping-pong.dir/build.make CMakeFiles/ping-pong.dir/utils/nodes_destination_translator.cpp.s
+	$(MAKE) -f CMakeFiles/first_network.dir/build.make CMakeFiles/first_network.dir/utils/nodes_destination_translator.cpp.s
+	$(MAKE) -f CMakeFiles/big_network_no_disconnections.dir/build.make CMakeFiles/big_network_no_disconnections.dir/utils/nodes_destination_translator.cpp.s
+	$(MAKE) -f CMakeFiles/no_disconnection_network.dir/build.make CMakeFiles/no_disconnection_network.dir/utils/nodes_destination_translator.cpp.s
+.PHONY : utils/nodes_destination_translator.cpp.s
+
 utils/utils.o: utils/utils.cpp.o
 
 .PHONY : utils/utils.o
@@ -711,6 +756,9 @@ help:
 	@echo "... utils/node_performance.o"
 	@echo "... utils/node_performance.i"
 	@echo "... utils/node_performance.s"
+	@echo "... utils/nodes_destination_translator.o"
+	@echo "... utils/nodes_destination_translator.i"
+	@echo "... utils/nodes_destination_translator.s"
 	@echo "... utils/utils.o"
 	@echo "... utils/utils.i"
 	@echo "... utils/utils.s"

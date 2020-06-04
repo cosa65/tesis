@@ -3,6 +3,8 @@
 XBT_LOG_EXTERNAL_DEFAULT_CATEGORY(logging);
 
 MailboxesManager *MapReduceCoordinator::mailboxes_manager;
+NodesDestinationTranslator *MapReduceCoordinator::translator;
+
 // pending_maps holds all maps that have been sent to be executed and haven't finished yet, each map has the workers it was sent to
 std::list<PendingMapTask*> MapReduceCoordinator::pending_maps;
 int MapReduceCoordinator::pending_maps_count;
@@ -31,8 +33,9 @@ simgrid::s4u::MutexPtr MapReduceCoordinator::workers_and_data_update_lock;
 // To measure performance
 PointInTime *MapReduceCoordinator::map_reduce_start_point;
 
-void MapReduceCoordinator::setup_map_reduce_coordinator_in_this_host(std::list<long> map_tasks_in_flops, std::list<std::string> workers, int initial_threshold, int timeout, MailboxesManager *mailboxes_manager, bool partitioned_redundancy_mode_enabled, bool threshold_of_execution_mode_enabled) {
+void MapReduceCoordinator::setup_map_reduce_coordinator_in_this_host(std::list<long> map_tasks_in_flops, std::list<std::string> workers, int initial_threshold, int timeout, MailboxesManager *mailboxes_manager, NodesDestinationTranslator *translator, bool partitioned_redundancy_mode_enabled, bool threshold_of_execution_mode_enabled) {
 	MapReduceCoordinator::mailboxes_manager = mailboxes_manager;
+	MapReduceCoordinator::translator = translator;
 	MapReduceCoordinator::timeout = timeout; 
 	MapReduceCoordinator::partitioned_redundancy_mode_enabled = partitioned_redundancy_mode_enabled;
 	MapReduceCoordinator::threshold_of_execution_mode_enabled = threshold_of_execution_mode_enabled;
@@ -172,20 +175,20 @@ void MapReduceCoordinator::distribute_and_send_maps(std::list<long> map_tasks_in
 			continue;
 		}
 
-		std::string message = "flops:" + std::to_string(*maps_it) + ";map_index:" + std::to_string(current_task_bundle_index);
+		std::string payload = "flops:" + std::to_string(*maps_it) + ";map_index:" + std::to_string(current_task_bundle_index);
 
-		XBT_INFO("Preparing to send map task: %s", message.c_str());
+		XBT_INFO("Preparing to send map task payload: %s", payload.c_str());
 
-		// This should be doing the same as the 3 lines below it, but for some reason it fails in this case, REVISATION    
-		// simgrid::s4u::CommPtr pending_map_comm = sendbig_network_no_disconnections_message(message, *workers_it, subarray_size);
+		std::string final_destination_node_name = std::string(*workers_it) + "-worker";
+		std::string next_step_node_name = MapReduceCoordinator::translator -> next_step_to("NodeCoordinator", final_destination_node_name);
 
-		simgrid::s4u::Mailbox *worker_mailbox = simgrid::s4u::Mailbox::by_name(*workers_it + "-worker");
+		simgrid::s4u::Mailbox* worker_mailbox = simgrid::s4u::Mailbox::by_name(next_step_node_name); 
 
 		simgrid::s4u::Host* my_host = simgrid::s4u::this_actor::get_host();
-		std::string *message_to_send = new std::string("from:" + my_host -> get_name() + ";payload:" + message);
+		std::string *message_to_send = new std::string("from:" + my_host -> get_name() + ";payload:" + payload + ";destination_node:" + final_destination_node_name);
 		simgrid::s4u::CommPtr pending_map_comm = worker_mailbox -> put_async(message_to_send, subarray_size);
 
-		PendingMapTask *current_task_to_send = new PendingMapTask(current_task_bundle_index, message);
+		PendingMapTask *current_task_to_send = new PendingMapTask(current_task_bundle_index, payload);
 		current_task_to_send -> add_new_worker(*workers_it);
 
 		MapReduceCoordinator::pending_maps.push_back(current_task_to_send);
@@ -342,18 +345,20 @@ bool MapReduceCoordinator::resend_pending_tasks() {
 		pop_heap(MapReduceCoordinator::idle_workers.begin(), MapReduceCoordinator::idle_workers.end());
 		MapReduceCoordinator::idle_workers.pop_back();
 
-		std::string mailbox_name = idle_worker_id + "-worker";
-		simgrid::s4u::Mailbox* mailbox = simgrid::s4u::Mailbox::by_name(mailbox_name);
-
 		std::string task_data = map_task -> task_data;
 		map_task -> add_new_worker(idle_worker_id);
-		// PendingMapTask *new_resent_task = map_tasks.front() -> copy_task(idle_worker_id);
-
 		MapIndex map_index = map_task -> map_index;
 
-		XBT_INFO("Resending task %i to idle worker %s. Performance value: %f, performance mean: %f", map_index, idle_worker_id.c_str(), idle_worker_performance.get_node_performance(), idle_worker_performance.response_time_mean());
 
-		resend_comms.push_back(MessageHelper::send_message(map_task -> task_data, mailbox, 5));
+		std::string final_destination_node_name = std::string(idle_worker_id) + "-worker";
+		std::string next_step_node_name = MapReduceCoordinator::translator -> next_step_to("NodeCoordinator", final_destination_node_name);
+		simgrid::s4u::Mailbox* send_to_mailbox = simgrid::s4u::Mailbox::by_name(next_step_node_name); 
+
+		std::string message_to_send = map_task -> task_data + ";destination_node:" + final_destination_node_name;
+
+		resend_comms.push_back(MessageHelper::send_message(message_to_send, send_to_mailbox, 5));
+
+		XBT_INFO("Resending task %i to idle worker %s. Performance value: %f, performance mean: %f", map_index, idle_worker_id.c_str(), idle_worker_performance.get_node_performance(), idle_worker_performance.response_time_mean());
 
 		pending_maps_it++;
 	}

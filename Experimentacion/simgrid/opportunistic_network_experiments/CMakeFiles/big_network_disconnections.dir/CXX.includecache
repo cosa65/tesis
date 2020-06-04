@@ -15,6 +15,8 @@ simgrid/s4u.hpp
 /home/martin/Documents/repos/tesis/Experimentacion/simgrid/opportunistic_network_experiments/utils/map_reduce_worker.h
 ../utils/map_reduce_coordinator.h
 /home/martin/Documents/repos/tesis/Experimentacion/simgrid/opportunistic_network_experiments/utils/map_reduce_coordinator.h
+../utils/nodes_destination_translator.h
+/home/martin/Documents/repos/tesis/Experimentacion/simgrid/opportunistic_network_experiments/utils/nodes_destination_translator.h
 sstream
 -
 stdexcept
@@ -85,6 +87,8 @@ message_helper.h
 /home/martin/Documents/repos/tesis/Experimentacion/simgrid/opportunistic_network_experiments/utils/message_helper.h
 mailboxes_manager.h
 /home/martin/Documents/repos/tesis/Experimentacion/simgrid/opportunistic_network_experiments/utils/mailboxes_manager.h
+nodes_destination_translator.h
+/home/martin/Documents/repos/tesis/Experimentacion/simgrid/opportunistic_network_experiments/utils/nodes_destination_translator.h
 
 /home/martin/Documents/repos/tesis/Experimentacion/simgrid/opportunistic_network_experiments/utils/message_helper.cpp
 message_helper.h
@@ -104,10 +108,32 @@ iostream
 list
 -
 
-/home/martin/Documents/repos/tesis/Experimentacion/simgrid/opportunistic_network_experiments/utils/pending_map_task.h
+/home/martin/Documents/repos/tesis/Experimentacion/simgrid/opportunistic_network_experiments/utils/nodes_destination_translator.cpp
+nodes_destination_translator.h
+/home/martin/Documents/repos/tesis/Experimentacion/simgrid/opportunistic_network_experiments/utils/nodes_destination_translator.h
+
+/home/martin/Documents/repos/tesis/Experimentacion/simgrid/opportunistic_network_experiments/utils/nodes_destination_translator.h
 simgrid/s4u.hpp
 -
-chrono
+map
+-
+list
+-
+vector
+-
+stdexcept
+-
+string
+-
+iostream
+-
+fstream
+-
+sstream
+-
+
+/home/martin/Documents/repos/tesis/Experimentacion/simgrid/opportunistic_network_experiments/utils/pending_map_task.h
+simgrid/s4u.hpp
 -
 string
 -
@@ -115,10 +141,10 @@ map
 -
 
 /home/martin/Documents/repos/tesis/Experimentacion/simgrid/opportunistic_network_experiments/utils/utils.cpp
-simgrid/s4u.hpp
--
 list
 -
 iterator
+-
+algorithm
 -
 

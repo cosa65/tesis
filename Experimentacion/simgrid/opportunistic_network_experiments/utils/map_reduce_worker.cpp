@@ -5,11 +5,15 @@
 XBT_LOG_EXTERNAL_DEFAULT_CATEGORY(logging);
 
 MailboxesManager *MapReduceWorker::mailboxes_manager;
+NodesDestinationTranslator *MapReduceWorker::translator;
 std::map<std::string, std::string> MapReduceWorker::workers_idle_times;
 
-void MapReduceWorker::setup_map_worker_in_this_host(MailboxesManager *mailboxes_manager) {
+void MapReduceWorker::setup_map_worker_in_this_host(MailboxesManager *mailboxes_manager, NodesDestinationTranslator *translator) {
 	MapReduceWorker::mailboxes_manager = mailboxes_manager;
-	
+	MapReduceWorker::translator = translator;
+
+	std::string my_host_name = simgrid::s4u::this_actor::get_host() -> get_name();
+
 	PointInTime lifetime_start_point = simgrid::s4u::Engine::get_instance() -> get_clock();
 
 	TimeSpan *total_execution_time = new TimeSpan();
@@ -86,6 +90,22 @@ void MapReduceWorker::operator()() {
 		return;
 	}
 
+	std::string* message = static_cast<std::string*>(message_raw);
+
+	std::string my_mailbox_name = receive_mailbox -> get_name();
+	std::string final_destination_mailbox_name = MessageHelper::get_final_destination(*message);
+	if (final_destination_mailbox_name != my_mailbox_name) {
+		std::string next_step_mailbox_name = MapReduceWorker::translator -> next_step_to(my_mailbox_name, final_destination_mailbox_name);
+
+		XBT_INFO("Message not meant for this host, resending to %s. Message is: %s", next_step_mailbox_name, *message);
+
+		simgrid::s4u::Mailbox *send_to_mailbox = simgrid::s4u::Mailbox::by_name(next_step_mailbox_name);
+
+		MessageHelper::send_message(*message, send_to_mailbox, 5) -> wait();
+		return;
+	}
+
+
 	PointInTime start_point = simgrid::s4u::Engine::get_instance() -> get_clock();
 
 	this -> concurrent_executions_mutex -> lock();
@@ -95,9 +115,6 @@ void MapReduceWorker::operator()() {
 
 	*executing += 1;
 	this -> concurrent_executions_mutex -> unlock();
-
-	// std::string* message = static_cast<std::string*>(receive_mailbox -> get());
-	std::string* message = static_cast<std::string*>(message_raw);
 
 	auto message_tuple = MessageHelper::unpack_message(*message);
 	std::string sender = std::get<0>(message_tuple), payload = std::get<1>(message_tuple);
@@ -125,7 +142,10 @@ void MapReduceWorker::operator()() {
 	}
 	this -> concurrent_executions_mutex -> unlock();
 	
-	simgrid::s4u::Mailbox* send_to_mailbox = simgrid::s4u::Mailbox::by_name(std::string(sender) + "-coordinator"); 
+	std::string final_destination_node_name = std::string(sender) + "-coordinator";
+	std::string next_step_node_name = MapReduceWorker::translator -> next_step_to(my_host -> get_name() + "-worker", final_destination_node_name);
+
+	simgrid::s4u::Mailbox* send_to_mailbox = simgrid::s4u::Mailbox::by_name(next_step_node_name); 
 	// XBT_INFO((send_to_mailbox -> get_name()).c_str());
 	XBT_INFO(
 		"Host %s finished executing map of %i flops, it is sending results back to %s",
@@ -134,8 +154,7 @@ void MapReduceWorker::operator()() {
 		(send_to_mailbox -> get_name()).c_str()
 	);
 
-	std::string message_to_send = std::string("flops:") + "10000" + ";map_index:" + std::string(index);
+	std::string message_to_send = std::string("flops:") + "10000" + ";map_index:" + std::string(index) + ";destination_node:" + final_destination_node_name;
 
 	MessageHelper::send_message(message_to_send, send_to_mailbox, 5) -> wait();
-
 }

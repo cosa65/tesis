@@ -5,6 +5,7 @@ file(REMOVE_RECURSE
   "CMakeFiles/ping-pong.dir/utils/map_reduce_worker.cpp.o"
   "CMakeFiles/ping-pong.dir/utils/message_helper.cpp.o"
   "CMakeFiles/ping-pong.dir/utils/node_performance.cpp.o"
+  "CMakeFiles/ping-pong.dir/utils/nodes_destination_translator.cpp.o"
   "CMakeFiles/ping-pong.dir/utils/utils.cpp.o"
   "ping-pong/ping-pong.pdb"
   "ping-pong/ping-pong"

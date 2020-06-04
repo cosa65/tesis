@@ -5,6 +5,7 @@ file(REMOVE_RECURSE
   "CMakeFiles/master-workers.dir/utils/map_reduce_worker.cpp.o"
   "CMakeFiles/master-workers.dir/utils/message_helper.cpp.o"
   "CMakeFiles/master-workers.dir/utils/node_performance.cpp.o"
+  "CMakeFiles/master-workers.dir/utils/nodes_destination_translator.cpp.o"
   "CMakeFiles/master-workers.dir/utils/utils.cpp.o"
   "master-workers/master-workers.pdb"
   "master-workers/master-workers"
