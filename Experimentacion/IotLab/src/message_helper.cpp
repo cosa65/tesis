@@ -1,6 +1,16 @@
 #include "message_helper.h"
 
+int MessageHelper::sent_messages;
+
+void MessageHelper::start() {
+	MessageHelper::sent_messages = 0;
+}
+
 int MessageHelper::send_message(std::string payload, std::string destination_ipv6, std::string destination_interface) {
+	MessageHelper::send_message(payload, destination_ipv6, "eth0", 8080);
+}
+
+int MessageHelper::send_message(std::string payload, std::string destination_ipv6, std::string destination_interface, int port) {
 
 	// SOCK_DGRAM = UDP, SOCK_STREAM = TCP
 	int socket_file_descriptor = socket(AF_INET6, SOCK_DGRAM, 0);
@@ -16,7 +26,7 @@ int MessageHelper::send_message(std::string payload, std::string destination_ipv
 
     inet_pton(AF_INET6,sending_ipv6, (void *)&socket_struct.sin6_addr.s6_addr);
     socket_struct.sin6_scope_id = if_nametoindex(sending_interface);
-	socket_struct.sin6_port = htons(8080);
+	socket_struct.sin6_port = htons(port);
 
 	const char *content = payload.c_str();
 
@@ -27,17 +37,18 @@ int MessageHelper::send_message(std::string payload, std::string destination_ipv
 	}
 
 	std::cout << "Sent message with content: " << content << std::endl;
+	MessageHelper::sent_messages++;
 	return 1;
 }
 
 // Returns socket_file_descriptor for created socket
-int MessageHelper::bind_listen(std::string receiving_ipv6, std::string receiving_interface) {
+int MessageHelper::bind_listen(std::string receiving_ipv6, std::string receiving_interface, int port) {
 	int socket_file_descriptor = socket(AF_INET6, SOCK_DGRAM, 0);
 
 	struct sockaddr_in6 socket_struct;
 	socket_struct.sin6_family = AF_INET6;
 
-	socket_struct.sin6_port = htons(8080);
+	socket_struct.sin6_port = htons(port);
 	socket_struct.sin6_scope_id = if_nametoindex(receiving_interface.c_str());
 	inet_pton(AF_INET6, receiving_ipv6.c_str(), (void *)&socket_struct.sin6_addr.s6_addr);
 
@@ -51,7 +62,7 @@ int MessageHelper::bind_listen(std::string receiving_ipv6, std::string receiving
 }
 
 MessageHelper::MessageData MessageHelper::listen_for_message(int socket_file_descriptor) {
-    char receive_buffer[549];
+    char receive_buffer[1000];
 	struct sockaddr src_addr;
 	socklen_t src_addr_len=sizeof(src_addr);
 
@@ -120,6 +131,10 @@ std::string MessageHelper::to_string(sockaddr sockaddr, socklen_t address_length
 	return address_str;
 }
 
+int MessageHelper::get_sent_messages() {
+	return MessageHelper::sent_messages;
+}
+
 std::tuple<std::string, std::string> MessageHelper::MessageData::unpack_message(std::string first_separator, std::string second_separator) {
 	std::string message = content_without_final_destination();
 
@@ -147,6 +162,25 @@ std::tuple<std::string, std::string, std::string> MessageHelper::MessageData::un
 	std::string third_msg = message.substr(third_start, (message.length()) - third_start);
 
 	return std::make_tuple(first_msg, second_msg, third_msg);
+}
+
+std::tuple<std::string, std::string, std::string, std::string> MessageHelper::MessageData::unpack_message(std::string first_separator, std::string second_separator, std::string third_separator, std::string fourth_separator) {
+	std::string message = content_without_final_destination();
+
+	int first_start = first_separator.length();
+	int first_size = message.find(second_separator) - first_separator.length();
+	int second_start = message.find(second_separator) + second_separator.length();
+	int second_size = message.find(third_separator) - second_start;
+	int third_start = message.find(third_separator) + third_separator.length();
+	int third_size = message.find(fourth_separator) - third_start;
+	int fourth_start = message.find(fourth_separator) + fourth_separator.length();
+
+	std::string first_msg = message.substr(first_start, first_size);
+	std::string second_msg = message.substr(second_start, second_size);
+	std::string third_msg = message.substr(third_start, third_size);
+	std::string fourth_msg = message.substr(fourth_start, (message.length()) - fourth_start);
+
+	return std::make_tuple(first_msg, second_msg, third_msg, fourth_msg);
 }
 
 std::string MessageHelper::MessageData::get_final_destination() {

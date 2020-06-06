@@ -7,6 +7,8 @@
 
 #include <thread>
 #include <future>
+#include <mutex>
+#include <atomic>
 
 #include "../connection_interference_manager.h"
 #include "../nodes_destination_translator.h"
@@ -22,6 +24,7 @@ public:
 private:
 	int handle_map_task(long iterations, std::string map_index);
 	int run_operation(long iterations);
+	void send_local_worker_statistics();
 
 	std::string worker_ip;
 	std::string ip_to_coordinator;
@@ -30,4 +33,11 @@ private:
 	NodesDestinationTranslator *translator;
 	NodeTimer *node_timer;
 	LogKeeper *log_keeper;
+
+	double total_execution_time = 0.0;
+
+	std::atomic<bool> ended;
+	bool running_operation = false;
+	double operation_start_time = 0.0;
+	std::mutex operation_status_mutex;
 };

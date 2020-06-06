@@ -30,7 +30,7 @@ int main(int argc, char *argv[]) {
 
 	MessageHelper::send_message(content, network_organizer_ipv6, network_organizer_interface);
 
-	int socket_file_descriptor = MessageHelper::bind_listen(host_ip, "eth0");
+	int socket_file_descriptor = MessageHelper::bind_listen(host_ip, "eth0", 8080);
 	MessageHelper::MessageData message_data = MessageHelper::listen_for_message(socket_file_descriptor);
 
 	std::cout << "Received message: " << message_data.content << std::endl;
@@ -50,7 +50,7 @@ int main(int argc, char *argv[]) {
 		// ip is a list of ips separated by space representing all workers
 		std::list<std::string> worker_ips = MessageHelper::split_by_spaces(ip);
 		
-		CoordinatorNode coordinator(socket_file_descriptor, connection_interference_manager, translator, log_keeper, node_timer);
+		CoordinatorNode coordinator(socket_file_descriptor, host_ip, connection_interference_manager, translator, log_keeper, node_timer);
 
 		std::cout << "ERROR Yo no puedo ser coordinator todavia" << ip << std::endl;
 		// coordinator.start()

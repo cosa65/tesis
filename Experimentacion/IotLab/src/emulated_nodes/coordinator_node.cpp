@@ -6,7 +6,7 @@ std::list<PendingMapTask*> CoordinatorNode::pending_maps;
 int CoordinatorNode::pending_maps_count;
 
 std::list<std::string> CoordinatorNode::workers;
-std::vector<NodePerformance> CoordinatorNode::idle_workers;
+std::vector<NodePerformance*> CoordinatorNode::idle_workers;
 
 std::map<std::string, NodePerformance*> CoordinatorNode::efficiency_by_worker_id;
 
@@ -30,8 +30,9 @@ bool CoordinatorNode::initial_threshold_of_execution_mode_enabled;
 PointInTime *CoordinatorNode::map_reduce_start_point;
 
 
-CoordinatorNode::CoordinatorNode(int socket_file_descriptor, ConnectionInterferenceManager *connection_interference_manager, NodesDestinationTranslator *translator, LogKeeper *log_keeper, NodeTimer *node_timer) :
+CoordinatorNode::CoordinatorNode(int socket_file_descriptor, std::string coordinator_ip, ConnectionInterferenceManager *connection_interference_manager, NodesDestinationTranslator *translator, LogKeeper *log_keeper, NodeTimer *node_timer) :
 	socket_file_descriptor(socket_file_descriptor),
+	coordinator_ip(coordinator_ip),
 	connection_interference_manager(connection_interference_manager),
 	translator(translator), 
 	log_keeper(log_keeper),
@@ -45,9 +46,10 @@ void CoordinatorNode::start(std::list<long> map_tasks_in_flops, std::list<std::s
 	CoordinatorNode::threshold_of_execution_mode_enabled = threshold_of_execution_mode_enabled;
 	CoordinatorNode::initial_threshold_of_execution_mode_enabled = threshold_of_execution_mode_enabled;
 	CoordinatorNode::workers = workers;
+	MessageHelper::start();
 
 	this -> finished = false;
-	this -> finished_execution_mutex.lock();
+	// this -> finished_execution_mutex.lock();
 	this -> finished_initial_distribution_mutex.lock();
 
 	this -> timeout_has_been_reset = false;
@@ -69,13 +71,18 @@ void CoordinatorNode::start(std::list<long> map_tasks_in_flops, std::list<std::s
 			std::cout << node_timer -> time_log() << "[COORDINATOR] Listening for map result" << std::endl;
 			// Blocking get, actor is blocked until it receives message
 			MessageHelper::MessageData message_data = MessageHelper::listen_for_message(socket_file_descriptor);
+
+			if (this -> finished.load()) {
+				return;
+			}
+
 			std::cout << node_timer -> time_log() << "[COORDINATOR] message_data: " << message_data.content << std::endl;
 
 			std::future<int> map_handle_thread = std::async(std::launch::async, [this, message_data]() { 
 				int maps_left = this -> handle_map_result_received(message_data);
 				if (maps_left == 0) {
 					this -> finished = true;
-					this -> finished_execution_mutex.unlock();
+					// this -> finished_execution_mutex.unlock();
 				}
 
 				return maps_left;
@@ -91,7 +98,7 @@ void CoordinatorNode::start(std::list<long> map_tasks_in_flops, std::list<std::s
 	// CoordinatorNode::resend_on_timeout_actor = simgrid::s4u::Actor::create("resend_pending_tasks_on_timeout", my_host, CoordinatorNode::resend_pending_tasks_on_timeout);
 	auto timeout_task_thread = std::async(std::launch::async, [this]() { this -> resend_pending_tasks_on_timeout(); });
 
-	this -> finished_execution_mutex.lock();
+	// this -> finished_execution_mutex.lock();
 }
 
 void CoordinatorNode::distribute_and_send_maps(std::list<long> map_tasks_in_flops, std::list<std::string> workers, int initial_threshold) {
@@ -217,7 +224,7 @@ void CoordinatorNode::distribute_and_send_maps(std::list<long> map_tasks_in_flop
 		if (*maps_it == 0) { 
 			// If worker doesn't have tasks to execute, then add it to idle_workers list
 			NodePerformance *performance = new NodePerformance(*workers_it);
-			CoordinatorNode::idle_workers.push_back(*performance);
+			CoordinatorNode::idle_workers.push_back(performance);
 			continue;
 		}
 
@@ -231,7 +238,7 @@ void CoordinatorNode::distribute_and_send_maps(std::list<long> map_tasks_in_flop
 		std::string *message_to_send = new std::string(message);
 		std::string current_step_ip = this -> translator -> next_step_ip_to(final_destination_ip);
 
-		std::async(std::launch::async, MessageHelper::send_message, message, current_step_ip, "eth0");
+		std::async(std::launch::async, [message, current_step_ip]() { MessageHelper::send_message(message, current_step_ip, "eth0"); });
 
 		PendingMapTask *current_task_to_send = new PendingMapTask(current_task_bundle_index, task_data);
 		current_task_to_send -> add_new_worker(final_destination_ip);
@@ -277,6 +284,11 @@ int CoordinatorNode::handle_map_result_received(MessageHelper::MessageData messa
 
 	this -> workers_and_data_update_mutex.lock();
 
+	if (this -> finished.load()) {
+		this -> workers_and_data_update_mutex.unlock();
+		return 0;
+	}
+
 	auto finished_task_it = std::find_if(
 								CoordinatorNode::pending_maps.begin(),
 								CoordinatorNode::pending_maps.end(), 
@@ -306,19 +318,21 @@ int CoordinatorNode::handle_map_result_received(MessageHelper::MessageData messa
 	if (CoordinatorNode::pending_maps_count == 0 ||
 		CoordinatorNode::pending_maps_count == 1 && CoordinatorNode::partitioned_redundancy_mode_enabled)
 	{
+		this -> finished = true;
 		//IMPORTANTE
 		// int reduce_execution_time = 100000;
 
-
 		std::cout << node_timer -> time_log() << "MapReduce has finished successfully!! Ending simulation" << std::endl;
 
-		// simgrid::s4u::Actor::kill_all();
-
-		// IMPORTANTE
-		// CoordinatorNode::save_logs();
+		close(this -> socket_file_descriptor);
 
 		// FIN	
 		this -> workers_and_data_update_mutex.unlock();
+
+		// IMPORTANTE
+		// CoordinatorNode::save_logs();
+		finish_workers_and_gather_statistics();
+
 		return 0;
 	}
 
@@ -356,6 +370,10 @@ void CoordinatorNode::check_completion_threshold_and_resend_if_necessary() {
 }
 
 void CoordinatorNode::setup_resend_on_timeout() {
+	if (this -> finished.load()) {
+		return;
+	}
+
 	std::cout << node_timer -> time_log() << "[TIMEOUT RESET]" << std::endl;
 	this -> timeout_resend_time_point = std::chrono::system_clock::now() + std::chrono::seconds(CoordinatorNode::timeout);
 }
@@ -363,8 +381,12 @@ void CoordinatorNode::setup_resend_on_timeout() {
 void CoordinatorNode::resend_pending_tasks_on_timeout() {
 	setup_resend_on_timeout();
 
-	while (true && !(this -> finished.load())) {
+	while (true) {
 		std::this_thread::sleep_until(timeout_resend_time_point);
+
+		if (this -> finished.load()) {
+			return;
+		}
 
 		// If threshold already triggered a resend, then it has also reset the timeout point, so this thread should wait until the new time point
 		if ( this -> timeout_has_been_reset.load() ) { 
@@ -392,7 +414,7 @@ bool CoordinatorNode::resend_pending_tasks() {
 	std::cout << "Idle workers to resend to: ";
 
 	for (auto idle_worker : CoordinatorNode::idle_workers) {
-		std::cout << idle_worker.get_node_id() << " ";
+		std::cout << idle_worker -> get_node_id() << " ";
 	}
 	std::cout << std::endl;
 
@@ -406,8 +428,8 @@ bool CoordinatorNode::resend_pending_tasks() {
 			continue;
 		}
 
-		NodePerformance idle_worker_performance = CoordinatorNode::idle_workers.front();
-		std::string idle_worker_id = idle_worker_performance.get_node_id();
+		NodePerformance *idle_worker_performance = CoordinatorNode::idle_workers.front();
+		std::string idle_worker_id = idle_worker_performance -> get_node_id();
 		pop_heap(CoordinatorNode::idle_workers.begin(), CoordinatorNode::idle_workers.end());
 		CoordinatorNode::idle_workers.pop_back();
 
@@ -417,7 +439,7 @@ bool CoordinatorNode::resend_pending_tasks() {
 
 		MapIndex map_index = map_task -> map_index;
 
-		std::cout << node_timer -> time_log() << "Resending task " << map_index << " to idle worker " << idle_worker_id << ". Performance value: " << idle_worker_performance.get_node_performance() << ", performance mean: " << idle_worker_performance.response_time_mean() << std::endl;
+		std::cout << node_timer -> time_log() << "Resending task " << map_index << " to idle worker " << idle_worker_id << ". Performance value: " << idle_worker_performance -> get_node_performance() << ", performance mean: " << idle_worker_performance -> response_time_mean() << std::endl;
 
 		MessageHelper::send_message(message, idle_worker_id, "eth0");
 
@@ -494,6 +516,102 @@ void CoordinatorNode::update_nodes_state_and_performance_history(PendingMapTask 
 
 	worker_performance -> add_response_time(response_time);
 	
-	CoordinatorNode::idle_workers.push_back(*worker_performance);
+	CoordinatorNode::idle_workers.push_back(worker_performance);
 	push_heap(CoordinatorNode::idle_workers.begin(), CoordinatorNode::idle_workers.end());
+}
+
+void CoordinatorNode::finish_workers_and_gather_statistics() {
+	int workers_size = CoordinatorNode::workers.size();
+
+	std::map<std::string, WorkerStatistics> workers_statistics;
+
+	std::cout << "Listening for stuff started" << std::endl;
+
+	int sent_messages = MessageHelper::get_sent_messages();
+
+	this -> ready_to_receive_statistics_messages_mutex.lock();
+
+	auto workers_statistics_future = std::async(std::launch::async, [this, workers_size](){ return this -> listen_for_workers_statistics_messages(workers_size); });
+
+	std::list<std::future<int>> threads;
+
+	this -> ready_to_receive_statistics_messages_mutex.lock();
+	this -> ready_to_receive_statistics_messages_mutex.unlock();
+
+	for (std::string worker_ip : CoordinatorNode::workers) {
+		threads.push_back(
+			std::async(
+				std::launch::async,
+				[worker_ip]() { return MessageHelper::send_message("end", worker_ip, "eth0", 8080); }
+			)
+		);
+	}
+
+	std::cout << "Sent all messages" << std::endl;
+	workers_statistics = workers_statistics_future.get();
+
+	std::cout << "Gathered all statistics" << std::endl;
+
+	std::string filename = "workers_logs.txt";
+	std::ofstream log_file(filename);
+	log_file << "Coordinator total runtime: " << this -> node_timer -> current_time_in_ms() << ", sent messages: " << sent_messages << std::endl;
+
+	int i = 2;
+	for (std::string worker_ip : CoordinatorNode::workers) {
+		WorkerStatistics statistics = workers_statistics[worker_ip];
+
+		double percentage_idle_time = ((statistics.total_lifetime - statistics.total_execution_time) / statistics.total_lifetime) * 100.0;
+
+		std::cout << "size: " << CoordinatorNode::efficiency_by_worker_id.size() << std::endl;
+
+		auto node_performance = CoordinatorNode::efficiency_by_worker_id[worker_ip];
+
+		std::string node_performance_str;
+		if (node_performance == NULL) {
+			node_performance_str = "not found";
+		} else {
+			double response_time_mean = node_performance -> response_time_mean();
+			node_performance_str = std::to_string(response_time_mean);
+		}
+
+		log_file << "Worker " << i << ", ip: " << worker_ip << ", total runtime: " << statistics.total_lifetime << ", total execution time: " << statistics.total_execution_time << "idle time: " << percentage_idle_time << "%" << ", sent_messages: " << statistics.sent_messages << ", performance mean: " << node_performance_str << std::endl;
+		i++;
+	}
+
+	log_file.close();
+
+	std::cout << "Statistics are in " << filename << std::endl;
+}
+
+std::map<std::string, WorkerStatistics> CoordinatorNode::listen_for_workers_statistics_messages(int workers_size) {
+	int statistics_descriptor = MessageHelper::bind_listen(this -> coordinator_ip, "eth0", 8081);
+
+
+	std::map<std::string, WorkerStatistics> idle_times_by_worker_ip;
+
+	this -> ready_to_receive_statistics_messages_mutex.unlock();
+
+	for (int i = 0; i < workers_size; i++) {
+		MessageHelper::MessageData message_data = MessageHelper::listen_for_message(statistics_descriptor);
+		
+		std::cout << "Received message data here" << std::endl;
+
+		auto message_tuple = message_data.unpack_message("total_execution_time:", ",total_lifetime:", ",sent_messages:", ",worker:");
+		std::string total_execution_time_str = std::get<0>(message_tuple), 
+			total_lifetime_str = std::get<1>(message_tuple), 
+			sent_messages_str = std::get<2>(message_tuple), 
+			worker_ip = std::get<3>(message_tuple);
+
+		long total_execution_time = stol(total_execution_time_str);
+		long total_lifetime = stol(total_lifetime_str);
+		int sent_messages = stoi(sent_messages_str);
+
+		WorkerStatistics worker_statistics = WorkerStatistics(total_execution_time, total_lifetime, sent_messages);
+
+		idle_times_by_worker_ip[worker_ip] = worker_statistics;
+
+		std::cout << "worker_ip: " << worker_ip << std::endl;
+	}
+
+	return idle_times_by_worker_ip;
 }

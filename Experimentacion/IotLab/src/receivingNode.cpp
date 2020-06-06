@@ -30,17 +30,18 @@ std::string begin_handler_for_role_receipt(
 		// WorkerNode worker(ip, translator);
 		std::cout << "I'm a worker, NOT IMPLEMENTED YET" << std::endl;
 	} else if (role == "coordinator") {
+
 		// ip is a list of ips separated by space representing all workers
 		std::list<std::string> worker_ips = MessageHelper::split_by_spaces(ip);
 		
-		CoordinatorNode coordinator(socket_file_descriptor, connection_interference_manager, translator, log_keeper, node_timer);
+		CoordinatorNode coordinator(socket_file_descriptor, listener_ip, connection_interference_manager, translator, log_keeper, node_timer);
 		std::cout << "I'm the coordinator" << std::endl;
 
-		std::list<long> map_tasks_in_flops = {600,200,300,400,500,600,700,800,900,100,110,120,130,140,150};
+		std::list<long> map_tasks_in_flops = {600,200,300,400,500,600,700,800,900,100,110,120,130,140,150,100,110,120,130,140,150,100,110,120,130,140,150,100,110,120,130,140,150,100,110,120,130,140,150,100,110,120,130,140,150,100,110,120,130,140,150,100,110,120,130,140,150};
 		int initial_threshold = 75;
 		int timeout = 10;
-		bool partitioned_redundancy_mode_enabled = 1;
-		bool threshold_of_execution_mode_enabled = 1;
+		bool partitioned_redundancy_mode_enabled = 0;
+		bool threshold_of_execution_mode_enabled = 0;
 
 		// Antes de arrancar, el coordinator deberia recibir un ack mas de todos los worker para saber que estan todos escuchando como workers
 		// (sino podria terminar enviando la task sin que esten ya en modo worker escuchando)
@@ -64,7 +65,7 @@ int main(int argc, char *argv[]) {
 
 	std::string network_coordinator_ipv6 = "2001:660:3207:400::1";
 	std::string network_coordinator_interface = "eth0";
-	int socket_file_descriptor = MessageHelper::bind_listen(network_coordinator_ipv6, network_coordinator_interface);
+	int socket_file_descriptor = MessageHelper::bind_listen(network_coordinator_ipv6, network_coordinator_interface, 8080);
 
 	NetworkInstaller network_installer = NetworkInstaller(network_coordinator_ipv6, network_coordinator_interface);
 

@@ -10,6 +10,9 @@ WorkerNode::WorkerNode(std::string ip_to_coordinator, std::string worker_ip, Con
 	{}
 
 void WorkerNode::start(int socket_file_descriptor) {
+	MessageHelper::start();
+	this -> ended = false;
+	
 	this -> node_timer -> start();
 	this -> connection_interference_manager -> start();
 
@@ -17,6 +20,15 @@ void WorkerNode::start(int socket_file_descriptor) {
 	while(true) {
 		std::cout << node_timer -> time_log() << "Listening for task" << std::endl;
 		MessageHelper::MessageData message_data = MessageHelper::listen_for_message(socket_file_descriptor);
+
+		if (message_data.content == "end") {
+			send_local_worker_statistics();
+
+			this -> ended = true;
+
+			std::cout << "Worker finished running!" << std::endl;
+			return;
+		}
 
 		// If the node is disconnected during this time, then we can't receive the message (so we imitate this behaviour by ignoring it)
 		if (!(this -> connection_interference_manager -> can_receive_message(message_data))) {
@@ -32,6 +44,7 @@ void WorkerNode::start(int socket_file_descriptor) {
 			std::cout << node_timer -> time_log() << "Received message meant for another node, forwarding over to next step: " << next_step_ip << ".\n\t\t Message is: " << message_data.content << std::endl;
 
 			MessageHelper::send_message(message_data.content, next_step_ip, "eth0");
+
 			continue;
 		} else {
 			std::cout << "Received message for me: " << message_data.content << std::endl;
@@ -47,12 +60,15 @@ void WorkerNode::start(int socket_file_descriptor) {
 
 			threads.push_back(std::move(map_handle_thread));
 		}
-
 	}
 }
 
 int WorkerNode::handle_map_task(long iterations, std::string map_index) {
 	int op_result = run_operation(iterations);
+
+	if (this -> ended.load()) {
+		return op_result;
+	}
 
 	std::stringstream ss;
 	ss << "map_index:" << map_index << ",worker:" << this -> worker_ip << ",destination_ip:" << this -> ip_to_coordinator;
@@ -67,6 +83,13 @@ int WorkerNode::handle_map_task(long iterations, std::string map_index) {
 }
 
 int WorkerNode::run_operation(const long iterations) {
+	this -> operation_status_mutex.lock();
+	{
+		this -> operation_start_time = this -> node_timer -> current_time_in_ms();
+		this -> running_operation = true;
+	}
+	this -> operation_status_mutex.unlock();
+
 	std::cout << this -> node_timer -> time_log() << "----------------------------RUNNING OPERATION----------------------------" << std::endl;
 	int a;
 	
@@ -77,5 +100,39 @@ int WorkerNode::run_operation(const long iterations) {
 	}
 
 	std::cout << this -> node_timer -> time_log() << "____________________________FINISHED OPERATION___________________________" << std::endl;
+
+	this -> operation_status_mutex.lock();
+	{
+		double operation_end_time = this -> node_timer -> current_time_in_ms();
+
+		double operation_execution_time = operation_end_time - this -> operation_start_time;
+
+		this -> total_execution_time += operation_execution_time;
+		this -> running_operation = false;
+	}
+	this -> operation_status_mutex.unlock();
+
 	return a;
+}
+
+void WorkerNode::send_local_worker_statistics() {
+	double total_execution_time_to_send = this -> total_execution_time;
+
+	this -> operation_status_mutex.lock();
+	{
+		// We are sending statistics while worker is running an operation, so we should add the current executions partial time to the total
+		if (this -> running_operation) {
+			double now = this -> node_timer -> current_time_in_ms();
+			double current_operation_execution_time = now - this -> operation_start_time;
+
+			total_execution_time_to_send += current_operation_execution_time;
+		}
+	}
+	this -> operation_status_mutex.unlock();
+
+	std::stringstream ss;
+	ss << "total_execution_time:" << total_execution_time_to_send << ",total_lifetime:" << this -> node_timer -> current_time_in_ms() << ",sent_messages:" << MessageHelper::get_sent_messages() << ",worker:" << this -> worker_ip;
+	std::string message = ss.str();
+
+	MessageHelper::send_message(message, this -> ip_to_coordinator, "eth0", 8081);
 }

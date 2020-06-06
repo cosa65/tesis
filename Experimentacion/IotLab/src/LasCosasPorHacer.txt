@@ -13,7 +13,7 @@
 	<LISTO> - Si la desconexion tiene lugar cuando el mensaje deberia llegar al receptor, entonces no se recibe.
 	<QUEDA PARA DESPUES> [Falta en simgrid tambien] - El coordinador reenvia tasks a nodos que no respondieron durante mucho tiempo de manera duplicada para ver si antes no estaban accesibles pero ahora si.
 	<QUEDA PARA DESPUES> - Si la desconexion tiene lugar tampoco se pueden enviar mensajes
-	<QUEDA PARA DESPUES> - Si la desconexion tiene lugar durante el tiempo entre que se envia el mensaje y se recibe, entonces no se recibe.
+	<QUEDA PARA DESPUES> <POR AHI ES DEMASIADO REBUSCADO> - Si la desconexion tiene lugar durante el tiempo entre que se envia el mensaje y se recibe, entonces no se recibe.
 
 <LISTO> - Existe una historia de desconexiones que se puede escribir en un .txt aparte y se envia a cada nodo su parte (diciendole cuando desconectarse y cuando volver).
 
@@ -30,7 +30,23 @@
 
 - El coordinador puede ser cualquier nodo, no necesariamente el organizador de la network.
 
-- Una vez terminado el MapReduce, los nodos worker envian al coordinador la informacion relevante para el experimento y esta info queda guardada en un archivo en el coordinador.
-- Logging
+<LISTO> - Una vez terminado el MapReduce, los nodos worker envian al coordinador la informacion relevante para el experimento y esta info queda guardada en un archivo en el coordinador.
+<LISTO> - Logging
 
-- Para interferencias podria hacer que linea con mucha interferencia pueda recibir/enviar mensajes con % de probabilidad segun su calidad de conexion
+- Para interferencias podria hacer que linea con mucha interferencia pueda recibir/enviar mensajes con % de probabilidad segun su calidad de conexion. <Por ahora no>
+
+
+
+- Cuanto tarda una iteracion en un A8.
+
+- <LISTO PARA VERSION PRE OTRAS MEJORES> Cuanto tardan 11000 iteraciones en un unico nodo (walltime). (corriendo sin latencia este nodo). [Alrededor de 294130, vs 40674 en el distribuido con 30 nodos).
+
+- Mandar tarea testigo ad hoc a todos los nodos al principio para ganar info sobre su performance, asumimos que la corre de vez en cuando. -cada cuanto la manda depende de la estabilidad performance de respuestas.
+
+- Enviar binario con parametro iteraciones.
+
+- Identificar nodos, para filtrar los malos.
+
+- Nodos apagados, no desconectados.
+
+- Criticidad (para despues).

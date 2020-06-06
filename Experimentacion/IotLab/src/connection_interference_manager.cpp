@@ -47,7 +47,6 @@ void ConnectionInterferenceManager::load_disconnection_intervals(int disconnecti
 void ConnectionInterferenceManager::start() {}
 
 bool ConnectionInterferenceManager::can_receive_message(MessageHelper::MessageData received_message) {
-	std::cout << "My node_timer is: " << this -> node_timer << std::endl;
 	double time_of_receipt_message = this -> node_timer -> current_time_in_ms();
 
 	return is_connected_now(time_of_receipt_message);

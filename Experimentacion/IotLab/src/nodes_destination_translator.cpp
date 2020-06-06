@@ -1,16 +1,10 @@
 #include "nodes_destination_translator.h"
 
-NodesDestinationTranslator::NodesDestinationTranslator(std::string ) {
-	this -> next_step_to_reach_node_by_current_node;
-}
-
-void load_nodes(std::list<std::string> worker_nodes) {
-	
-}
+NodesDestinationTranslator::NodesDestinationTranslator() {}
 
 // Loads ip version of connections for node node_topology_index_number (indexed from 1)
 // Returns lines specifying connections for each node
-void NodesDestinationTranslator::load_network_topology_from_file(int node_topology_index_number, std::map<int, std::string> index_to_ip_map, std::string network_organizer_ipv6) {
+std::vector<std::string> NodesDestinationTranslator::load_network_topology_from_file(int node_topology_index_number, std::map<int, std::string> index_to_ip_map, std::string network_organizer_ipv6) {
 
 	std::cout << "[NODES_DESTINATION_TRANSLATOR] About to load stuff" << std::endl;
 

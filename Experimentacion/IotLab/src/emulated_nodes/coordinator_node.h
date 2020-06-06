@@ -2,6 +2,7 @@
 
 #include <string.h>
 #include <sstream>
+#include <fstream>
 #include <numeric>
 
 #include <list>
@@ -11,15 +12,20 @@
 #include <thread>
 #include <future>
 #include <mutex>
-#include <condition_variable>
+
+#include <unistd.h>
 
 #include "../log_keeper.h"
 #include "../connection_interference_manager.h"
 #include "../nodes_destination_translator.h"
 #include "../message_helper.h"
+
 #include "../../../simgrid/opportunistic_network_experiments/utils/utils.cpp"
+
 #include "pending_map_task.h"
 #include "node_performance.h"
+
+#include "../worker_statistics.h"
 
 typedef int MapIndex;
 typedef double PointInTime;
@@ -27,7 +33,7 @@ typedef double TimeSpan;
 
 class CoordinatorNode {
 public:
-	CoordinatorNode(int socket_file_descriptor, ConnectionInterferenceManager *connection_interference_manager, NodesDestinationTranslator *translator, LogKeeper *log_keeper, NodeTimer *node_timer);
+	CoordinatorNode(int socket_file_descriptor, std::string coordinator_ip, ConnectionInterferenceManager *connection_interference_manager, NodesDestinationTranslator *translator, LogKeeper *log_keeper, NodeTimer *node_timer);
 
 	void start(
 		std::list<long> map_tasks_in_flops,
@@ -37,6 +43,10 @@ public:
 		bool partitioned_redundancy_mode_enabled, 
 		bool threshold_of_execution_mode_enabled
 	);
+
+
+
+private:
 
 	void distribute_and_send_maps(std::list<long> map_tasks_in_flops, std::list<std::string> workers, int initial_threshold);
 
@@ -49,14 +59,14 @@ public:
 	void save_logs();
 	void update_nodes_state_and_performance_history(PendingMapTask *map_task, std::string worker_id);
 
-private:
+	void finish_workers_and_gather_statistics();
+	std::map<std::string, WorkerStatistics> listen_for_workers_statistics_messages(int workers_size);
+
 	static std::list<PendingMapTask*> pending_maps;
 
 	static std::list<std::string> workers;
 
-	static std::vector<NodePerformance> idle_workers;
-	static std::list<std::string> potentially_lost_workers;
-
+	static std::vector<NodePerformance*> idle_workers;
 	
 	// Used to aid guessing which worker to pick when resending
 	static std::map<std::string, NodePerformance *> efficiency_by_worker_id;
@@ -93,12 +103,14 @@ private:
 	std::mutex finished_execution_mutex;
 	std::atomic<bool> finished;
 
+
+	std::mutex ready_to_receive_statistics_messages_mutex;
+
 	int socket_file_descriptor;
-	std::list<std::string> worker_ips;
+	std::string coordinator_ip;
 
 	std::chrono::system_clock::time_point timeout_resend_time_point;
 	std::atomic<bool> timeout_has_been_reset;
-
 
 	ConnectionInterferenceManager *connection_interference_manager;
 	NodesDestinationTranslator *translator;
