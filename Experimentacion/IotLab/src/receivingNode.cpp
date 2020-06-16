@@ -22,7 +22,7 @@ std::string begin_handler_for_role_receipt(
 
 	std::cout << "Received message: " << message_data.content << std::endl;
 
-	auto message_tuple = message_data.unpack_message("role:", ",ip:", ",ip_translations:");
+	auto message_tuple = message_data.unpack_message("role:", ",ip:", ",ip_translations:", ",performance:");
 	std::string role = std::get<0>(message_tuple), ip = std::get<1>(message_tuple), ip_translations = std::get<2>(message_tuple);
 
 	if (role == "worker") {
@@ -53,6 +53,23 @@ std::string begin_handler_for_role_receipt(
 	return role;
 }
 
+std::vector<int> load_nodes_performances() {
+	std::ifstream file;
+	file.open("network_performance.txt");
+
+	std::vector<int> nodes_performances;
+
+	int i = 1;
+	for(std::string line; getline(file, line);) {
+		std::cout << "node_performance_for_node " << i << ": " << line << std::endl;
+		i++;
+
+		nodes_performances.push_back(std::stoi(line));
+	}
+
+	return nodes_performances;
+}
+
 // Al uso del socket_file_descriptor deberia agregarle un mutex para evitar que lo use mas de un thread al mismo tiempo (a menos que imite los mutexes de simgrid, que se supone que garantizan eso)
 int main(int argc, char *argv[]) {
 	int amount_of_worker_nodes = std::stoi(argv[1]);
@@ -74,6 +91,8 @@ int main(int argc, char *argv[]) {
 	NodesDestinationTranslator *translator = new NodesDestinationTranslator();
 	std::vector<std::string> nodes_connections = translator -> load_network_topology_from_file(1, index_to_ip_map, network_coordinator_ipv6);
 
+	std::vector<int> nodes_performances = load_nodes_performances();
+
 	auto role = std::async(
 		std::launch::async, 
 		begin_handler_for_role_receipt, 
@@ -90,7 +109,7 @@ int main(int argc, char *argv[]) {
 	// Entonces sacamos el coordinator a la lista de workers en index_to_ip_map
 	// }
 
-	network_installer.create_network_and_send_links(nodes_connections, index_to_ip_map);
+	network_installer.create_network_and_send_links(nodes_connections, nodes_performances, index_to_ip_map);
 
 	// role.wait() will stop this function for the whole experiment's duration
 	role.wait();

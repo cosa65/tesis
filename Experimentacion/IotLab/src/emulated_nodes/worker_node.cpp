@@ -1,8 +1,9 @@
 #include "worker_node.h"
 
-WorkerNode::WorkerNode(std::string ip_to_coordinator, std::string worker_ip, ConnectionInterferenceManager *connection_interference_manager, NodesDestinationTranslator *translator, LogKeeper *log_keeper, NodeTimer *node_timer):	
+WorkerNode::WorkerNode(std::string ip_to_coordinator, std::string worker_ip, int performance, ConnectionInterferenceManager *connection_interference_manager, NodesDestinationTranslator *translator, LogKeeper *log_keeper, NodeTimer *node_timer):	
 	ip_to_coordinator(ip_to_coordinator),
 	worker_ip(worker_ip),
+	performance(performance),
 	connection_interference_manager(connection_interference_manager),
 	translator(translator),
 	log_keeper(log_keeper),
@@ -90,15 +91,13 @@ int WorkerNode::run_operation(const long iterations) {
 	}
 	this -> operation_status_mutex.unlock();
 
-	std::cout << this -> node_timer -> time_log() << "----------------------------RUNNING OPERATION----------------------------" << std::endl;
-	int a;
-	
-	srand (time(NULL));
-	int random = (rand() % 2) + 1;
-	
-	std::cout << "My random now is: " << random << std::endl;
+	std::cout << "My performance value is: " << this -> performance << std::endl;
 
-	for (int z = 0; z < random; z++) {
+	long a;
+
+	std::cout << this -> node_timer -> time_log() << "----------------------------RUNNING OPERATION----------------------------" << std::endl;
+
+	for (int z = 0; z < this -> performance; z++) {
 		for (int j = 0; j < 10000; j++) {
 			for (int i = 0; i < iterations; i++) {
 				a = i * 20 + 100;

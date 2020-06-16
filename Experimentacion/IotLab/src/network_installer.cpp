@@ -29,7 +29,7 @@ std::map<int, std::string> NetworkInstaller::listen_for_worker_ips(int workers_s
 	return workers_index_to_ip_map;
 }
 
-void NetworkInstaller::create_network_and_send_links(std::vector<std::string> connections_as_index, std::map<int, std::string> index_to_ip_map) {
+void NetworkInstaller::create_network_and_send_links(std::vector<std::string> connections_as_index, std::vector<int> nodes_performances, std::map<int, std::string> index_to_ip_map) {
 	// For now, just connect all nodes to the coordinator (default coordinator is the same as network_installer)
 
 	std::list<std::string> worker_ips;
@@ -52,7 +52,9 @@ void NetworkInstaller::create_network_and_send_links(std::vector<std::string> co
 
 		std::string worker_connections_as_ip = translate_worker_indexes_to_ip(one_worker_connections_as_index, index_to_ip_map);
 
-		std::string message_content = "role:worker,ip:" + this -> network_organizer_ipv6 + ",ip_translations:" + worker_connections_as_ip;
+		int node_performance = nodes_performances[worker_index - 1];
+
+		std::string message_content = "role:worker,ip:" + this -> network_organizer_ipv6 + ",ip_translations:" + worker_connections_as_ip + ",performance:" + std::to_string(node_performance);
 		MessageHelper::send_message(message_content, worker_ip, "eth0");		
 	}
 

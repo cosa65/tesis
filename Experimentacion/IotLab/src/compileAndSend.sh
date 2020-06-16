@@ -62,8 +62,9 @@ ssh fosco@strasbourg.iot-lab.info "rsync -avzhe ssh sendingNodeArm root@node-a8-
 wait
 
 network_topology_content=$(cat network_topology.txt)
+network_performance_content=$(cat network_performance.txt)
 disconnection_intervals_content=$(cat disconnection_intervals_for_all_nodes.txt)
-	gnome-terminal --tab -- bash -c "ssh -t fosco@saclay.iot-lab.info 'ssh -t root@node-a8-1.saclay.iot-lab.info \"echo '\"'${disconnection_intervals_content}'\"' > disconnection_intervals_for_all_nodes.txt; echo '\"'${network_topology_content}'\"' > network_topology.txt; ./receivingNodeArm 28 1; bash\" '"
+	gnome-terminal --tab -- bash -c "ssh -t fosco@saclay.iot-lab.info 'ssh -t root@node-a8-1.saclay.iot-lab.info \"echo '\"'${disconnection_intervals_content}'\"' > disconnection_intervals_for_all_nodes.txt; echo '\"'${network_topology_content}'\"' > network_topology.txt; echo '\"'${network_performance_content}'\"' > network_performance.txt; ./receivingNodeArm 28 1; bash\" '"
 
 function execute_sender_number_with_disconnection_line {
 	sender_command="echo '\"'${disconnection_intervals_content}'\"' > disconnection_intervals_for_all_nodes.txt | ip addr show eth0 scope global | sed -e'\''s/^.*inet6 \([^ ]*\)\/.*$/\1/;t;d'\'' | xargs -I{} ./sendingNodeArm {} ${3}"
@@ -75,7 +76,7 @@ sleep 30
 
 execute_sender_number_with_disconnection_line saclay a8-2.saclay.iot-lab.info 2
 execute_sender_number_with_disconnection_line saclay a8-3.saclay.iot-lab.info 3
-execute_sender_number_with_disconnection_line saclay a8-4.saclay.iot-lab.info 4 
+execute_sender_number_with_disconnection_line saclay a8-4.saclay.iot-lab.info 4
 execute_sender_number_with_disconnection_line saclay a8-5.saclay.iot-lab.info 5 
 execute_sender_number_with_disconnection_line saclay a8-6.saclay.iot-lab.info 6
 execute_sender_number_with_disconnection_line saclay a8-7.saclay.iot-lab.info 7

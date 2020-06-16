@@ -19,7 +19,7 @@
 
 class WorkerNode {
 public:
-	WorkerNode(std::string ip_to_coordinator, std::string worker_ip, ConnectionInterferenceManager *connection_interference_manager, NodesDestinationTranslator *translator, LogKeeper *log_keeper, NodeTimer *node_timer);
+	WorkerNode(std::string ip_to_coordinator, std::string worker_ip, int performance, ConnectionInterferenceManager *connection_interference_manager, NodesDestinationTranslator *translator, LogKeeper *log_keeper, NodeTimer *node_timer);
 
 	void start(int socket_file_descriptor);
 
@@ -30,6 +30,9 @@ private:
 
 	std::string worker_ip;
 	std::string ip_to_coordinator;
+
+	// A lower value is better, it is used as a multiplier of the iterations a task takes
+	int performance;
 
 	ConnectionInterferenceManager *connection_interference_manager;
 	NodesDestinationTranslator *translator;

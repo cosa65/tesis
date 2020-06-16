@@ -35,15 +35,17 @@ int main(int argc, char *argv[]) {
 
 	std::cout << "Received message: " << message_data.content << std::endl;
 
-	auto message_tuple = message_data.unpack_message("role:", ",ip:", ",ip_translations:");
-	std::string role = std::get<0>(message_tuple), ip = std::get<1>(message_tuple), ip_translations = std::get<2>(message_tuple);
+	auto message_tuple = message_data.unpack_message("role:", ",ip:", ",ip_translations:", ",performance:");
+	std::string role = std::get<0>(message_tuple), ip = std::get<1>(message_tuple), ip_translations = std::get<2>(message_tuple), performance_str = std::get<3>(message_tuple);
 
 	NodesDestinationTranslator *translator = new NodesDestinationTranslator();
 	translator -> load_network_topology_from_ips_string(ip_translations);
 
+	int performance = std::stoi(performance_str);
+
 	if (role == "worker") {
 		// ip is the address to which to send the responses to coordinator
-		WorkerNode worker(ip, host_ip, connection_interference_manager, translator, log_keeper, node_timer);
+		WorkerNode worker(ip, host_ip, performance, connection_interference_manager, translator, log_keeper, node_timer);
 		worker.start(socket_file_descriptor);
 
 	} else if (role == "coordinator") {
