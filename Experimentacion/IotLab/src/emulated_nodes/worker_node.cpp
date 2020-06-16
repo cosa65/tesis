@@ -93,9 +93,16 @@ int WorkerNode::run_operation(const long iterations) {
 	std::cout << this -> node_timer -> time_log() << "----------------------------RUNNING OPERATION----------------------------" << std::endl;
 	int a;
 	
-	for (int j = 0; j < 1000000; j++) {
-		for (int i = 0; i < iterations; i++) {
-			a = i * 20 + 100;
+	srand (time(NULL));
+	int random = (rand() % 2) + 1;
+	
+	std::cout << "My random now is: " << random << std::endl;
+
+	for (int z = 0; z < random; z++) {
+		for (int j = 0; j < 10000; j++) {
+			for (int i = 0; i < iterations; i++) {
+				a = i * 20 + 100;
+			}
 		}
 	}
 

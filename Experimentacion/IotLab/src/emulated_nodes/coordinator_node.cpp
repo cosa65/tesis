@@ -64,6 +64,8 @@ void CoordinatorNode::start(std::list<long> map_tasks_in_flops, std::list<std::s
 	// CoordinatorNode::map_reduce_start_point = new PointInTime();
 	// *CoordinatorNode::map_reduce_start_point = simgrid::s4u::Engine::get_instance() -> get_clock();
 
+	perform_all_workers_performance_update();
+
 	// Begin listening before sending maps
 	auto map_results_listener_thread = std::async(std::launch::async, [this, map_tasks_in_flops, workers, initial_threshold]() { 
 		std::list<std::future<int>> threads;
@@ -297,7 +299,7 @@ int CoordinatorNode::handle_map_result_received(MessageHelper::MessageData messa
 								}
 							);
 
-	CoordinatorNode::update_nodes_state_and_performance_history(*finished_task_it, sender);
+	CoordinatorNode::update_nodes_state(*finished_task_it, sender);
 
 	if ((*finished_task_it) -> finished) {
 		// This task is actually finished (already received result from another node), so ignore
@@ -441,7 +443,9 @@ bool CoordinatorNode::resend_pending_tasks() {
 
 		std::cout << node_timer -> time_log() << "Resending task " << map_index << " to idle worker " << idle_worker_id << ". Performance value: " << idle_worker_performance -> get_node_performance() << ", performance mean: " << idle_worker_performance -> response_time_mean() << std::endl;
 
-		MessageHelper::send_message(message, idle_worker_id, "eth0");
+		std::string next_step_ip = this -> translator -> next_step_ip_to(idle_worker_id);
+
+		MessageHelper::send_message(message, next_step_ip, "eth0");
 
 		pending_maps_it++;
 	}
@@ -502,23 +506,81 @@ void CoordinatorNode::save_logs() {
 	// file.close();
 }
 
-void CoordinatorNode::update_nodes_state_and_performance_history(PendingMapTask *map_task, std::string worker_id) {
-	double response_time = map_task -> time_since_creation(worker_id);
+void CoordinatorNode::update_nodes_state(PendingMapTask *map_task, std::string worker_id) {
+	// During execution of a mapreduce we always have info on efficiency of node because of witness task
+	NodePerformance *worker_performance = CoordinatorNode::efficiency_by_worker_id[worker_id];
 
-	NodePerformance *worker_performance;
-
-	if (CoordinatorNode::efficiency_by_worker_id.count(worker_id) == 0) {
-		worker_performance = new NodePerformance(worker_id);
-		CoordinatorNode::efficiency_by_worker_id[worker_id] = worker_performance;
-	} else {
-		worker_performance = CoordinatorNode::efficiency_by_worker_id[worker_id];
-	}
-
-	worker_performance -> add_response_time(response_time);
-	
 	CoordinatorNode::idle_workers.push_back(worker_performance);
 	push_heap(CoordinatorNode::idle_workers.begin(), CoordinatorNode::idle_workers.end());
 }
+
+void CoordinatorNode::perform_all_workers_performance_update() {
+	std::map<std::string, double> send_times;
+
+	std::future<void> listen_and_update_performance_thread = std::async(std::launch::async, [this] (std::map<std::string, double> *send_times_ptr) { return listen_for_benchmark_tasks_and_update_performance(send_times_ptr); }, &send_times);
+
+
+	for (std::string worker_id : this -> workers) {
+		send_times[worker_id] = send_benchmark_task_to(worker_id);
+	}
+
+	listen_and_update_performance_thread.wait();
+}
+
+// Returns send time
+double CoordinatorNode::send_benchmark_task_to(std::string worker_id) {
+	std::string task_data = "iterations:100,index:1";
+	std::string message = task_data + ",destination_ip:" + worker_id;
+
+	std::string next_step_ip = translator -> next_step_ip_to(worker_id);
+
+	double send_message = node_timer -> current_time_in_ms();
+
+	MessageHelper::send_message(message, next_step_ip, "eth0");
+
+	return send_message;
+}
+
+void CoordinatorNode::listen_for_benchmark_tasks_and_update_performance(std::map<std::string, double> *send_times) {
+	// std::list<std::future<void>> benchmark_tasks;
+
+	for (int i = 0; i < this -> workers.size(); i++) {
+		MessageHelper::MessageData message_data = MessageHelper::listen_for_message(this -> socket_file_descriptor);
+		
+		std::cout << "Received message data here" << std::endl;
+
+		auto message_tuple = message_data.unpack_message("map_index:", ",worker:");
+
+		std::string worker = std::get<1>(message_tuple);
+		double receive_time = this -> node_timer -> current_time_in_ms();
+		
+		double response_time = receive_time - (*send_times)[worker];
+
+		NodePerformance *worker_performance = new NodePerformance(worker);
+		worker_performance -> add_response_time(response_time);
+
+		CoordinatorNode::efficiency_by_worker_id[worker] = worker_performance;
+	}
+
+	// for (auto task : benchmark_tasks) {
+	// 	task.wait();
+	// }
+}
+
+// void CoordinatorNode::set_nodes_performance_history(PendingMapTask *map_task, std::string worker_id) {
+// 	double response_time = map_task -> time_since_creation(worker_id);
+
+// 	NodePerformance *worker_performance;
+
+// 	if (CoordinatorNode::efficiency_by_worker_id.count(worker_id) == 0) {
+// 		worker_performance = new NodePerformance(worker_id);
+// 		CoordinatorNode::efficiency_by_worker_id[worker_id] = worker_performance;
+// 	} else {
+// 		worker_performance = CoordinatorNode::efficiency_by_worker_id[worker_id];
+// 	}
+	
+// 	worker_performance -> add_response_time(response_time);
+// }
 
 void CoordinatorNode::finish_workers_and_gather_statistics() {
 	int workers_size = CoordinatorNode::workers.size();
@@ -533,10 +595,10 @@ void CoordinatorNode::finish_workers_and_gather_statistics() {
 
 	auto workers_statistics_future = std::async(std::launch::async, [this, workers_size](){ return this -> listen_for_workers_statistics_messages(workers_size); });
 
-	std::list<std::future<int>> threads;
-
 	this -> ready_to_receive_statistics_messages_mutex.lock();
 	this -> ready_to_receive_statistics_messages_mutex.unlock();
+
+	std::list<std::future<int>> threads;
 
 	for (std::string worker_ip : CoordinatorNode::workers) {
 		threads.push_back(
@@ -561,8 +623,6 @@ void CoordinatorNode::finish_workers_and_gather_statistics() {
 		WorkerStatistics statistics = workers_statistics[worker_ip];
 
 		double percentage_idle_time = ((statistics.total_lifetime - statistics.total_execution_time) / statistics.total_lifetime) * 100.0;
-
-		std::cout << "size: " << CoordinatorNode::efficiency_by_worker_id.size() << std::endl;
 
 		auto node_performance = CoordinatorNode::efficiency_by_worker_id[worker_ip];
 

@@ -57,7 +57,15 @@ private:
 	void resend_pending_tasks_on_timeout();
 	bool resend_pending_tasks();
 	void save_logs();
-	void update_nodes_state_and_performance_history(PendingMapTask *map_task, std::string worker_id);
+	void update_nodes_state(PendingMapTask *map_task, std::string worker_id);
+
+	void perform_all_workers_performance_update();
+
+	// Returns send time
+	double send_benchmark_task_to(std::string worker_id);
+	void gather_all_workers_performance();
+	void listen_for_benchmark_tasks_and_update_performance(std::map<std::string, double> *send_times);
+	// void set_nodes_performance_history(PendingMapTask *map_task, std::string worker_id);
 
 	void finish_workers_and_gather_statistics();
 	std::map<std::string, WorkerStatistics> listen_for_workers_statistics_messages(int workers_size);

@@ -35,7 +35,7 @@
 
 - Para interferencias podria hacer que linea con mucha interferencia pueda recibir/enviar mensajes con % de probabilidad segun su calidad de conexion. <Por ahora no>
 
-
+	
 
 - Cuanto tarda una iteracion en un A8.
 
