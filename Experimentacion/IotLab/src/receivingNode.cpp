@@ -41,7 +41,7 @@ std::string begin_handler_for_role_receipt(
 		int initial_threshold = 75;
 		int timeout = 10;
 		bool partitioned_redundancy_mode_enabled = 0;
-		bool threshold_of_execution_mode_enabled = 0;
+		bool threshold_of_execution_mode_enabled = 1;
 
 		// Antes de arrancar, el coordinator deberia recibir un ack mas de todos los worker para saber que estan todos escuchando como workers
 		// (sino podria terminar enviando la task sin que esten ya en modo worker escuchando)

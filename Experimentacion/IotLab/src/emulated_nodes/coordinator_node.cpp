@@ -6,7 +6,7 @@ std::list<PendingMapTask*> CoordinatorNode::pending_maps;
 int CoordinatorNode::pending_maps_count;
 
 std::list<std::string> CoordinatorNode::workers;
-std::vector<NodePerformance*> CoordinatorNode::idle_workers;
+std::priority_queue<NodePerformance*, std::vector<NodePerformance *>, CoordinatorNode::PerformancePtrsCmp> CoordinatorNode::idle_workers;
 
 std::map<std::string, NodePerformance*> CoordinatorNode::efficiency_by_worker_id;
 
@@ -225,8 +225,8 @@ void CoordinatorNode::distribute_and_send_maps(std::list<long> map_tasks_in_flop
 		// Filter out partitions that are empty (this takes place only when there are more workers than maps to execute)
 		if (*maps_it == 0) { 
 			// If worker doesn't have tasks to execute, then add it to idle_workers list
-			NodePerformance *performance = new NodePerformance(*workers_it);
-			CoordinatorNode::idle_workers.push_back(performance);
+			NodePerformance *worker_performance_ptr = CoordinatorNode::efficiency_by_worker_id[*workers_it];
+			CoordinatorNode::idle_workers.push(worker_performance_ptr);
 			continue;
 		}
 
@@ -413,12 +413,12 @@ bool CoordinatorNode::resend_pending_tasks() {
 
 	std::cout << node_timer -> time_log() << "Begun resending tasks" << std::endl; 
 
-	std::cout << "Idle workers to resend to: ";
+	// std::cout << "Idle workers to resend to: ";
 
-	for (auto idle_worker : CoordinatorNode::idle_workers) {
-		std::cout << idle_worker -> get_node_id() << " ";
-	}
-	std::cout << std::endl;
+	// for (auto idle_worker : CoordinatorNode::idle_workers) {
+	// 	std::cout << idle_worker -> get_node_id() << " with performance: " << idle_worker -> get_node_performance() << std::endl;
+	// }
+	// std::cout << std::endl;
 
 	auto pending_maps_it = CoordinatorNode::pending_maps.begin();
 
@@ -430,10 +430,13 @@ bool CoordinatorNode::resend_pending_tasks() {
 			continue;
 		}
 
-		NodePerformance *idle_worker_performance = CoordinatorNode::idle_workers.front();
+		NodePerformance *idle_worker_performance = CoordinatorNode::idle_workers.top();
+
+		std::cout << "\033[1;31m<DEBUG> Picked worker with performance " << idle_worker_performance -> get_node_performance() << "\033[0m" << std::endl;
+
+		CoordinatorNode::idle_workers.pop();
+
 		std::string idle_worker_id = idle_worker_performance -> get_node_id();
-		pop_heap(CoordinatorNode::idle_workers.begin(), CoordinatorNode::idle_workers.end());
-		CoordinatorNode::idle_workers.pop_back();
 
 		std::string task_data = map_task -> task_data;
 		std::string message = task_data + ",destination_ip:" + idle_worker_id;
@@ -509,9 +512,7 @@ void CoordinatorNode::save_logs() {
 void CoordinatorNode::update_nodes_state(PendingMapTask *map_task, std::string worker_id) {
 	// During execution of a mapreduce we always have info on efficiency of node because of witness task
 	NodePerformance *worker_performance = CoordinatorNode::efficiency_by_worker_id[worker_id];
-
-	CoordinatorNode::idle_workers.push_back(worker_performance);
-	push_heap(CoordinatorNode::idle_workers.begin(), CoordinatorNode::idle_workers.end());
+	CoordinatorNode::idle_workers.push(worker_performance);
 }
 
 void CoordinatorNode::perform_all_workers_performance_update() {
@@ -529,7 +530,7 @@ void CoordinatorNode::perform_all_workers_performance_update() {
 
 // Returns send time
 double CoordinatorNode::send_benchmark_task_to(std::string worker_id) {
-	std::string task_data = "iterations:100,index:1";
+	std::string task_data = "iterations:100,index:-1";
 	std::string message = task_data + ",destination_ip:" + worker_id;
 
 	std::string next_step_ip = translator -> next_step_ip_to(worker_id);

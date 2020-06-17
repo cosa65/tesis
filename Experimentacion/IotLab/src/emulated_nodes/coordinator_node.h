@@ -8,6 +8,8 @@
 #include <list>
 #include <vector>
 #include <tuple>
+#include <queue>
+#include <functional>
 
 #include <thread>
 #include <future>
@@ -44,9 +46,14 @@ public:
 		bool threshold_of_execution_mode_enabled
 	);
 
-
-
 private:
+
+	class PerformancePtrsCmp {
+	public:
+		bool operator() (NodePerformance* node1_ptr, NodePerformance* node2_ptr) {
+			return *node1_ptr < *node2_ptr;
+		}
+	};
 
 	void distribute_and_send_maps(std::list<long> map_tasks_in_flops, std::list<std::string> workers, int initial_threshold);
 
@@ -74,7 +81,7 @@ private:
 
 	static std::list<std::string> workers;
 
-	static std::vector<NodePerformance*> idle_workers;
+	static std::priority_queue<NodePerformance*, std::vector<NodePerformance *>, PerformancePtrsCmp> idle_workers;
 	
 	// Used to aid guessing which worker to pick when resending
 	static std::map<std::string, NodePerformance *> efficiency_by_worker_id;
