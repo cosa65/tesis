@@ -3,7 +3,6 @@
 NodeTimer::NodeTimer(): started(false) {}
 
 void NodeTimer::start() {
-	std::cout << "[NODE_TIMER] Started timer now" << std::endl;
 	this -> started = true;
 	this -> begin_time_in_ms = now_since_epoch();
 }

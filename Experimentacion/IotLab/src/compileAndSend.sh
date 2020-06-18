@@ -6,10 +6,16 @@ arm-linux-gnueabi-g++ -Wl,--whole-archive -lpthread -Wl,--no-whole-archive -Wno-
 echo "<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<Everything compiled successfully!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>"
 
 rsync -avzhe ssh receivingNodeArm fosco@saclay.iot-lab.info:/senslab/users/fosco
+rsync -avzhe ssh map_single_task.cpp fosco@saclay.iot-lab.info:/senslab/users/fosco
 rsync -avzhe ssh sendingNodeArm fosco@saclay.iot-lab.info:/senslab/users/fosco
+
+
 rsync -avzhe ssh sendingNodeArm fosco@strasbourg.iot-lab.info:/senslab/users/fosco
 
+
+
 ssh fosco@saclay.iot-lab.info "rsync -avzhe ssh receivingNodeArm root@node-a8-1.saclay.iot-lab.info:/home/root" &
+ssh fosco@saclay.iot-lab.info "rsync -avzhe ssh map_single_task.cpp root@node-a8-1.saclay.iot-lab.info:/home/root" &
 
 # ssh fosco@strasbourg.iot-lab.info "rsync -avzhe ssh sendingNodeArm root@node-a8-1.strasbourg.iot-lab.info:/home/root" &
 # ssh fosco@strasbourg.iot-lab.info "rsync -avzhe ssh sendingNodeArm root@node-a8-3.strasbourg.iot-lab.info:/home/root" &
@@ -51,13 +57,16 @@ ssh fosco@strasbourg.iot-lab.info "rsync -avzhe ssh sendingNodeArm root@node-a8-
 ssh fosco@strasbourg.iot-lab.info "rsync -avzhe ssh sendingNodeArm root@node-a8-3.strasbourg.iot-lab.info:/home/root" & 
 ssh fosco@strasbourg.iot-lab.info "rsync -avzhe ssh sendingNodeArm root@node-a8-4.strasbourg.iot-lab.info:/home/root" & 
 wait
-ssh fosco@strasbourg.iot-lab.info "rsync -avzhe ssh sendingNodeArm root@node-a8-5.strasbourg.iot-lab.info:/home/root" & 
+# ssh fosco@strasbourg.iot-lab.info "rsync -avzhe ssh sendingNodeArm root@node-a8-5.strasbourg.iot-lab.info:/home/root" & 
+# ssh fosco@strasbourg.iot-lab.info "rsync -avzhe ssh sendingNodeArm root@node-a8-6.strasbourg.iot-lab.info:/home/root" & 
 ssh fosco@strasbourg.iot-lab.info "rsync -avzhe ssh sendingNodeArm root@node-a8-7.strasbourg.iot-lab.info:/home/root" & 
 ssh fosco@strasbourg.iot-lab.info "rsync -avzhe ssh sendingNodeArm root@node-a8-8.strasbourg.iot-lab.info:/home/root" & 
 wait
 ssh fosco@strasbourg.iot-lab.info "rsync -avzhe ssh sendingNodeArm root@node-a8-9.strasbourg.iot-lab.info:/home/root" & 
-ssh fosco@strasbourg.iot-lab.info "rsync -avzhe ssh sendingNodeArm root@node-a8-10.strasbourg.iot-lab.info:/home/root" & 
+# ssh fosco@strasbourg.iot-lab.info "rsync -avzhe ssh sendingNodeArm root@node-a8-10.strasbourg.iot-lab.info:/home/root" & 
 ssh fosco@strasbourg.iot-lab.info "rsync -avzhe ssh sendingNodeArm root@node-a8-11.strasbourg.iot-lab.info:/home/root" & 
+ssh fosco@strasbourg.iot-lab.info "rsync -avzhe ssh sendingNodeArm root@node-a8-12.strasbourg.iot-lab.info:/home/root" & 
+ssh fosco@strasbourg.iot-lab.info "rsync -avzhe ssh sendingNodeArm root@node-a8-13.strasbourg.iot-lab.info:/home/root" & 
 
 wait
 
@@ -71,43 +80,63 @@ function execute_sender_number_with_disconnection_line {
 	gnome-terminal --tab -- bash -c "ssh -t -oStrictHostKeyChecking=no fosco@${1}.iot-lab.info 'ssh -t root@node-${2} \"${sender_command}; bash\" '"
 }
 
-# spd-say -l es 'denunciado lince, despedite de tu cuenta maquinola'
-sleep 30
+# function execute_sender_number_with_disconnection_line_debug {
+# 	sender_command="echo '\"'${disconnection_intervals_content}'\"' > disconnection_intervals_for_all_nodes.txt | ip addr show eth0 scope global | sed -e'\''s/^.*inet6 \([^ ]*\)\/.*$/\1/;t;d'\'' | xargs -I{} -i gdb --args sendingNodeArm {} ${3}"
+# 	gnome-terminal --tab -- bash -c "ssh -t -oStrictHostKeyChecking=no fosco@${1}.iot-lab.info 'ssh -t root@node-${2} \"${sender_command}\" '"
+# }
+
+echo "Press any key to continue"
+spd-say "a"
+while [ true ] ; do
+	read -t 3 -n 1
+if [ $? = 0 ] ; then
+	break;
+else
+	echo "waiting for the keypress"
+fi
+done
 
 execute_sender_number_with_disconnection_line saclay a8-2.saclay.iot-lab.info 2
 execute_sender_number_with_disconnection_line saclay a8-3.saclay.iot-lab.info 3
 execute_sender_number_with_disconnection_line saclay a8-4.saclay.iot-lab.info 4
 execute_sender_number_with_disconnection_line saclay a8-5.saclay.iot-lab.info 5 
+sleep 5
 execute_sender_number_with_disconnection_line saclay a8-6.saclay.iot-lab.info 6
 execute_sender_number_with_disconnection_line saclay a8-7.saclay.iot-lab.info 7
-sleep 5
 # execute_sender_number_with_disconnection_line saclay a8-8.saclay.iot-lab.info 8
 execute_sender_number_with_disconnection_line saclay a8-9.saclay.iot-lab.info 8
+sleep 5
 execute_sender_number_with_disconnection_line saclay a8-10.saclay.iot-lab.info 9
 execute_sender_number_with_disconnection_line saclay a8-11.saclay.iot-lab.info 10
 execute_sender_number_with_disconnection_line saclay a8-12.saclay.iot-lab.info 11
+sleep 5
 execute_sender_number_with_disconnection_line saclay a8-13.saclay.iot-lab.info 12
 # execute_sender_number_with_disconnection_line saclay a8-14.saclay.iot-lab.info 13
-sleep 5
 execute_sender_number_with_disconnection_line saclay a8-16.saclay.iot-lab.info 13
 execute_sender_number_with_disconnection_line saclay a8-17.saclay.iot-lab.info 14
+sleep 5
 execute_sender_number_with_disconnection_line saclay a8-18.saclay.iot-lab.info 15
 execute_sender_number_with_disconnection_line saclay a8-19.saclay.iot-lab.info 16
 execute_sender_number_with_disconnection_line saclay a8-20.saclay.iot-lab.info 17
+sleep 5
 execute_sender_number_with_disconnection_line saclay a8-21.saclay.iot-lab.info 18
 execute_sender_number_with_disconnection_line saclay a8-22.saclay.iot-lab.info 19
-sleep 5
 execute_sender_number_with_disconnection_line strasbourg a8-1.strasbourg.iot-lab.info 20
+sleep 5
 execute_sender_number_with_disconnection_line strasbourg a8-2.strasbourg.iot-lab.info 21
 execute_sender_number_with_disconnection_line strasbourg a8-3.strasbourg.iot-lab.info 22
 execute_sender_number_with_disconnection_line strasbourg a8-4.strasbourg.iot-lab.info 23
-execute_sender_number_with_disconnection_line strasbourg a8-5.strasbourg.iot-lab.info 24
 sleep 5
-execute_sender_number_with_disconnection_line strasbourg a8-7.strasbourg.iot-lab.info 25
-execute_sender_number_with_disconnection_line strasbourg a8-8.strasbourg.iot-lab.info 26
-execute_sender_number_with_disconnection_line strasbourg a8-9.strasbourg.iot-lab.info 27
-execute_sender_number_with_disconnection_line strasbourg a8-10.strasbourg.iot-lab.info 28
-execute_sender_number_with_disconnection_line strasbourg a8-11.strasbourg.iot-lab.info 29
+# execute_sender_number_with_disconnection_line strasbourg a8-5.strasbourg.iot-lab.info 24
+# execute_sender_number_with_disconnection_line strasbourg a8-6.strasbourg.iot-lab.info 24
+execute_sender_number_with_disconnection_line strasbourg a8-7.strasbourg.iot-lab.info 24
+execute_sender_number_with_disconnection_line strasbourg a8-8.strasbourg.iot-lab.info 25
+sleep 5
+execute_sender_number_with_disconnection_line strasbourg a8-9.strasbourg.iot-lab.info 26
+# execute_sender_number_with_disconnection_line strasbourg a8-10.strasbourg.iot-lab.info 27
+execute_sender_number_with_disconnection_line strasbourg a8-11.strasbourg.iot-lab.info 27
+execute_sender_number_with_disconnection_line strasbourg a8-12.strasbourg.iot-lab.info 28
+execute_sender_number_with_disconnection_line strasbourg a8-13.strasbourg.iot-lab.info 28
 
 
 #./receivingNodeArm

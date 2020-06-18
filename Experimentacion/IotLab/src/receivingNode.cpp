@@ -9,6 +9,10 @@
 #include "emulated_nodes/coordinator_node.h"
 #include "emulated_nodes/worker_node.h"
 
+void compile_map_binary() {
+	system("g++ map_single_task.cpp -std=c++11 -o map_single_task");
+}
+
 std::string begin_handler_for_role_receipt(
 	std::string listener_ip,
 	std::string listener_interface, 
@@ -42,6 +46,8 @@ std::string begin_handler_for_role_receipt(
 		int timeout = 10;
 		bool partitioned_redundancy_mode_enabled = 0;
 		bool threshold_of_execution_mode_enabled = 1;
+
+		compile_map_binary();
 
 		// Antes de arrancar, el coordinator deberia recibir un ack mas de todos los worker para saber que estan todos escuchando como workers
 		// (sino podria terminar enviando la task sin que esten ya en modo worker escuchando)

@@ -1,4 +1,4 @@
-arm-linux-gnueabi-g++ -Wl,--whole-archive -lpthread -Wl,--no-whole-archive -Wno-psabi -std=c++11 -O0 -pthread -static sequential_execution_map_reduce.cpp node_timer.cpp -g -o sequentialMapReduce
+arm-linux-gnueabi-g++ -static sequential_execution_map_reduce.cpp node_timer.cpp -o sequentialMapReduce
 echo "<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<Everything compiled successfully!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>"
 
 rsync -avzhe ssh sequentialMapReduce fosco@saclay.iot-lab.info:/senslab/users/fosco
@@ -33,7 +33,8 @@ ssh fosco@strasbourg.iot-lab.info "rsync -avzhe ssh sequentialMapReduce root@nod
 wait
 
 function execute_sequential_map_reduce {
-	gnome-terminal --tab -- bash -c "ssh -t -oStrictHostKeyChecking=no fosco@${1}.iot-lab.info 'ssh -t root@node-a8-${2}.${1}.iot-lab.info ./sequentialMapReduce 11000; bash '"
+	# gnome-terminal --tab -- bash -c "ssh -t -oStrictHostKeyChecking=no fosco@${1}.iot-lab.info 'ssh -t root@node-a8-${2}.${1}.iot-lab.info ./sequentialMapReduce 11000 verbose; bash '"
+	gnome-terminal --tab -- bash -c "ssh -t -oStrictHostKeyChecking=no fosco@${1}.iot-lab.info 'ssh -t root@node-a8-${2}.${1}.iot-lab.info ./sequentialMapReduce; bash '"
 }
 
 execute_sequential_map_reduce saclay 1

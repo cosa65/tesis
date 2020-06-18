@@ -69,10 +69,14 @@ void CoordinatorNode::start(std::list<long> map_tasks_in_flops, std::list<std::s
 	// Begin listening before sending maps
 	auto map_results_listener_thread = std::async(std::launch::async, [this, map_tasks_in_flops, workers, initial_threshold]() { 
 		std::list<std::future<int>> threads;
+
 		while(true && !(this -> finished.load())) {
 			std::cout << node_timer -> time_log() << "[COORDINATOR] Listening for map result" << std::endl;
 			// Blocking get, actor is blocked until it receives message
 			MessageHelper::MessageData message_data = MessageHelper::listen_for_message(socket_file_descriptor);
+
+			this -> finished_initial_distribution_mutex.lock();
+			this -> finished_initial_distribution_mutex.unlock();
 
 			if (this -> finished.load()) {
 				return;
@@ -220,6 +224,8 @@ void CoordinatorNode::distribute_and_send_maps(std::list<long> map_tasks_in_flop
 		std::cout << std::endl;
 	}
 
+	std::string binary_buffer = get_map_binary();
+
 	for(; maps_it != bundled_up_map_tasks_in_flops.end() && workers_it != workers.end(); ++maps_it, ++workers_it) {
 
 		// Filter out partitions that are empty (this takes place only when there are more workers than maps to execute)
@@ -232,15 +238,17 @@ void CoordinatorNode::distribute_and_send_maps(std::list<long> map_tasks_in_flop
 
 		std::string final_destination_ip = *workers_it;
 
-		std::string task_data = "iterations:" + std::to_string(*maps_it) + ",index:" + std::to_string(current_task_bundle_index);
-		std::string message = task_data + ",destination_ip:" + final_destination_ip;
+		int binary_size = binary_buffer.length();
 
-		std::cout << node_timer -> time_log() << "Preparing to send map task: " << message.c_str() << std::endl;
+		std::string task_data = "iterations:" + std::to_string(*maps_it) + ",index:" + std::to_string(current_task_bundle_index);
+		std::string message = task_data + ",binary:" + binary_buffer + ",destination_ip:" + final_destination_ip;
+
+		std::cout << node_timer -> time_log() << "Preparing to send map task: " << task_data.c_str() << std::endl;
 
 		std::string *message_to_send = new std::string(message);
 		std::string current_step_ip = this -> translator -> next_step_ip_to(final_destination_ip);
 
-		std::async(std::launch::async, [message, current_step_ip]() { MessageHelper::send_message(message, current_step_ip, "eth0"); });
+		auto send_task_thread = std::async(std::launch::async, [message, current_step_ip]() { MessageHelper::send_message(message, current_step_ip, "eth0"); });
 
 		PendingMapTask *current_task_to_send = new PendingMapTask(current_task_bundle_index, task_data);
 		current_task_to_send -> add_new_worker(final_destination_ip);
@@ -275,9 +283,6 @@ int CoordinatorNode::handle_map_result_received(MessageHelper::MessageData messa
 		std::cout << node_timer -> time_log() << "[CONNECTION_INTERFERENCE_MANAGER] blocked message: " << message_data.content << std::endl; 
 		return 1;
 	}
-
-	finished_initial_distribution_mutex.lock();
-	finished_initial_distribution_mutex.unlock();
 
 	auto message_tuple = message_data.unpack_message("map_index:", ",worker:");
 	std::string index_str = std::get<0>(message_tuple), sender = std::get<1>(message_tuple);
@@ -405,6 +410,9 @@ void CoordinatorNode::resend_pending_tasks_on_timeout() {
 bool CoordinatorNode::resend_pending_tasks() {
 	std::cout << node_timer -> time_log() << "Resending pending tasks" << std::endl;
 
+	this -> finished_initial_distribution_mutex.lock();
+	this -> finished_initial_distribution_mutex.unlock();
+
 	// If we failed to capture the lock, then that means a resend operation is already taking place, so we don't need to perform the resend_pending_task again
 	if (!this -> resend_pending_maps_mutex.try_lock()) {
 		std::cout << "Another resend task is currently working so this resend execution will be cancelled" << std::endl;
@@ -438,8 +446,11 @@ bool CoordinatorNode::resend_pending_tasks() {
 
 		std::string idle_worker_id = idle_worker_performance -> get_node_id();
 
+		std::string binary_buffer = get_map_binary();
+		int binary_size = binary_buffer.length();
+
 		std::string task_data = map_task -> task_data;
-		std::string message = task_data + ",destination_ip:" + idle_worker_id;
+		std::string message = task_data + ",binary:" + binary_buffer + ",destination_ip:" + idle_worker_id;
 		map_task -> add_new_worker(idle_worker_id);
 
 		MapIndex map_index = map_task -> map_index;
@@ -530,8 +541,13 @@ void CoordinatorNode::perform_all_workers_performance_update() {
 
 // Returns send time
 double CoordinatorNode::send_benchmark_task_to(std::string worker_id) {
+	std::string binary_buffer = get_map_binary();
+	int binary_size = binary_buffer.length();
+
+	std::cout << "\033[1;31m<DEBUG>Got map binary of size: " << binary_size << "\033[0m" << std::endl;
+
 	std::string task_data = "iterations:100,index:-1";
-	std::string message = task_data + ",destination_ip:" + worker_id;
+	std::string message = task_data + ",binary:" + binary_buffer + ",destination_ip:" + worker_id;
 
 	std::string next_step_ip = translator -> next_step_ip_to(worker_id);
 
@@ -675,4 +691,28 @@ std::map<std::string, WorkerStatistics> CoordinatorNode::listen_for_workers_stat
 	}
 
 	return idle_times_by_worker_ip;
+}
+
+// Copied from https://cboard.cprogramming.com/networking-device-communication/53005-send-recv-binary-files-using-sockets-cplusplus.html
+std::string CoordinatorNode::get_map_binary() {
+	std::string filename = "map_single_task";
+
+	std::ifstream file (filename);
+	// std::ifstream::pos_type pos = file.tellg();     			//retrieve get pointer position
+	// int size = pos;     //file size
+	// char *buffer = new char[size];     				//initialize the buffer
+	// file.seekg (0, std::ios::beg);     	//position get pointer at the begining of the file
+	// file.read(buffer, size);     		//read file to buffer
+
+	std::ostringstream binary_str;
+	std::string buffer;
+
+	while (getline(file, buffer)) {
+		binary_str << buffer;
+		binary_str << std::endl;
+	}
+
+	file.close();     					//close file
+
+	return binary_str.str();
 }

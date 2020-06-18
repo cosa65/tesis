@@ -26,10 +26,13 @@ void WorkerNode::start(int socket_file_descriptor) {
 			send_local_worker_statistics();
 
 			this -> ended = true;
-
 			std::cout << "Worker finished running!" << std::endl;
+
+			system("rm map_task");
+
 			return;
 		}
+
 
 		// If the node is disconnected during this time, then we can't receive the message (so we imitate this behaviour by ignoring it)
 		if (!(this -> connection_interference_manager -> can_receive_message(message_data))) {
@@ -39,23 +42,43 @@ void WorkerNode::start(int socket_file_descriptor) {
 
 		std::string destination_ip = message_data.get_final_destination();
 		// If this node is not the intended recipient of the message, then just forward the message
-		if (destination_ip != this -> worker_ip) {
+
+		int cmp = strcmp(destination_ip.c_str(), this -> worker_ip.c_str());
+
+		if (cmp != 0) {
 			std::string next_step_ip = this -> translator -> next_step_ip_to(destination_ip);
 
-			std::cout << node_timer -> time_log() << "Received message meant for another node, forwarding over to next step: " << next_step_ip << ".\n\t\t Message is: " << message_data.content << std::endl;
+			std::cout << node_timer -> time_log() << "Received message meant for another node, forwarding over to next step: " << next_step_ip << ".\n\t\t Messages final destination is: " << message_data.get_final_destination() << std::endl;
 
 			MessageHelper::send_message(message_data.content, next_step_ip, "eth0");
 
 			continue;
 		} else {
-			std::cout << "Received message for me: " << message_data.content << std::endl;
-			auto message_tuple = message_data.unpack_message("iterations:", ",index:");
+			std::ofstream file("received_message");
+			file << message_data.content;
+			file.close();
+
+			auto message_tuple = message_data.unpack_message("iterations:", ",index:", ",binary:");
 			std::string iterations_str = std::get<0>(message_tuple), map_index = std::get<1>(message_tuple);
+
+			std::string binary_content = std::get<2>(message_tuple);
+
+
 			long iterations = std::stol(iterations_str);
 
-			std::future<void> map_handle_thread = std::async(std::launch::async, [this, iterations, map_index]() { 
+			std::future<void> map_handle_thread = std::async(std::launch::async, [this, iterations, map_index, binary_content]() { 
+
 				std::cout << this -> node_timer -> time_log() << "Received map task. iterations: " << iterations << ", map_index: " << map_index << std::endl;
 				
+				this -> running_operation_mutex.lock();
+
+				if (!file_exists("map_task")) {
+					std::cout << "Creating binary" << std::endl;
+					create_local_binary_from(binary_content);
+				} else {
+					std::cout << "<DEBUG> Binary already exists" << std::endl;
+				}
+
 				int op_result = this -> handle_map_task(iterations, map_index);
 			});
 
@@ -91,21 +114,27 @@ int WorkerNode::run_operation(const long iterations) {
 	}
 	this -> operation_status_mutex.unlock();
 
+	// this -> running_operation_mutex.lock();
+
 	std::cout << "My performance value is: " << this -> performance << std::endl;
 
-	long a;
+	std::cout << this -> node_timer -> time_log() << "----------------------------RUNNING OPERATION----------------------------" << "iterations:" << iterations << std::endl;
 
-	std::cout << this -> node_timer -> time_log() << "----------------------------RUNNING OPERATION----------------------------" << std::endl;
+	std::string cmd_string = "./map_task " + std::to_string(iterations) + " " + std::to_string(this -> performance);
 
-	for (int z = 0; z < this -> performance; z++) {
-		for (int j = 0; j < 10000; j++) {
-			for (int i = 0; i < iterations; i++) {
-				a = i * 20 + 100;
-			}
-		}
-	}
+	std::cout << "<DEBUG> cmd_string now is: " << cmd_string << std::endl;
 
-	std::cout << this -> node_timer -> time_log() << "____________________________FINISHED OPERATION___________________________" << std::endl;
+	system(cmd_string.c_str());
+
+	// int pid = execl("./map_task", std::to_string(iterations).c_str(), std::to_string(this -> performance), (char *)NULL);
+	// std::cout << "At pid: " << pid << std::endl;
+	// int status;
+	// waitpid(pid, &status, 0);
+
+	this -> running_operation_mutex.unlock();
+
+	std::cout << this -> node_timer -> time_log() << "____________________________FINISHED OPERATION___________________________" << "iterations:" << iterations << std::endl;
+	// std::cout << "status: " << status << std::endl;
 
 	this -> operation_status_mutex.lock();
 	{
@@ -118,7 +147,9 @@ int WorkerNode::run_operation(const long iterations) {
 	}
 	this -> operation_status_mutex.unlock();
 
-	return a;
+	// this -> running_operation_mutex.unlock();
+
+	return 1;
 }
 
 void WorkerNode::send_local_worker_statistics() {
@@ -141,4 +172,24 @@ void WorkerNode::send_local_worker_statistics() {
 	std::string message = ss.str();
 
 	MessageHelper::send_message(message, this -> ip_to_coordinator, "eth0", 8081);
+}
+
+void WorkerNode::create_local_binary_from(std::string binary_content) {
+	std::ofstream file("map_task");
+	file << binary_content;
+	file.close();
+
+	chmod("map_task", 755);
+}
+
+bool WorkerNode::file_exists(std::string filepath) {
+	std::ifstream fileStream;
+	fileStream.open("logs.txt");
+
+	if (fileStream) {
+		fileStream.close();
+		return true;
+	} else {
+		return false;
+	}
 }

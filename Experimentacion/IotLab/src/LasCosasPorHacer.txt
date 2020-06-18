@@ -35,18 +35,26 @@
 
 - Para interferencias podria hacer que linea con mucha interferencia pueda recibir/enviar mensajes con % de probabilidad segun su calidad de conexion. <Por ahora no>
 
-	
+
 
 - Cuanto tarda una iteracion en un A8.
 
 - <LISTO PARA VERSION PRE OTRAS MEJORES> Cuanto tardan 11000 iteraciones en un unico nodo (walltime). (corriendo sin latencia este nodo). [Alrededor de 294130, vs 40674 en el distribuido con 30 nodos).
 
-- Mandar tarea testigo ad hoc a todos los nodos al principio para ganar info sobre su performance, asumimos que la corre de vez en cuando. -cada cuanto la manda depende de la estabilidad performance de respuestas.
+- <LISTO> Mandar tarea testigo ad hoc a todos los nodos al principio para ganar info sobre su performance, asumimos que la corre de vez en cuando. -cada cuanto la manda depende de la estabilidad performance de respuestas.
 
-- Enviar binario con parametro iteraciones.
+- Enviar binario con parametro iteraciones. Pesa 2 mb poruqe tengo que compilar usando static.
+	Alternativa simple: Llenar de basura el mensaje que se envia hasta llegar a unos cuantos Kb que es lo que nos importa.
+	Alternativa elegida por ahora: Compilar en el mismo programa antes de empezar el experimento.
+
+		PREGUNTA, pensamos cada tarea indivudal como un binario separado, entonces si agrupo 10 tareas para un nodo tengo que agrupar 10 binarios y mandarselos uno por uno?
+		Dado que es un map en realidad se podria ver como el mismo binario con distintos parametros, para evitar peso
+
+		QUEDA: Mando un mensaje por cada tarea
+
 
 - Identificar nodos, para filtrar los malos.
 
-- Nodos apagados, no desconectados.
+- <FALTA> Nodos apagados, no desconectados.
 
-- Criticidad (para despues).
+- <FALTA> Criticidad (para despues).

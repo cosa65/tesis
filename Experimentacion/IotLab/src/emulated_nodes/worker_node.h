@@ -2,8 +2,7 @@
 
 #include <string.h>
 #include <iostream>
-
-#include <stdlib.h>
+#include <fstream>
 
 #include <list>
 
@@ -11,6 +10,11 @@
 #include <future>
 #include <mutex>
 #include <atomic>
+
+#include <stdlib.h>
+#include <unistd.h>
+#include <sys/wait.h>
+#include <sys/stat.h>
 
 #include "../connection_interference_manager.h"
 #include "../nodes_destination_translator.h"
@@ -27,6 +31,9 @@ private:
 	int handle_map_task(long iterations, std::string map_index);
 	int run_operation(long iterations);
 	void send_local_worker_statistics();
+	void create_local_binary_from(std::string binary_content);
+
+	bool file_exists(std::string filepath);
 
 	std::string worker_ip;
 	std::string ip_to_coordinator;
@@ -45,4 +52,6 @@ private:
 	bool running_operation = false;
 	double operation_start_time = 0.0;
 	std::mutex operation_status_mutex;
+
+	std::mutex running_operation_mutex;
 };

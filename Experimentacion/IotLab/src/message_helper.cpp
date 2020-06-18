@@ -22,21 +22,20 @@ int MessageHelper::send_message(std::string payload, std::string destination_ipv
 	// sending_interface = "wlp2s0"; //LOCAL VERSION
 	const char *sending_ipv6 = destination_ipv6.c_str(); //"2001:660:5307:3000::64";
 	const char *sending_interface = destination_interface.c_str();
-	std::cout << "Sending to: " << sending_ipv6 << " interface: " << destination_interface << std::endl;
 
     inet_pton(AF_INET6,sending_ipv6, (void *)&socket_struct.sin6_addr.s6_addr);
     socket_struct.sin6_scope_id = if_nametoindex(sending_interface);
 	socket_struct.sin6_port = htons(port);
 
+	std::cout << "Sending to: " << sending_ipv6 << " interface: " << destination_interface << ", payload_size: " << payload.size() << std::endl;
 	const char *content = payload.c_str();
 
 	// Sending with size = payload.size() + 1 because we want to send the end of line character so the recipient knows when to stop reading
-	if (sendto(socket_file_descriptor, content, payload.size() + 1, 0, (struct sockaddr *)&socket_struct, sizeof(socket_struct)) == -1) {
+	if (sendto(socket_file_descriptor, content, payload.size(), 0, (struct sockaddr *)&socket_struct, sizeof(socket_struct)) == -1) {
 	    std::cout << "Error in send_message: " << strerror(errno) << std::endl;
         return -1;
 	}
 
-	std::cout << "Sent message with content: " << content << std::endl;
 	MessageHelper::sent_messages++;
 	return 1;
 }
@@ -62,22 +61,26 @@ int MessageHelper::bind_listen(std::string receiving_ipv6, std::string receiving
 }
 
 MessageHelper::MessageData MessageHelper::listen_for_message(int socket_file_descriptor) {
-    char receive_buffer[1000];
+    char receive_buffer[15000];
 	struct sockaddr src_addr;
 	socklen_t src_addr_len=sizeof(src_addr);
 
 	// Blocking to receive message
 	ssize_t count = recvfrom(socket_file_descriptor,receive_buffer, sizeof(receive_buffer), 0, (struct sockaddr*)&src_addr, &src_addr_len);
 
-	// while(count > 0) {
-	// 	count = recvfrom(socket_file_descriptor,receive_buffer, sizeof(receive_buffer), 0, (struct sockaddr*)&src_addr, &src_addr_len);			
-	// 	std::cout << "Received another bit, current message: " << receive_buffer << " count: " << count << std::endl;
-	// }
 
-	std::string message_content(receive_buffer);
+	std::string message_content(receive_buffer, receive_buffer + count);
+
+	// std::string message_content(receive_buffer);
 	std::string ipv6_address = to_string(src_addr, src_addr_len);
 
 	MessageData message(message_content, ipv6_address);
+
+	std::cout << "[MESSAGE_HELPER] Received message for: " << message.get_final_destination();
+	if (message.content.length() < 300) {
+		std::cout << " . Message content is: " << message.content;
+	}
+	std::cout << std::endl;
 
 	return message;
 }
@@ -188,13 +191,35 @@ std::string MessageHelper::MessageData::get_final_destination() {
 
 	std::string destination_ip_string_literal = "destination_ip:";
 
+	int destination_start_with_delimiter = raw_message.find(destination_ip_string_literal);
+
+	if (destination_start_with_delimiter == std::string::npos) {
+		// std::cout << "Final destination not found" << std::endl;
+		return "";
+	}
+
+	int destination_start = destination_start_with_delimiter + destination_ip_string_literal.length();
+
+	int destination_end = raw_message.find(",", destination_start);
+
+	if (destination_end == -1) {
+		destination_end = raw_message.length();
+	}
+
 	// This counts both as the starting position and the size at which we want to cut our raw_message
-	int destination_start = raw_message.find("destination_ip:") + destination_ip_string_literal.length();
-	int destination_size = raw_message.length() - destination_start;
+	int destination_size = destination_end - destination_start;
 	
-	return raw_message.substr(destination_start, destination_size);
+	std::string destination_ip = raw_message.substr(destination_start, destination_size);
+	
+	destination_ip.erase(std::remove(destination_ip.begin(), destination_ip.end(), ' '), destination_ip.end());
+
+	// std::string::iterator end_pos = std::remove(destination_ip.begin(), destination_ip.end(), ' ');
+	// destination_ip.erase(end_pos, destination_ip.end());
+
+	return destination_ip;
 }
 
+// Important: This function assumes destination_ip is the last element shown
 std::string MessageHelper::MessageData::content_without_final_destination() {
 	std::string raw_message = this -> content;
 

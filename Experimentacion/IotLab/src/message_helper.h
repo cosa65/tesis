@@ -1,6 +1,10 @@
 #pragma once
 
 #include <iostream>
+#include <algorithm>
+#include <string>
+#include <cctype>
+
 #include <sys/socket.h>
 #include <net/if.h>
 #include <arpa/inet.h>

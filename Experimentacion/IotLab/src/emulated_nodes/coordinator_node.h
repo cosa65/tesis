@@ -77,6 +77,8 @@ private:
 	void finish_workers_and_gather_statistics();
 	std::map<std::string, WorkerStatistics> listen_for_workers_statistics_messages(int workers_size);
 
+	std::string get_map_binary();
+
 	static std::list<PendingMapTask*> pending_maps;
 
 	static std::list<std::string> workers;
