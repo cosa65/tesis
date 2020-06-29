@@ -248,7 +248,9 @@ void CoordinatorNode::distribute_and_send_maps(std::list<long> map_tasks_in_flop
 		std::string *message_to_send = new std::string(message);
 		std::string current_step_ip = this -> translator -> next_step_ip_to(final_destination_ip);
 
-		auto send_task_thread = std::async(std::launch::async, [message, current_step_ip]() { MessageHelper::send_message(message, current_step_ip, "eth0"); });
+		int port = final_destination_ip == current_step_ip ? 8080 : 8082;
+
+		auto send_task_thread = std::async(std::launch::async, [message, current_step_ip, port]() { MessageHelper::send_message(message, current_step_ip, "eth0", port); });
 
 		PendingMapTask *current_task_to_send = new PendingMapTask(current_task_bundle_index, task_data);
 		current_task_to_send -> add_new_worker(final_destination_ip);
@@ -459,7 +461,9 @@ bool CoordinatorNode::resend_pending_tasks() {
 
 		std::string next_step_ip = this -> translator -> next_step_ip_to(idle_worker_id);
 
-		MessageHelper::send_message(message, next_step_ip, "eth0");
+		int port = idle_worker_id == next_step_ip ? 8080 : 8082;
+
+		MessageHelper::send_message(message, next_step_ip, "eth0", port);
 
 		pending_maps_it++;
 	}
@@ -553,7 +557,9 @@ double CoordinatorNode::send_benchmark_task_to(std::string worker_id) {
 
 	double send_message = node_timer -> current_time_in_ms();
 
-	MessageHelper::send_message(message, next_step_ip, "eth0");
+	int port = worker_id == next_step_ip ? 8080 : 8082;
+
+	MessageHelper::send_message(message, next_step_ip, "eth0", port);
 
 	return send_message;
 }
@@ -621,7 +627,7 @@ void CoordinatorNode::finish_workers_and_gather_statistics() {
 		threads.push_back(
 			std::async(
 				std::launch::async,
-				[worker_ip]() { return MessageHelper::send_message("end", worker_ip, "eth0", 8080); }
+				[worker_ip]() { return MessageHelper::send_message("end", worker_ip, "eth0", 8082); }
 			)
 		);
 	}

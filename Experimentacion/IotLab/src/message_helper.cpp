@@ -27,11 +27,11 @@ int MessageHelper::send_message(std::string payload, std::string destination_ipv
     socket_struct.sin6_scope_id = if_nametoindex(sending_interface);
 	socket_struct.sin6_port = htons(port);
 
-	std::cout << "Sending to: " << sending_ipv6 << " interface: " << destination_interface << ", payload_size: " << payload.size() << std::endl;
+	std::cout << "Sending to: " << sending_ipv6 << " port: " << port << ", payload_size: " << payload.size() << std::endl;
 	const char *content = payload.c_str();
 
 	// Sending with size = payload.size() + 1 because we want to send the end of line character so the recipient knows when to stop reading
-	if (sendto(socket_file_descriptor, content, payload.size(), 0, (struct sockaddr *)&socket_struct, sizeof(socket_struct)) == -1) {
+	if (sendto(socket_file_descriptor, content, payload.size() + 1, 0, (struct sockaddr *)&socket_struct, sizeof(socket_struct)) == -1) {
 	    std::cout << "Error in send_message: " << strerror(errno) << std::endl;
         return -1;
 	}
@@ -61,7 +61,7 @@ int MessageHelper::bind_listen(std::string receiving_ipv6, std::string receiving
 }
 
 MessageHelper::MessageData MessageHelper::listen_for_message(int socket_file_descriptor) {
-    char receive_buffer[15000];
+    char receive_buffer[18000];
 	struct sockaddr src_addr;
 	socklen_t src_addr_len=sizeof(src_addr);
 
@@ -69,7 +69,7 @@ MessageHelper::MessageData MessageHelper::listen_for_message(int socket_file_des
 	ssize_t count = recvfrom(socket_file_descriptor,receive_buffer, sizeof(receive_buffer), 0, (struct sockaddr*)&src_addr, &src_addr_len);
 
 
-	std::string message_content(receive_buffer, receive_buffer + count);
+	std::string message_content(receive_buffer, receive_buffer + (count - 1));
 
 	// std::string message_content(receive_buffer);
 	std::string ipv6_address = to_string(src_addr, src_addr_len);

@@ -13,6 +13,12 @@ const char *network_organizer_ipv6 = "2001:660:3207:400::1";
 const char *network_organizer_interface = "eth0";
 
 int main(int argc, char *argv[]) {
+	std::cout << "Args: ";
+	for (int i = 0; i < argc; i++) {
+		std::cout << argv[i] << " ";
+	}
+	std::cout << std::endl;
+
 	std::string host_ip = argv[1];
 	int node_line_number = std::stoi(argv[2]);
 
@@ -31,6 +37,7 @@ int main(int argc, char *argv[]) {
 	MessageHelper::send_message(content, network_organizer_ipv6, network_organizer_interface);
 
 	int socket_file_descriptor = MessageHelper::bind_listen(host_ip, "eth0", 8080);
+
 	MessageHelper::MessageData message_data = MessageHelper::listen_for_message(socket_file_descriptor);
 
 	std::cout << "Received message: " << message_data.content << std::endl;
@@ -46,7 +53,10 @@ int main(int argc, char *argv[]) {
 	if (role == "worker") {
 		// ip is the address to which to send the responses to coordinator
 		WorkerNode worker(ip, host_ip, performance, connection_interference_manager, translator, log_keeper, node_timer);
-		worker.start(socket_file_descriptor);
+
+		int tasks_resend_descriptor = MessageHelper::bind_listen(host_ip, "eth0", 8082);
+
+		worker.start(socket_file_descriptor, tasks_resend_descriptor);
 
 	} else if (role == "coordinator") {
 		// ip is a list of ips separated by space representing all workers
