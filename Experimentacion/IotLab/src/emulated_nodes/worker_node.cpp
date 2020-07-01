@@ -1,10 +1,13 @@
 #include "worker_node.h"
 
-WorkerNode::WorkerNode(std::string ip_to_coordinator, std::string worker_ip, int performance, ConnectionInterferenceManager *connection_interference_manager, NodesDestinationTranslator *translator, LogKeeper *log_keeper, NodeTimer *node_timer):	
+#define SHUTDOWN_DURING_EXECUTION -1
+#define FINISHED_EXECUTION_WITHOUT_PROBLEMS 1
+
+WorkerNode::WorkerNode(std::string ip_to_coordinator, std::string worker_ip, int performance, NodeShutdownManager *node_shutdown_manager, NodesDestinationTranslator *translator, LogKeeper *log_keeper, NodeTimer *node_timer):	
 	ip_to_coordinator(ip_to_coordinator),
 	worker_ip(worker_ip),
 	performance(performance),
-	connection_interference_manager(connection_interference_manager),
+	node_shutdown_manager(node_shutdown_manager),
 	translator(translator),
 	log_keeper(log_keeper),
 	node_timer(node_timer)
@@ -15,7 +18,7 @@ void WorkerNode::start(int socket_file_descriptor, int tasks_resend_socket_file_
 	this -> ended = false;
 	
 	this -> node_timer -> start();
-	this -> connection_interference_manager -> start();
+	this -> node_shutdown_manager -> start();
 
 	auto resend_listener_future = std::async(
 		std::launch::async,
@@ -26,7 +29,8 @@ void WorkerNode::start(int socket_file_descriptor, int tasks_resend_socket_file_
 
 	while(true) {
 		std::cout << node_timer -> time_log() << "Listening for task" << std::endl;
-		MessageHelper::MessageData message_data = MessageHelper::listen_for_message(socket_file_descriptor);
+		MessageHelper::MessageData *message_data_ptr = MessageHelper::listen_for_message(socket_file_descriptor);
+		MessageHelper::MessageData message_data = *message_data_ptr;
 
 		if (message_data.content == "end") {
 			std::cout << "Ending owned tasks thread" << std::endl;
@@ -34,8 +38,8 @@ void WorkerNode::start(int socket_file_descriptor, int tasks_resend_socket_file_
 		}
 
 		// If the node is disconnected during this time, then we can't receive the message (so we imitate this behaviour by ignoring it)
-		if (!(this -> connection_interference_manager -> can_receive_message(message_data))) {
-			std::cout << node_timer -> time_log() << "[CONNECTION_INTERFERENCE_MANAGER] blocked message: " << message_data.content << std::endl; 
+		if (!(this -> node_shutdown_manager -> can_receive_message(message_data))) {
+			std::cout << node_timer -> time_log() << "[NODE_SHUTDOWN_MANAGER] blocked message: " << message_data.content << std::endl; 
 			continue;
 		}
 
@@ -75,7 +79,8 @@ void WorkerNode::start(int socket_file_descriptor, int tasks_resend_socket_file_
 
 void WorkerNode::tasks_forwarding_listener(int tasks_resend_socket_file_descriptor) {
 	while(true) {
-		MessageHelper::MessageData message_data = MessageHelper::listen_for_message(tasks_resend_socket_file_descriptor);
+		MessageHelper::MessageData *message_data_ptr = MessageHelper::listen_for_message(tasks_resend_socket_file_descriptor);
+		MessageHelper::MessageData message_data = *message_data_ptr;
 
 		// Not checking if forward because this end is off experiment (actual workers for no are assumed never to end on their own)
 		if (message_data.content == "end") {
@@ -89,6 +94,12 @@ void WorkerNode::tasks_forwarding_listener(int tasks_resend_socket_file_descript
 
 			return;
 		} else {
+			// If the node is disconnected during this time, then we can't receive the message (so we imitate this behaviour by ignoring it)
+			if (!(this -> node_shutdown_manager -> can_receive_message(message_data))) {
+				std::cout << node_timer -> time_log() << "[NODE_SHUTDOWN_MANAGER] blocked message: " << message_data.content << std::endl; 
+				continue;
+			}
+
 			std::string destination_ip = message_data.get_final_destination();
 
 			std::string next_step_ip = this -> translator -> next_step_ip_to(destination_ip);
@@ -105,6 +116,11 @@ void WorkerNode::tasks_forwarding_listener(int tasks_resend_socket_file_descript
 
 int WorkerNode::handle_map_task(long iterations, std::string map_index, std::string binary_name) {
 	int op_result = run_operation(iterations, binary_name);
+
+	if (op_result == SHUTDOWN_DURING_EXECUTION) {
+		std::cout << "\033[1;31mNode was shut down during at least part of the execution, so task result will be dumped and nothing sent\033[0m" << std::endl;
+		return op_result;
+	}
 
 	if (this -> ended.load()) {
 		return op_result;
@@ -149,7 +165,7 @@ int WorkerNode::run_operation(const long iterations, std::string binary_name) {
 	std::cout << "cmd_string: " << cmd_char << std::endl;	
 
 	std::cout << this -> node_timer -> time_log() << "____________________________FINISHED OPERATION___________________________" << "iterations:" << iterations << std::endl;
-	std::cout << "ret is: " << ret << std::endl;
+	std::cout << "execution value of task is: " << ret << std::endl;
 
 	this -> operation_status_mutex.lock();
 	{
@@ -159,12 +175,19 @@ int WorkerNode::run_operation(const long iterations, std::string binary_name) {
 
 		this -> total_execution_time += operation_execution_time;
 		this -> running_operation = false;
+
+		if (this -> node_shutdown_manager -> was_off_during(this -> operation_start_time, operation_end_time)) {
+			this -> operation_status_mutex.unlock();
+
+			return SHUTDOWN_DURING_EXECUTION;
+		}
 	}
+
 	this -> operation_status_mutex.unlock();
 
 	// this -> running_operation_mutex.unlock();
 
-	return 1;
+	return FINISHED_EXECUTION_WITHOUT_PROBLEMS;
 }
 
 void WorkerNode::send_local_worker_statistics() {

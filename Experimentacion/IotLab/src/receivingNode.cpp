@@ -4,7 +4,7 @@
 #include "log_keeper.h"
 #include "network_installer.h"
 #include "nodes_destination_translator.h"
-#include "connection_interference_manager.h"
+#include "node_shutdown_manager.h"
 #include "node_timer.h"
 #include "emulated_nodes/coordinator_node.h"
 #include "emulated_nodes/worker_node.h"
@@ -17,12 +17,13 @@ std::string begin_handler_for_role_receipt(
 	std::string listener_ip,
 	std::string listener_interface, 
 	int socket_file_descriptor, 
-	ConnectionInterferenceManager *connection_interference_manager, 
+	NodeShutdownManager *node_shutdown_manager, 
 	NodesDestinationTranslator *translator,
 	LogKeeper *log_keeper,
 	NodeTimer *node_timer)
 {
-	MessageHelper::MessageData message_data = MessageHelper::listen_for_message(socket_file_descriptor);
+	MessageHelper::MessageData *message_data_ptr = MessageHelper::listen_for_message(socket_file_descriptor);
+	MessageHelper::MessageData message_data = *message_data_ptr;
 
 	std::cout << "Received message: " << message_data.content << std::endl;
 
@@ -38,7 +39,7 @@ std::string begin_handler_for_role_receipt(
 		// ip is a list of ips separated by space representing all workers
 		std::list<std::string> worker_ips = MessageHelper::split_by_spaces(ip);
 		
-		CoordinatorNode coordinator(socket_file_descriptor, listener_ip, connection_interference_manager, translator, log_keeper, node_timer);
+		CoordinatorNode coordinator(socket_file_descriptor, listener_ip, node_shutdown_manager, translator, log_keeper, node_timer);
 		std::cout << "I'm the coordinator" << std::endl;
 
 		std::list<long> map_tasks_in_flops = {600,200,300,400,500,600,700,800,900,100,110,120,130,140,150,100,110,120,130,140,150,100,110,120,130,140,150,100,110,120,130,140,150,100,110,120,130,140,150,100,110,120,130,140,150,100,110,120,130,140,150,100,110,120,130,140,150};
@@ -83,8 +84,8 @@ int main(int argc, char *argv[]) {
 
 	NodeTimer *node_timer = new NodeTimer();
 	LogKeeper *log_keeper = new LogKeeper(node_timer);
-	ConnectionInterferenceManager *connection_interference_manager = new ConnectionInterferenceManager(node_timer);
-	connection_interference_manager -> load_disconnection_intervals(disconnections_and_topology_line_number);
+	NodeShutdownManager *node_shutdown_manager = new NodeShutdownManager(node_timer);
+	node_shutdown_manager -> load_disconnection_intervals(disconnections_and_topology_line_number);
 
 	std::string network_coordinator_ipv6 = "2001:660:3207:400::1";
 	std::string network_coordinator_interface = "eth0";
@@ -105,7 +106,7 @@ int main(int argc, char *argv[]) {
 		network_coordinator_ipv6, 
 		network_coordinator_interface, 
 		socket_file_descriptor, 
-		connection_interference_manager, 
+		node_shutdown_manager, 
 		translator,
 		log_keeper, 
 		node_timer

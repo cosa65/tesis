@@ -7,15 +7,16 @@
 #include "node_timer.h"
 #include "message_helper.h"
 
-class ConnectionInterferenceManager {
+class NodeShutdownManager {
 public:
-	ConnectionInterferenceManager(NodeTimer *node_timer);
+	NodeShutdownManager(NodeTimer *node_timer);
 	void load_disconnection_intervals(std::list< std::tuple<double, double> > disconnection_intervals);
 	void load_disconnection_intervals(int disconnections_line_number);
 	
 	void start();
 	// Checks against the history of connections to devide whether message can be received or not
 	bool can_receive_message(MessageHelper::MessageData received_message);
+	bool was_off_during(double start_time, double end_time);
 	bool is_connected_now(double time_point);
 
 private:
