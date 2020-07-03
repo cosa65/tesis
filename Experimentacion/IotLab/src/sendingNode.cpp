@@ -4,7 +4,7 @@
 #include "node_timer.h"
 #include "log_keeper.h"
 #include "message_helper.h"
-#include "connection_interference_manager.h"
+#include "node_shutdown_manager.h"
 #include "emulated_nodes/coordinator_node.h"
 #include "emulated_nodes/worker_node.h"
 
@@ -27,8 +27,8 @@ int main(int argc, char *argv[]) {
 
 	NodeTimer *node_timer = new NodeTimer();
 	LogKeeper *log_keeper = new LogKeeper(node_timer);
-	ConnectionInterferenceManager *connection_interference_manager = new ConnectionInterferenceManager(node_timer);
-	connection_interference_manager -> load_disconnection_intervals(node_line_number);
+	NodeShutdownManager *node_shutdown_manager = new NodeShutdownManager(node_timer);
+	node_shutdown_manager -> load_disconnection_intervals(node_line_number);
 
 	std::string content = "ip:" + host_ip + ",node_line_number:" + std::to_string(node_line_number);
 
@@ -38,7 +38,8 @@ int main(int argc, char *argv[]) {
 
 	int socket_file_descriptor = MessageHelper::bind_listen(host_ip, "eth0", 8080);
 
-	MessageHelper::MessageData message_data = MessageHelper::listen_for_message(socket_file_descriptor);
+	MessageHelper::MessageData *message_data_ptr = MessageHelper::listen_for_message(socket_file_descriptor);
+	MessageHelper::MessageData message_data = *message_data_ptr;
 
 	std::cout << "Received message: " << message_data.content << std::endl;
 
@@ -52,7 +53,7 @@ int main(int argc, char *argv[]) {
 
 	if (role == "worker") {
 		// ip is the address to which to send the responses to coordinator
-		WorkerNode worker(ip, host_ip, performance, connection_interference_manager, translator, log_keeper, node_timer);
+		WorkerNode worker(ip, host_ip, performance, node_shutdown_manager, translator, log_keeper, node_timer);
 
 		int tasks_resend_descriptor = MessageHelper::bind_listen(host_ip, "eth0", 8082);
 
@@ -62,7 +63,7 @@ int main(int argc, char *argv[]) {
 		// ip is a list of ips separated by space representing all workers
 		std::list<std::string> worker_ips = MessageHelper::split_by_spaces(ip);
 		
-		CoordinatorNode coordinator(socket_file_descriptor, host_ip, connection_interference_manager, translator, log_keeper, node_timer);
+		CoordinatorNode coordinator(socket_file_descriptor, host_ip, node_shutdown_manager, translator, log_keeper, node_timer);
 
 		std::cout << "ERROR Yo no puedo ser coordinator todavia" << ip << std::endl;
 		// coordinator.start()

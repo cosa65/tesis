@@ -18,7 +18,7 @@
 #include <unistd.h>
 
 #include "../log_keeper.h"
-#include "../connection_interference_manager.h"
+#include "../node_shutdown_manager.h"
 #include "../nodes_destination_translator.h"
 #include "../message_helper.h"
 
@@ -35,7 +35,7 @@ typedef double TimeSpan;
 
 class CoordinatorNode {
 public:
-	CoordinatorNode(int socket_file_descriptor, std::string coordinator_ip, ConnectionInterferenceManager *connection_interference_manager, NodesDestinationTranslator *translator, LogKeeper *log_keeper, NodeTimer *node_timer);
+	CoordinatorNode(int socket_file_descriptor, std::string coordinator_ip, NodeShutdownManager *node_shutdown_manager, NodesDestinationTranslator *translator, LogKeeper *log_keeper, NodeTimer *node_timer);
 
 	void start(
 		std::list<long> map_tasks_in_flops,
@@ -55,7 +55,7 @@ private:
 		}
 	};
 
-	void distribute_and_send_maps(std::list<long> map_tasks_in_flops, std::list<std::string> workers, int initial_threshold);
+	void distribute_and_send_maps(std::list<long> map_tasks_in_flops, int initial_threshold);
 
 	int handle_map_result_received(MessageHelper::MessageData message_data);
 
@@ -64,15 +64,16 @@ private:
 	void resend_pending_tasks_on_timeout();
 	bool resend_pending_tasks();
 	void save_logs();
-	void update_nodes_state(PendingMapTask *map_task, std::string worker_id);
+	void set_node_as_idle(std::string worker_id);
 
-	void perform_all_workers_performance_update();
+	void send_benchmark_test_to_all_nodes();
 
 	// Returns send time
 	double send_benchmark_task_to(std::string worker_id);
 	void gather_all_workers_performance();
-	void listen_for_benchmark_tasks_and_update_performance(std::map<std::string, double> *send_times);
-	// void set_nodes_performance_history(PendingMapTask *map_task, std::string worker_id);
+	void listen_for_benchmark_tasks_and_update_performance();
+
+	void update_performance(MessageHelper::MessageData message_data);
 
 	void finish_workers_and_gather_statistics();
 	std::map<std::string, WorkerStatistics> listen_for_workers_statistics_messages(int workers_size);
@@ -101,35 +102,29 @@ private:
 	// This initial state is saved for logging purposes (since above threshold flag is eventually disabled during execution)
 	static bool initial_threshold_of_execution_mode_enabled;
 
-	// static simgrid::s4u::MutexPtr resending_map_lock;
-	// static simgrid::s4u::MutexPtr workers_and_data_update_lock; 	
-
-	// static simgrid::s4u::ActorPtr resend_on_timeout_actor;
-
 	static double *map_reduce_start_point;
 
 	// To avoid racing conditions on maps handler before finishing with initial distribution
-	// Stops all map handler processing until finished sending initial maps
 	std::mutex finished_initial_distribution_mutex;
-
-	std::mutex workers_and_data_update_mutex;
-
+	std::mutex workers_data_access_mutex;
 	std::mutex resend_pending_maps_mutex;
-
 	// Locks main thread so that all stored threads aren't lost when main thread exits
 	std::mutex finished_execution_mutex;
-	std::atomic<bool> finished;
-
-
 	std::mutex ready_to_receive_statistics_messages_mutex;
+	// Stops map reduce from being sent until the initial benchmark has taken place (gathering information from as many nodes as possible)
+	std::mutex initial_benchmark_mutex;
 
 	int socket_file_descriptor;
 	std::string coordinator_ip;
 
 	std::chrono::system_clock::time_point timeout_resend_time_point;
+
+	std::atomic<bool> finished;
 	std::atomic<bool> timeout_has_been_reset;
 
-	ConnectionInterferenceManager *connection_interference_manager;
+	std::map<std::string, double> benchmark_tasks_send_times;
+
+	NodeShutdownManager *node_shutdown_manager;
 	NodesDestinationTranslator *translator;
 	NodeTimer *node_timer;
 	LogKeeper *log_keeper;

@@ -29,6 +29,8 @@ public:
 		std::tuple<std::string, std::string, std::string, std::string> unpack_message(std::string first_separator, std::string second_separator, std::string third_separator, std::string fourth_separator);
 		std::string get_final_destination();
 		std::string content_without_final_destination();
+		bool is_benchmark_task();
+		std::string get_value_for(std::string key);
 
 		std::string content;
 		std::string sender_ipv6_address;
@@ -40,7 +42,12 @@ public:
 	static int send_message(std::string payload, std::string destination_ipv6, std::string destination_interface, int port);
 
 	static int bind_listen(std::string receiving_ipv6, std::string receiving_interface, int port);
-	static MessageData listen_for_message(int socket_file_descriptor);
+
+	// Listen forever
+	static MessageData *listen_for_message(int socket_file_descriptor);
+	// Listen with timeout
+	static MessageData *listen_for_message(int socket_file_descriptor, int timeout_in_seconds);
+	
 	// map payload shape is "flops:%s;map_index:%s"
 	static std::tuple<std::string, std::string> unpack_task_payload(std::string payload);
 
@@ -51,7 +58,8 @@ public:
 	static int get_sent_messages();
 
 private:
+	static int socket_with_receive_timeout(int socket_file_descriptor, int seconds);
 	static std::string to_string(sockaddr s, socklen_t address_length);
-	
+
 	static int sent_messages;
 };

@@ -1,5 +1,7 @@
 #include "message_helper.h"
 
+#define NO_TIMEOUT 0
+
 int MessageHelper::sent_messages;
 
 void MessageHelper::start() {
@@ -31,7 +33,7 @@ int MessageHelper::send_message(std::string payload, std::string destination_ipv
 	const char *content = payload.c_str();
 
 	// Sending with size = payload.size() + 1 because we want to send the end of line character so the recipient knows when to stop reading
-	if (sendto(socket_file_descriptor, content, payload.size() + 1, 0, (struct sockaddr *)&socket_struct, sizeof(socket_struct)) == -1) {
+	if (sendto(socket_file_descriptor, content, payload.size() + 1, 0, (struct sockaddr *)&socket_struct, sizeof(socket_struct)) < 0) {
 	    std::cout << "Error in send_message: " << strerror(errno) << std::endl;
         return -1;
 	}
@@ -60,25 +62,69 @@ int MessageHelper::bind_listen(std::string receiving_ipv6, std::string receiving
 	return socket_file_descriptor;
 }
 
-MessageHelper::MessageData MessageHelper::listen_for_message(int socket_file_descriptor) {
+MessageHelper::MessageData *MessageHelper::listen_for_message(int socket_file_descriptor) {
     char receive_buffer[18000];
 	struct sockaddr src_addr;
 	socklen_t src_addr_len=sizeof(src_addr);
 
-	// Blocking to receive message
-	ssize_t count = recvfrom(socket_file_descriptor,receive_buffer, sizeof(receive_buffer), 0, (struct sockaddr*)&src_addr, &src_addr_len);
+	int socket_file_descriptor_without_timeout = socket_with_receive_timeout(socket_file_descriptor, NO_TIMEOUT);
 
+	// Blocking to receive message
+	ssize_t count = recvfrom(socket_file_descriptor_without_timeout, receive_buffer, sizeof(receive_buffer), 0, (struct sockaddr*)&src_addr, &src_addr_len);
+
+	// Check if listen timed out
+	if (count == -1) {
+		std::cout << "ES UN ERROR POSTA ESTO MIGO " << errno << std::endl;
+
+		return NULL;
+	}
 
 	std::string message_content(receive_buffer, receive_buffer + (count - 1));
 
 	// std::string message_content(receive_buffer);
 	std::string ipv6_address = to_string(src_addr, src_addr_len);
 
-	MessageData message(message_content, ipv6_address);
+	MessageData *message = new MessageData(message_content, ipv6_address);
 
-	std::cout << "[MESSAGE_HELPER] Received message for: " << message.get_final_destination();
-	if (message.content.length() < 300) {
-		std::cout << " . Message content is: " << message.content;
+	std::cout << "[MESSAGE_HELPER] Received message for: " << message -> get_final_destination();
+	if (message -> content.length() < 300) {
+		std::cout << " . Message content is: " << message -> content;
+	}
+	std::cout << std::endl;
+
+	return message;
+}
+
+MessageHelper::MessageData *MessageHelper::listen_for_message(int socket_file_descriptor, int timeout_in_seconds) {
+    char receive_buffer[18000];
+	struct sockaddr src_addr;
+	socklen_t src_addr_len=sizeof(src_addr);
+
+	int socket_file_descriptor_with_timeout = socket_with_receive_timeout(socket_file_descriptor, timeout_in_seconds);
+
+	// Blocking to receive message
+	ssize_t count = recvfrom(socket_file_descriptor_with_timeout, receive_buffer, sizeof(receive_buffer), 0, (struct sockaddr*)&src_addr, &src_addr_len);
+
+	// Check if listen timed out
+	if (count == -1) {
+		std::cout << "Timeout listening for message" << std::endl;
+		if ((errno != EAGAIN) && (errno != EWOULDBLOCK)) {
+			std::cout << "ES UN ERROR POSTA ESTO MIGO " << errno << std::endl;
+		}
+
+		return NULL;
+	}
+
+	std::string message_content(receive_buffer, receive_buffer + (count - 1));
+
+	// std::string message_content(receive_buffer);
+	std::string ipv6_address = to_string(src_addr, src_addr_len);
+
+	MessageData *message = new MessageData(message_content, ipv6_address);
+
+	std::cout << "[MESSAGE_HELPER] Received message for: " << message -> get_final_destination();
+	if (message -> content.length() < 300) {
+		std::cout << " . Message content is: " << message -> content;
 	}
 	std::cout << std::endl;
 
@@ -116,6 +162,9 @@ std::string MessageHelper::concatenate_with_separator(std::list<std::string> str
 	return result;
 }
 
+int MessageHelper::get_sent_messages() {
+	return MessageHelper::sent_messages;
+}
 
 // https://stackoverflow.com/a/37722395
 std::string MessageHelper::to_string(sockaddr sockaddr, socklen_t address_length) {
@@ -134,8 +183,21 @@ std::string MessageHelper::to_string(sockaddr sockaddr, socklen_t address_length
 	return address_str;
 }
 
-int MessageHelper::get_sent_messages() {
-	return MessageHelper::sent_messages;
+int MessageHelper::socket_with_receive_timeout(int socket_file_descriptor, int seconds) {
+	struct timeval tv;
+	tv.tv_sec = seconds;
+	tv.tv_usec = 0;
+
+	if (setsockopt(socket_file_descriptor, SOL_SOCKET, SO_RCVTIMEO, (const char*)&tv, sizeof tv) < 0) {
+		std::cout << "Error setting timeout" << std::endl;
+		perror("Error setting timeout");
+	}
+
+	// if (select(0, &fd, NULL, NULL, &tv) < 0) {
+	// 	perror("Error setting timeout");
+	// }
+
+	return socket_file_descriptor;
 }
 
 std::tuple<std::string, std::string> MessageHelper::MessageData::unpack_message(std::string first_separator, std::string second_separator) {
@@ -187,36 +249,37 @@ std::tuple<std::string, std::string, std::string, std::string> MessageHelper::Me
 }
 
 std::string MessageHelper::MessageData::get_final_destination() {
-	std::string raw_message = this -> content;
+	return get_value_for("destination_ip:");
+	// std::string raw_message = this -> content;
 
-	std::string destination_ip_string_literal = "destination_ip:";
+	// std::string destination_ip_string_literal = "destination_ip:";
 
-	int destination_start_with_delimiter = raw_message.find(destination_ip_string_literal);
+	// int destination_start_with_delimiter = raw_message.find(destination_ip_string_literal);
 
-	if (destination_start_with_delimiter == std::string::npos) {
-		// std::cout << "Final destination not found" << std::endl;
-		return "";
-	}
+	// if (destination_start_with_delimiter == std::string::npos) {
+	// 	// std::cout << "Final destination not found" << std::endl;
+	// 	return "";
+	// }
 
-	int destination_start = destination_start_with_delimiter + destination_ip_string_literal.length();
+	// int destination_start = destination_start_with_delimiter + destination_ip_string_literal.length();
 
-	int destination_end = raw_message.find(",", destination_start);
+	// int destination_end = raw_message.find(",", destination_start);
 
-	if (destination_end == -1) {
-		destination_end = raw_message.length();
-	}
+	// if (destination_end == -1) {
+	// 	destination_end = raw_message.length();
+	// }
 
-	// This counts both as the starting position and the size at which we want to cut our raw_message
-	int destination_size = destination_end - destination_start;
+	// // This counts both as the starting position and the size at which we want to cut our raw_message
+	// int destination_size = destination_end - destination_start;
 	
-	std::string destination_ip = raw_message.substr(destination_start, destination_size);
+	// std::string destination_ip = raw_message.substr(destination_start, destination_size);
 	
-	destination_ip.erase(std::remove(destination_ip.begin(), destination_ip.end(), ' '), destination_ip.end());
+	// destination_ip.erase(std::remove(destination_ip.begin(), destination_ip.end(), ' '), destination_ip.end());
 
-	// std::string::iterator end_pos = std::remove(destination_ip.begin(), destination_ip.end(), ' ');
-	// destination_ip.erase(end_pos, destination_ip.end());
+	// // std::string::iterator end_pos = std::remove(destination_ip.begin(), destination_ip.end(), ' ');
+	// // destination_ip.erase(end_pos, destination_ip.end());
 
-	return destination_ip;
+	// return destination_ip;
 }
 
 // Important: This function assumes destination_ip is the last element shown
@@ -233,4 +296,41 @@ std::string MessageHelper::MessageData::content_without_final_destination() {
 	std::string message = raw_message.substr(0, cut_raw_message_size);
 
 	return message;
+}
+
+bool MessageHelper::MessageData::is_benchmark_task() {
+	return get_value_for("map_index:") == "-1";
+}
+
+std::string MessageHelper::MessageData::get_value_for(std::string key) {
+	std::string raw_message = this -> content;
+
+	std::string key_string_literal = key;
+
+	int key_start_with_delimiter = raw_message.find(key_string_literal);
+
+	if (key_start_with_delimiter == std::string::npos) {
+		// std::cout << "Final destination not found" << std::endl;
+		return "";
+	}
+
+	int value_start = key_start_with_delimiter + key_string_literal.length();
+
+	int value_end = raw_message.find(",", value_start);
+
+	if (value_end == std::string::npos) {
+		value_end = raw_message.length();
+	}
+
+	// This counts both as the starting position and the size at which we want to cut our raw_message
+	int destination_size = value_end - value_start;
+	
+	std::string value = raw_message.substr(value_start, destination_size);
+	
+	value.erase(std::remove(value.begin(), value.end(), ' '), value.end());
+
+	// std::string::iterator end_pos = std::remove(value.begin(), value.end(), ' ');
+	// value.erase(end_pos, value.end());
+
+	return value;
 }

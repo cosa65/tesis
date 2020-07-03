@@ -55,6 +55,29 @@
 
 - Identificar nodos, para filtrar los malos.
 
-- <FALTA> Nodos apagados, no desconectados.
+- <FALTA TESTEAR> Nodos apagados, no desconectados.
 
-- <FALTA> Criticidad (para despues).
+- <FALTA> Agregar un timeout al envio de tareas de prueba cosa que despues de x tiempo decida cortar con la espera y arrancar con los nodos que contestaron, guardando a los demas como nodos ocupados (excluidos) por ahora.
+
+
+- compilar y enviar binarios
+- <FALTA TESTEAR> Nodos apagados, no desconectados. Testeando
+
+
+- problemas, reunion: 
+	- Cual es el punto de seguir usando redundancia por grupos (asigno un grupo de tareas a cada nodo y envio un cacho de cada grupo al resto de los nodos).
+	 Se pierde un poco el significado de asignar un grupo a un nodo si de todos modos cada tarea se envia por separado.
+	 Una solucion: envio una rafaga de mensajes, como para imitar lo de enviar el grupo de una en un solo mensaje como hacia hasta ahora.
+					// Mensajes individuales causan un problema con el tema de la redundancia por grupos de tareas.
+	
+	// Pregunta medio para el futuro
+	- Mando tarea testigo, si algunos nodos no responden los dejo de usar (hasta que consiga alguna respuesta de ellos). 
+
+	Separo a los nodos en grupos, la idea es que estos grupos se mantengan a lo largo del tiempo?
+
+Redundancia: 
+	- Replicar tareas y enviarselas a varios nodos / Agruparlas y usar redundancia raid segun la relacion #nodos/#tareas. Si estoy agrupando tareas esta bien enviar mas de una tarea en un mensaje.
+
+	- Criticidad == Calidad de servicio que se quiere determina cuanta redundancia y cuanto uso de nodos hago, segun gasto.
+		- Esperar al timeout/No esperar al timeout.
+		- Seleccionar calidad de nodos segun cuanto pagan.
