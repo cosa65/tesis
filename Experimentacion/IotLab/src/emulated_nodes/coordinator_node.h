@@ -80,29 +80,29 @@ private:
 
 	std::string get_map_binary();
 
-	static std::list<PendingMapTask*> pending_maps;
+	std::list<PendingMapTask*> pending_maps;
 
-	static std::list<std::string> workers;
+	std::list<std::string> workers;
 
-	static std::priority_queue<NodePerformance*, std::vector<NodePerformance *>, PerformancePtrsCmp> idle_workers;
+	std::priority_queue<NodePerformance*, std::vector<NodePerformance *>, PerformancePtrsCmp> idle_workers;
 	
 	// Used to aid guessing which worker to pick when resending
-	static std::map<std::string, NodePerformance *> efficiency_by_worker_id;
-	static long average_execution_time; 
+	std::map<std::string, NodePerformance *> efficiency_by_worker_id;
+	long average_execution_time; 
 
 	// To keep track of whether the execution of the MapReduce is finished or not
-	static int pending_maps_count;
+	int pending_maps_count;
 
-	static int total_maps;
-	static int threshold;
-	static int timeout;
-	static bool partitioned_redundancy_mode_enabled;
-	static bool threshold_of_execution_mode_enabled;
+	int total_maps;
+	int threshold;
+	int timeout;
+	bool partitioned_redundancy_mode_enabled;
+	bool threshold_of_execution_mode_enabled;
 
 	// This initial state is saved for logging purposes (since above threshold flag is eventually disabled during execution)
-	static bool initial_threshold_of_execution_mode_enabled;
+	bool initial_threshold_of_execution_mode_enabled;
 
-	static double *map_reduce_start_point;
+	double *map_reduce_start_point;
 
 	// To avoid racing conditions on maps handler before finishing with initial distribution
 	std::mutex finished_initial_distribution_mutex;
