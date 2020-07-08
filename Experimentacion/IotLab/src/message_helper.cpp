@@ -162,6 +162,37 @@ std::string MessageHelper::concatenate_with_separator(std::list<std::string> str
 	return result;
 }
 
+std::string MessageHelper::get_value_for(std::string key, std::string container) {
+	std::string key_string_literal = key;
+
+	int key_start_with_delimiter = container.find(key_string_literal);
+
+	if (key_start_with_delimiter == std::string::npos) {
+		// std::cout << "Final destination not found" << std::endl;
+		return "";
+	}
+
+	int value_start = key_start_with_delimiter + key_string_literal.length();
+
+	int value_end = container.find(",", value_start);
+
+	if (value_end == std::string::npos) {
+		value_end = container.length();
+	}
+
+	// This counts both as the starting position and the size at which we want to cut our container
+	int destination_size = value_end - value_start;
+	
+	std::string value = container.substr(value_start, destination_size);
+	
+	value.erase(std::remove(value.begin(), value.end(), ' '), value.end());
+
+	// std::string::iterator end_pos = std::remove(value.begin(), value.end(), ' ');
+	// value.erase(end_pos, value.end());
+
+	return value;
+}
+
 int MessageHelper::get_sent_messages() {
 	return MessageHelper::sent_messages;
 }
@@ -249,37 +280,7 @@ std::tuple<std::string, std::string, std::string, std::string> MessageHelper::Me
 }
 
 std::string MessageHelper::MessageData::get_final_destination() {
-	return get_value_for("destination_ip:");
-	// std::string raw_message = this -> content;
-
-	// std::string destination_ip_string_literal = "destination_ip:";
-
-	// int destination_start_with_delimiter = raw_message.find(destination_ip_string_literal);
-
-	// if (destination_start_with_delimiter == std::string::npos) {
-	// 	// std::cout << "Final destination not found" << std::endl;
-	// 	return "";
-	// }
-
-	// int destination_start = destination_start_with_delimiter + destination_ip_string_literal.length();
-
-	// int destination_end = raw_message.find(",", destination_start);
-
-	// if (destination_end == -1) {
-	// 	destination_end = raw_message.length();
-	// }
-
-	// // This counts both as the starting position and the size at which we want to cut our raw_message
-	// int destination_size = destination_end - destination_start;
-	
-	// std::string destination_ip = raw_message.substr(destination_start, destination_size);
-	
-	// destination_ip.erase(std::remove(destination_ip.begin(), destination_ip.end(), ' '), destination_ip.end());
-
-	// // std::string::iterator end_pos = std::remove(destination_ip.begin(), destination_ip.end(), ' ');
-	// // destination_ip.erase(end_pos, destination_ip.end());
-
-	// return destination_ip;
+	return get_value_for("destination_ip:", this -> content);
 }
 
 // Important: This function assumes destination_ip is the last element shown
@@ -299,38 +300,38 @@ std::string MessageHelper::MessageData::content_without_final_destination() {
 }
 
 bool MessageHelper::MessageData::is_benchmark_task() {
-	return get_value_for("map_index:") == "-1";
+	return get_value_for("map_index:", this -> content) == "-1";
 }
 
-std::string MessageHelper::MessageData::get_value_for(std::string key) {
-	std::string raw_message = this -> content;
+// std::string MessageHelper::MessageData::get_value_for(std::string key) {
+// 	std::string raw_message = this -> content;
 
-	std::string key_string_literal = key;
+// 	std::string key_string_literal = key;
 
-	int key_start_with_delimiter = raw_message.find(key_string_literal);
+// 	int key_start_with_delimiter = raw_message.find(key_string_literal);
 
-	if (key_start_with_delimiter == std::string::npos) {
-		// std::cout << "Final destination not found" << std::endl;
-		return "";
-	}
+// 	if (key_start_with_delimiter == std::string::npos) {
+// 		// std::cout << "Final destination not found" << std::endl;
+// 		return "";
+// 	}
 
-	int value_start = key_start_with_delimiter + key_string_literal.length();
+// 	int value_start = key_start_with_delimiter + key_string_literal.length();
 
-	int value_end = raw_message.find(",", value_start);
+// 	int value_end = raw_message.find(",", value_start);
 
-	if (value_end == std::string::npos) {
-		value_end = raw_message.length();
-	}
+// 	if (value_end == std::string::npos) {
+// 		value_end = raw_message.length();
+// 	}
 
-	// This counts both as the starting position and the size at which we want to cut our raw_message
-	int destination_size = value_end - value_start;
+// 	// This counts both as the starting position and the size at which we want to cut our raw_message
+// 	int destination_size = value_end - value_start;
 	
-	std::string value = raw_message.substr(value_start, destination_size);
+// 	std::string value = raw_message.substr(value_start, destination_size);
 	
-	value.erase(std::remove(value.begin(), value.end(), ' '), value.end());
+// 	value.erase(std::remove(value.begin(), value.end(), ' '), value.end());
 
-	// std::string::iterator end_pos = std::remove(value.begin(), value.end(), ' ');
-	// value.erase(end_pos, value.end());
+// 	// std::string::iterator end_pos = std::remove(value.begin(), value.end(), ' ');
+// 	// value.erase(end_pos, value.end());
 
-	return value;
-}
+// 	return value;
+// }

@@ -21,6 +21,7 @@
 #include "../node_shutdown_manager.h"
 #include "../nodes_destination_translator.h"
 #include "../message_helper.h"
+#include "../priorities_mutex.h"
 
 #include "../../../simgrid/opportunistic_network_experiments/utils/utils.cpp"
 
@@ -64,10 +65,11 @@ private:
 	void resend_pending_tasks_on_timeout();
 	bool resend_pending_tasks();
 	void save_logs();
+
+	PendingMapTask *add_pending_map_sent_to_worker(PendingMapTask *pending_map_ptr, std::string worker_id);
 	void set_node_as_idle(std::string worker_id);
 
 	void send_benchmark_test_to_all_nodes();
-
 	// Returns send time
 	double send_benchmark_task_to(std::string worker_id);
 	void gather_all_workers_performance();
@@ -90,9 +92,6 @@ private:
 	std::map<std::string, NodePerformance *> efficiency_by_worker_id;
 	long average_execution_time; 
 
-	// To keep track of whether the execution of the MapReduce is finished or not
-	int pending_maps_count;
-
 	int total_maps;
 	int threshold;
 	int timeout;
@@ -106,13 +105,16 @@ private:
 
 	// To avoid racing conditions on maps handler before finishing with initial distribution
 	std::mutex finished_initial_distribution_mutex;
-	std::mutex workers_data_access_mutex;
 	std::mutex resend_pending_maps_mutex;
 	// Locks main thread so that all stored threads aren't lost when main thread exits
 	std::mutex finished_execution_mutex;
 	std::mutex ready_to_receive_statistics_messages_mutex;
 	// Stops map reduce from being sent until the initial benchmark has taken place (gathering information from as many nodes as possible)
 	std::mutex initial_benchmark_mutex;
+	
+	std::mutex workers_and_maps_access_mutex;
+	// PrioritiesMutex workers_and_maps_access_mutex;
+
 
 	int socket_file_descriptor;
 	std::string coordinator_ip;

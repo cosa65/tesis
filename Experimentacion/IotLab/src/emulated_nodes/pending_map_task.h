@@ -2,15 +2,21 @@
 
 #include <string>
 #include <map>
+#include <list>
 
 #include "../time_helper.h"
 
 struct PendingMapTask {
 	// map_index is an integer that represents the index of the subarray that is being mapped (so its value range is from 0 .. array_size/subarray_size - 1)
-	PendingMapTask(int map_index, std::string task_data) {
+	PendingMapTask(int map_index, long iterations) {
 		this -> map_index = map_index;
-		this -> task_data = task_data;
+		this -> iterations = iterations;
 		this -> finished = false;
+	}
+
+	std::string get_task_data() {
+		std::string task_data = "map_index:" + std::to_string(this -> map_index) + ",iterations:" + std::to_string(this -> iterations);
+		return task_data;
 	}
 
 	double time_since_creation(std::string worker_id) {
@@ -26,7 +32,7 @@ struct PendingMapTask {
 	}
 
 	int map_index;
+	long iterations;
 	std::map<std::string, double> start_times_by_worker_ids;
-	std::string task_data;
 	bool finished;
 };

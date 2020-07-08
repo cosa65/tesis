@@ -30,7 +30,6 @@ public:
 		std::string get_final_destination();
 		std::string content_without_final_destination();
 		bool is_benchmark_task();
-		std::string get_value_for(std::string key);
 
 		std::string content;
 		std::string sender_ipv6_address;
@@ -54,6 +53,7 @@ public:
 	// This doesnt really belong here
 	static std::list<std::string> split_by_spaces(std::string string_with_spaces);
 	static std::string concatenate_with_separator(std::list<std::string> strings, std::string separator);
+	static std::string get_value_for(std::string key, std::string container);
 
 	static int get_sent_messages();
 

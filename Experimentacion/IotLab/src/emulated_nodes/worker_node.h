@@ -17,6 +17,7 @@
 #include <sys/wait.h>
 #include <sys/stat.h>
 
+#include "worker_task.h"
 #include "../node_shutdown_manager.h"
 #include "../nodes_destination_translator.h"
 #include "../log_keeper.h"
@@ -30,7 +31,9 @@ public:
 
 private:
 	void tasks_forwarding_listener(int tasks_resend_socket_file_descriptor);
-	int handle_map_task(long iterations, std::string map_index, std::string binary_name);
+	void tasks_for_host_listener(int socket_file_descriptor);
+
+	int handle_map_task(WorkerTask worker_task);
 	int run_operation(long iterations, std::string binary_name);
 	void send_local_worker_statistics();
 	std::string store_binary(std::string binary_content, std::string unique_id);
@@ -59,4 +62,12 @@ private:
 	std::string binary_name;
 
 	std::mutex running_operation_mutex;
+
+	// This mutex is used to send a signal to the thread that executes tasks when it is sleeping because up that point the pending_tasks list was empty
+	std::mutex waiting_for_pending_tasks_mutex_signal;
+	std::atomic<bool> main_thread_waiting_on_new_tasks;
+
+	std::mutex pending_tasks_access_mutex;
+	
+	std::list<WorkerTask *> pending_tasks;
 };
