@@ -86,7 +86,7 @@ void WorkerNode::tasks_forwarding_listener(int tasks_resend_socket_file_descript
 		} else {
 			// If the node is disconnected during this time, then we can't receive the message (so we imitate this behaviour by ignoring it)
 			if (!(this -> node_shutdown_manager -> can_receive_message(message_data))) {
-				std::cout << node_timer -> time_log() << "\033[1;33m[TASKS_FORWARDING_THREAD]\033[0m" << "blocked message: " << message_data.content << std::endl; 
+				std::cout << node_timer -> time_log() << "\033[1;33m[TASKS_FORWARDING_THREAD]\033[0m" << "blocked message" << std::endl; 
 				continue;
 			}
 
@@ -122,7 +122,7 @@ void WorkerNode::tasks_for_host_listener(int socket_file_descriptor) {
 
 		// If the node is disconnected during this time, then we can't receive the message (so we imitate this behaviour by ignoring it)
 		if (!(this -> node_shutdown_manager -> can_receive_message(message_data))) {
-			std::cout << node_timer -> time_log() << "\033[1;32m[TASKS_FOR_HOST_THREAD]\033[0m" << "blocked message: " << message_data.content << std::endl; 
+			std::cout << node_timer -> time_log() << "\033[1;32m[TASKS_FOR_HOST_THREAD]\033[0m" << "blocked message" << std::endl; 
 			continue;
 		}
 

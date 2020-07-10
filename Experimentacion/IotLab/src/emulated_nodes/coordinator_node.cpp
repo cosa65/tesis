@@ -38,7 +38,7 @@ void CoordinatorNode::start(std::list<long> map_tasks_in_flops, std::list<std::s
 			std::cout << node_timer -> time_log() << "benchmarks_left: " << benchmarks_left << std::endl;
 			std::cout << node_timer -> time_log() << "Listening for benchmark task" << std::endl;
 			MessageHelper::MessageData *message_data_ptr = MessageHelper::listen_for_message(socket_file_descriptor, benchmark_timeout_seconds);
-			
+
 			std::cout << node_timer -> time_log() << "Received something" << std::endl;
 
 			// Check if message has timed out
@@ -47,7 +47,7 @@ void CoordinatorNode::start(std::list<long> map_tasks_in_flops, std::list<std::s
 			}
 
 			update_performance(*message_data_ptr);
-		
+
 			benchmarks_left--;
 		}
 
@@ -216,8 +216,10 @@ void CoordinatorNode::distribute_and_send_maps(std::list<long> map_tasks_in_flop
 
 	for(auto maps_partition_ptr_it = partitioned_tasks.begin(); maps_partition_ptr_it != partitioned_tasks.end(); ++maps_partition_ptr_it) {
 
-		std::string final_destination_ip = idle_workers.top() -> get_node_id();
-		idle_workers.pop();
+		NodeState *worker_state = this -> idle_workers.top();
+
+		std::string final_destination_ip = worker_state -> get_node_id();
+		this -> idle_workers.pop();
 
 		int binary_size = binary_buffer.length();
 
@@ -227,6 +229,7 @@ void CoordinatorNode::distribute_and_send_maps(std::list<long> map_tasks_in_flop
 
 		for (PendingMapTask *pending_map_task : maps_partition) {
 			pending_map_task -> add_new_worker(final_destination_ip);
+			worker_state -> add_task(pending_map_task -> map_index);
 
 			task_data += pending_map_task -> get_task_data();
 			task_data += " ";
@@ -264,7 +267,7 @@ int CoordinatorNode::handle_map_result_received(MessageHelper::MessageData messa
 	// Once it is allowed to pass by distribute_and_send_maps, it will allow every other thread to pass too 
 	
 	if (!(this -> node_shutdown_manager -> can_receive_message(message_data))) {
-		std::cout << node_timer -> time_log() << "[NODE_SHUTDOWN_MANAGER] blocked message: " << message_data.content << std::endl; 
+		std::cout << node_timer -> time_log() << "[NODE_SHUTDOWN_MANAGER] blocked message" << std::endl; 
 		return 1;
 	}
 
@@ -290,21 +293,21 @@ int CoordinatorNode::handle_map_result_received(MessageHelper::MessageData messa
 								}
 							);
 
-	set_node_as_idle(sender);
-
 	if (finished_task_it == this -> pending_maps.end()) {
 		std::cout << "Task already finished by another node, exiting" << std::endl;
 		int pending_maps_size = this -> pending_maps.size();
 
-		std::cout << "\033[1;31m<DEBUG> workers_and_maps_access_mutex: 297 \033[0m" << std::endl;
+		std::cout << "\033[1;31m<DEBUG> workers_and_maps_access_mutex: 299 \033[0m" << std::endl;
 		this -> workers_and_maps_access_mutex.unlock();
 		return pending_maps_size;
 	}
 
+	update_worker_node_state_with_finished_task(sender, (*finished_task_it) -> map_index);
+
 	if ((*finished_task_it) -> finished) {
 		int pending_maps_size = this -> pending_maps.size();
 		// This task is actually finished (already received result from another node), so ignore
-		std::cout << "\033[1;31m<DEBUG> workers_and_maps_access_mutex: 318 \033[0m" << std::endl;
+		std::cout << "\033[1;31m<DEBUG> workers_and_maps_access_mutex: 307 \033[0m" << std::endl;
 		this -> workers_and_maps_access_mutex.unlock();
 		return pending_maps_size;
 	}
@@ -333,13 +336,13 @@ int CoordinatorNode::handle_map_result_received(MessageHelper::MessageData messa
 
 		int pending_maps_size = this -> pending_maps.size();
 
-		std::cout << "\033[1;31m<DEBUG> workers_and_maps_access_mutex: 310 \033[0m" << std::endl;
+		std::cout << "\033[1;31m<DEBUG> workers_and_maps_access_mutex: 336 \033[0m" << std::endl;
 		this -> workers_and_maps_access_mutex.unlock();
 
 		return pending_maps_size;
 	}
 
-	std::cout << "\033[1;31m<DEBUG> workers_and_maps_access_mutex: 333 \033[0m" << std::endl;
+	std::cout << "\033[1;31m<DEBUG> workers_and_maps_access_mutex: 342 \033[0m" << std::endl;
 	this -> workers_and_maps_access_mutex.unlock();
 
 	int pending_maps_size = this -> pending_maps.size();
@@ -425,7 +428,7 @@ bool CoordinatorNode::resend_pending_tasks() {
 
 	
 	
-	std::cout << "\033[1;31m<DEBUG> workers_and_maps_access_mutex: 406 \033[0m" << std::endl;
+	std::cout << "\033[1;31m<DEBUG> workers_and_maps_access_mutex: 428 \033[0m" << std::endl;
 	this -> workers_and_maps_access_mutex.lock();
 
 	std::cout << node_timer -> time_log() << "Begun resending tasks" << std::endl; 
@@ -440,13 +443,12 @@ bool CoordinatorNode::resend_pending_tasks() {
 			continue;
 		}
 
-		NodePerformance *idle_worker_performance = this -> idle_workers.top();
-
-		std::cout << "\033[1;31m<DEBUG> Picked worker with performance " << idle_worker_performance -> get_node_performance() << "\033[0m" << std::endl;
-
+		NodeState *idle_worker_state = this -> idle_workers.top();
 		this -> idle_workers.pop();
 
-		std::string idle_worker_id = idle_worker_performance -> get_node_id();
+		std::cout << "\033[1;31m<DEBUG> Picked worker with performance " << idle_worker_state -> get_node_performance() << "\033[0m" << std::endl;
+
+		std::string idle_worker_id = idle_worker_state -> get_node_id();
 
 		std::string binary_buffer = get_map_binary();
 		int binary_size = binary_buffer.length();
@@ -456,8 +458,10 @@ bool CoordinatorNode::resend_pending_tasks() {
 		map_task -> add_new_worker(idle_worker_id);
 
 		MapIndex map_index = map_task -> map_index;
+		
+		idle_worker_state -> add_task(map_index);
 
-		std::cout << node_timer -> time_log() << "Resending task " << map_index << " to idle worker " << idle_worker_id << ". Performance value: " << idle_worker_performance -> get_node_performance() << ", performance mean: " << idle_worker_performance -> response_time_mean() << std::endl;
+		std::cout << node_timer -> time_log() << "Resending task " << map_index << " to idle worker " << idle_worker_id << ". Performance value: " << idle_worker_state -> get_node_performance() << ", performance mean: " << idle_worker_state -> response_time_mean() << std::endl;
 
 		std::string next_step_ip = this -> translator -> next_step_ip_to(idle_worker_id);
 
@@ -503,7 +507,7 @@ void CoordinatorNode::save_logs() {
 	// 	std::string idle_time = workers_idle_times[worker];
 	// 	std::string node_performance_value; 
 
-	// 	NodePerformance *node_performance_ptr = CoordinatorNode::efficiency_by_worker_id[worker];	
+	// 	NodeState *node_performance_ptr = CoordinatorNode::efficiency_by_worker_id[worker];	
 
 	// 	if (node_performance_ptr != NULL) {
 	// 		node_performance_value = std::to_string(node_performance_ptr -> get_node_performance());
@@ -553,9 +557,14 @@ void CoordinatorNode::save_logs() {
 // 	return pending_map_ptr;
 // }
 
-void CoordinatorNode::set_node_as_idle(std::string worker_id) {
-	NodePerformance *worker_performance = this -> efficiency_by_worker_id[worker_id];
-	this -> idle_workers.push(worker_performance);
+void CoordinatorNode::update_worker_node_state_with_finished_task(std::string worker_id, int map_index) {
+	NodeState *worker_state = this -> efficiency_by_worker_id[worker_id];
+
+	worker_state -> remove_task(map_index);
+
+	if (worker_state -> node_is_idle()) {
+		this -> idle_workers.push(worker_state);
+	}
 }
 
 void CoordinatorNode::send_benchmark_test_to_all_nodes() {
@@ -602,11 +611,11 @@ void CoordinatorNode::listen_for_benchmark_tasks_and_update_performance() {
 		std::cout << "\033[1;31m<DEBUG> workers_and_maps_access_mutex: 582 \033[0m" << std::endl;
 		this -> workers_and_maps_access_mutex.lock();
 		{
-			NodePerformance *worker_performance = new NodePerformance(worker);
-			worker_performance -> add_response_time(response_time);
+			NodeState *worker_state = new NodeState(worker);
+			worker_state -> add_response_time(response_time);
 
-			this -> efficiency_by_worker_id[worker] = worker_performance;
-			this -> idle_workers.push(worker_performance);
+			this -> efficiency_by_worker_id[worker] = worker_state;
+			this -> idle_workers.push(worker_state);
 		}
 		std::cout << "\033[1;31m<DEBUG> workers_and_maps_access_mutex: 591 \033[0m" << std::endl;
 		this -> workers_and_maps_access_mutex.unlock();
@@ -625,11 +634,11 @@ void CoordinatorNode::update_performance(MessageHelper::MessageData message_data
 	std::cout << "\033[1;31m<DEBUG> workers_and_maps_access_mutex: 582 \033[0m" << std::endl;
 	this -> workers_and_maps_access_mutex.lock();
 	{
-		NodePerformance *worker_performance = new NodePerformance(worker);
-		worker_performance -> add_response_time(response_time);
+		NodeState *worker_state = new NodeState(worker);
+		worker_state -> add_response_time(response_time);
 
-		this -> efficiency_by_worker_id[worker] = worker_performance;
-		this -> idle_workers.push(worker_performance);
+		this -> efficiency_by_worker_id[worker] = worker_state;
+		this -> idle_workers.push(worker_state);
 	}
 	std::cout << "\033[1;31m<DEBUG> workers_and_maps_access_mutex: 591 \033[0m" << std::endl;
 	this -> workers_and_maps_access_mutex.unlock();
@@ -638,16 +647,16 @@ void CoordinatorNode::update_performance(MessageHelper::MessageData message_data
 // void CoordinatorNode::set_nodes_performance_history(PendingMapTask *map_task, std::string worker_id) {
 // 	double response_time = map_task -> time_since_creation(worker_id);
 
-// 	NodePerformance *worker_performance;
+// 	NodeState *worker_state;
 
 // 	if (this -> efficiency_by_worker_id.count(worker_id) == 0) {
-// 		worker_performance = new NodePerformance(worker_id);
-// 		this -> efficiency_by_worker_id[worker_id] = worker_performance;
+// 		worker_state = new NodeState(worker_id);
+// 		this -> efficiency_by_worker_id[worker_id] = worker_state;
 // 	} else {
-// 		worker_performance = this -> efficiency_by_worker_id[worker_id];
+// 		worker_state = this -> efficiency_by_worker_id[worker_id];
 // 	}
 	
-// 	worker_performance -> add_response_time(response_time);
+// 	worker_state -> add_response_time(response_time);
 // }
 
 void CoordinatorNode::finish_workers_and_gather_statistics() {
@@ -692,13 +701,13 @@ void CoordinatorNode::finish_workers_and_gather_statistics() {
 
 		double percentage_idle_time = ((statistics.total_lifetime - statistics.total_execution_time) / statistics.total_lifetime) * 100.0;
 
-		auto node_performance = this -> efficiency_by_worker_id[worker_ip];
+		auto node_state = this -> efficiency_by_worker_id[worker_ip];
 
 		std::string node_performance_str;
-		if (node_performance == NULL) {
+		if (node_state == NULL) {
 			node_performance_str = "not found";
 		} else {
-			double response_time_mean = node_performance -> response_time_mean();
+			double response_time_mean = node_state -> response_time_mean();
 			node_performance_str = std::to_string(response_time_mean);
 		}
 

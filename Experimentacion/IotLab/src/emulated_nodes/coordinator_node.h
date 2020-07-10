@@ -26,7 +26,7 @@
 #include "../../../simgrid/opportunistic_network_experiments/utils/utils.cpp"
 
 #include "pending_map_task.h"
-#include "node_performance.h"
+#include "node_state.h"
 
 #include "../worker_statistics.h"
 
@@ -51,7 +51,7 @@ private:
 
 	class PerformancePtrsCmp {
 	public:
-		bool operator() (NodePerformance* node1_ptr, NodePerformance* node2_ptr) {
+		bool operator() (NodeState* node1_ptr, NodeState* node2_ptr) {
 			return *node1_ptr < *node2_ptr;
 		}
 	};
@@ -67,7 +67,7 @@ private:
 	void save_logs();
 
 	PendingMapTask *add_pending_map_sent_to_worker(PendingMapTask *pending_map_ptr, std::string worker_id);
-	void set_node_as_idle(std::string worker_id);
+	void update_worker_node_state_with_finished_task(std::string worker_id, int map_index);
 
 	void send_benchmark_test_to_all_nodes();
 	// Returns send time
@@ -86,10 +86,10 @@ private:
 
 	std::list<std::string> workers;
 
-	std::priority_queue<NodePerformance*, std::vector<NodePerformance *>, PerformancePtrsCmp> idle_workers;
+	std::priority_queue<NodeState*, std::vector<NodeState *>, PerformancePtrsCmp> idle_workers;
 	
 	// Used to aid guessing which worker to pick when resending
-	std::map<std::string, NodePerformance *> efficiency_by_worker_id;
+	std::map<std::string, NodeState *> efficiency_by_worker_id;
 	long average_execution_time; 
 
 	int total_maps;
@@ -111,10 +111,9 @@ private:
 	std::mutex ready_to_receive_statistics_messages_mutex;
 	// Stops map reduce from being sent until the initial benchmark has taken place (gathering information from as many nodes as possible)
 	std::mutex initial_benchmark_mutex;
-	
+
 	std::mutex workers_and_maps_access_mutex;
 	// PrioritiesMutex workers_and_maps_access_mutex;
-
 
 	int socket_file_descriptor;
 	std::string coordinator_ip;
