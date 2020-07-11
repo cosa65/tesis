@@ -45,12 +45,15 @@ std::string begin_handler_for_role_receipt(
 		std::list<long> map_tasks_in_flops = {
 			600,200,300,400,500,600,700,800,900,100,
 			110,120,130,140,150,100,110,120,130,140,
+			150,100,110,120,130,140,150,100,110,120,
+			600,200,300,400,500,600,700,800,900,100,
+			110,120,130,140,150,100,110,120,130,140,
 			150,100,110,120,130,140,150,100,110,120
 		};
 		
 		int initial_threshold = 75;
 		int timeout = 10;
-		bool partitioned_redundancy_mode_enabled = 0;
+		bool partitioned_redundancy_mode_enabled = 1;
 		bool threshold_of_execution_mode_enabled = 1;
 
 		compile_map_binary();

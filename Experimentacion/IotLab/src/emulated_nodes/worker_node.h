@@ -12,6 +12,8 @@
 #include <mutex>
 #include <atomic>
 
+#include <algorithm>
+
 #include <stdlib.h>
 #include <unistd.h>
 #include <sys/wait.h>
@@ -22,6 +24,7 @@
 #include "../nodes_destination_translator.h"
 #include "../log_keeper.h"
 #include "../message_helper.h"
+#include "../priorities_mutex.h"
 
 class WorkerNode {
 public:
@@ -61,13 +64,12 @@ private:
 
 	std::string binary_name;
 
-	std::mutex running_operation_mutex;
-
 	// This mutex is used to send a signal to the thread that executes tasks when it is sleeping because up that point the pending_tasks list was empty
 	std::mutex waiting_for_pending_tasks_mutex_signal;
 	std::atomic<bool> main_thread_waiting_on_new_tasks;
 
-	std::mutex pending_tasks_access_mutex;
+	// std::mutex pending_tasks_access_mutex;
+	PrioritiesMutex pending_tasks_access_mutex;
 	
 	std::list<WorkerTask *> pending_tasks;
 };

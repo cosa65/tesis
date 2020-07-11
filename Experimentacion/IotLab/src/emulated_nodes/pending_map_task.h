@@ -20,19 +20,21 @@ struct PendingMapTask {
 	}
 
 	double time_since_creation(std::string worker_id) {
-		return TimeHelper::now_in_milliseconds() - start_times_by_worker_ids[worker_id];
+		return TimeHelper::now_in_milliseconds() - current_workers_by_worker_ids[worker_id];
 	}
 
 	void add_new_worker(std::string worker_id) {
-		start_times_by_worker_ids[worker_id] = TimeHelper::now_in_milliseconds();
+		current_workers_by_worker_ids[worker_id] = TimeHelper::now_in_milliseconds();
 	}
 
-	void mark_as_finished() {
+	void mark_as_finished(std::string finishing_worker) {
+		current_workers_by_worker_ids.erase(finishing_worker);
+
 		this -> finished = true;
 	}
 
 	int map_index;
 	long iterations;
-	std::map<std::string, double> start_times_by_worker_ids;
+	std::map<std::string, double> current_workers_by_worker_ids;
 	bool finished;
 };

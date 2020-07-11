@@ -313,7 +313,9 @@ int CoordinatorNode::handle_map_result_received(MessageHelper::MessageData messa
 	}
 
 	// TODO Replace this line with messages telling nodes to cancel their task execution (or send this message in the new task we send to them)
-	(*finished_task_it) -> mark_as_finished();
+	(*finished_task_it) -> mark_as_finished(sender);
+
+	std::list<std::string> workers_to_cancel_task_on = update_workers_states_with_cancelled_task(*finished_task_it);
 
 	this -> pending_maps.erase(finished_task_it);
 
@@ -350,6 +352,10 @@ int CoordinatorNode::handle_map_result_received(MessageHelper::MessageData messa
 	//IMPORTANTE
 	if (threshold_of_execution_mode_enabled) {
 		check_completion_threshold_and_resend_if_necessary();
+	}
+
+	for (std::string worker_id : workers_to_cancel_task_on) {
+		send_cancel_message_to((*finished_task_it) -> map_index, worker_id);
 	}
 
 	return pending_maps_size;
@@ -567,10 +573,34 @@ void CoordinatorNode::update_worker_node_state_with_finished_task(std::string wo
 	}
 }
 
+// Returns worker ids of all workers that have been updated
+std::list<std::string> CoordinatorNode::update_workers_states_with_cancelled_task(PendingMapTask *finished_task) {
+	std::list<std::string> updated_workers;
+
+	for (auto worker_pair : finished_task -> current_workers_by_worker_ids) {
+		std::string worker = worker_pair.first;
+
+		update_worker_node_state_with_finished_task(worker, finished_task -> map_index);
+		updated_workers.push_back(worker);
+	}
+
+	return updated_workers;
+}
+
 void CoordinatorNode::send_benchmark_test_to_all_nodes() {
 	for (std::string worker_id : this -> workers) {
 		this -> benchmark_tasks_send_times[worker_id] = send_benchmark_task_to(worker_id);
 	}
+}
+
+void CoordinatorNode::send_cancel_message_to(int map_index, std::string worker_id) {
+	std::string message = "cancel_task_index:" + std::to_string(map_index) + ",destination_ip:" + worker_id;
+
+	std::string next_step_ip = translator -> next_step_ip_to(worker_id);
+	int port = worker_id == next_step_ip ? 8080 : 8082;
+
+	std::cout << "\033[1;33m[SENDING_CANCEL_MESSAGE]Sending cancel " << map_index << " message to " << worker_id << "\033[0m" << std::endl;
+	MessageHelper::send_message(message, next_step_ip, "eth0", port);
 }
 
 // Returns send time

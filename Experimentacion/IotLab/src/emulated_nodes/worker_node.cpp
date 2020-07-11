@@ -11,7 +11,9 @@ WorkerNode::WorkerNode(std::string ip_to_coordinator, std::string worker_ip, int
 	translator(translator),
 	log_keeper(log_keeper),
 	node_timer(node_timer)
-	{}
+	{
+		// pending_tasks_access_mutex = PrioritiesMutex();
+	}
 
 void WorkerNode::start(int socket_file_descriptor, int tasks_resend_socket_file_descriptor) {
 	MessageHelper::start();
@@ -42,7 +44,7 @@ void WorkerNode::start(int socket_file_descriptor, int tasks_resend_socket_file_
 		if (this -> pending_tasks.empty()) {
 			this -> main_thread_waiting_on_new_tasks = true;
 
-			std::cout << node_timer -> time_log() << "[MAIN_THREAD]" << "Pending tasks is empty, so sleeping until it isn't" << std::endl;
+			std::cout << node_timer -> time_log() << "[MAIN_THREAD]" << "tasks is empty, so sleeping until it isn't" << std::endl;
 			waiting_for_pending_tasks_mutex_signal.lock();
 			std::cout << node_timer -> time_log() << "[MAIN_THREAD]" << "Woke up" << std::endl;
 			this -> main_thread_waiting_on_new_tasks = false;
@@ -56,6 +58,15 @@ void WorkerNode::start(int socket_file_descriptor, int tasks_resend_socket_file_
 
 		std::cout << node_timer -> time_log() << "[MAIN_THREAD]" << "Waiting for pending_tasks_access_mutex" << std::endl;
 		pending_tasks_access_mutex.lock();
+
+		std::cout << "Pending tasks [";
+
+		for (auto pending_task : this -> pending_tasks) {
+			std::cout << pending_task -> map_index << " "; 
+		}
+
+		std::cout << "]" << std::endl;
+
 		std::cout << node_timer -> time_log() << "[MAIN_THREAD]" << "Caught pending_tasks_access_mutex" << std::endl;
 		WorkerTask *current_task = this -> pending_tasks.front();
 		this -> pending_tasks.pop_front();
@@ -123,6 +134,25 @@ void WorkerNode::tasks_for_host_listener(int socket_file_descriptor) {
 		// If the node is disconnected during this time, then we can't receive the message (so we imitate this behaviour by ignoring it)
 		if (!(this -> node_shutdown_manager -> can_receive_message(message_data))) {
 			std::cout << node_timer -> time_log() << "\033[1;32m[TASKS_FOR_HOST_THREAD]\033[0m" << "blocked message" << std::endl; 
+			continue;
+		}
+
+		std::string cancel_task_index_str = MessageHelper::get_value_for("cancel_task_index:", message_data.content);
+
+		if (!cancel_task_index_str.empty()) {
+			int cancel_task_index = std::stoi(cancel_task_index_str);
+			std::cout << this -> node_timer -> time_log() << "\033[1;94m[TASKS_FOR_HOST_THREAD]\033[0m" << "Received cancel task " << cancel_task_index << " message, removing" << std::endl;
+
+			pending_tasks_access_mutex.lock(PrioritiesMutex::PriorityOption::high);
+			
+			std::list<WorkerTask *>::iterator task_to_remove_it = std::remove_if(
+				this -> pending_tasks.begin(),
+				this -> pending_tasks.end(),
+				[cancel_task_index] (const WorkerTask *task) { return task -> map_index == cancel_task_index; }
+			);
+
+			pending_tasks_access_mutex.unlock(PrioritiesMutex::PriorityOption::high);
+
 			continue;
 		}
 
@@ -200,7 +230,7 @@ int WorkerNode::run_operation(const long iterations, std::string binary_name) {
 
 	std::cout << "My performance value is: " << this -> performance << std::endl;
 
-	std::cout << this -> node_timer -> time_log() << "----------------------------RUNNING OPERATION----------------------------" << "iterations:" << iterations << std::endl;
+	std::cout << this -> node_timer -> time_log() << "----------------------------RUNNING OPERATION----------------------------" << " iterations:" << iterations << std::endl;
 
 	std::string basic_exec_str = "./" + binary_name;
 	std::string cmd_string = std::string(basic_exec_str + " " + std::to_string(iterations) + " " + std::to_string(this -> performance));
@@ -214,7 +244,7 @@ int WorkerNode::run_operation(const long iterations, std::string binary_name) {
 
 	std::cout << "cmd_string: " << cmd_char << std::endl;	
 
-	std::cout << this -> node_timer -> time_log() << "____________________________FINISHED OPERATION___________________________" << "iterations:" << iterations << std::endl;
+	std::cout << this -> node_timer -> time_log() << "____________________________FINISHED OPERATION___________________________" << " iterations:" << iterations << std::endl;
 	std::cout << "execution value of task is: " << ret << std::endl;
 
 	this -> operation_status_mutex.lock();
@@ -234,8 +264,6 @@ int WorkerNode::run_operation(const long iterations, std::string binary_name) {
 	}
 
 	this -> operation_status_mutex.unlock();
-
-	// this -> running_operation_mutex.unlock();
 
 	return FINISHED_EXECUTION_WITHOUT_PROBLEMS;
 }

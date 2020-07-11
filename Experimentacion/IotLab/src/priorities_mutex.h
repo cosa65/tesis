@@ -10,6 +10,14 @@ public:
 
 	PrioritiesMutex() {}
 
+	void lock() {
+		lock(low);
+	}
+
+	void unlock() {
+		unlock(low);
+	}
+
 	void lock(PriorityOption priority) {
 		if (priority == high) {
 			next_to_access_mutex.lock();

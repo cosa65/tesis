@@ -68,10 +68,15 @@ private:
 
 	PendingMapTask *add_pending_map_sent_to_worker(PendingMapTask *pending_map_ptr, std::string worker_id);
 	void update_worker_node_state_with_finished_task(std::string worker_id, int map_index);
+	std::list<std::string> update_workers_states_with_cancelled_task(PendingMapTask *finished_task);
 
 	void send_benchmark_test_to_all_nodes();
+	std::list<std::string> update_nodes_state_with_finished_task(PendingMapTask *finished_task, std::string worker_id);
+
 	// Returns send time
 	double send_benchmark_task_to(std::string worker_id);
+	void send_cancel_message_to(int map_index, std::string worker_id);
+
 	void gather_all_workers_performance();
 	void listen_for_benchmark_tasks_and_update_performance();
 
