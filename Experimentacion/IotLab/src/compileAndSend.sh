@@ -71,7 +71,7 @@ wait
 network_topology_content=$(cat network_topology.txt)
 network_performance_content=$(cat network_performance.txt)
 shutdown_intervals_content=$(cat shutdown_intervals_for_all_nodes.txt)
-	gnome-terminal --tab -- bash -c "ssh -t fosco@saclay.iot-lab.info 'ssh -t root@node-a8-1.saclay.iot-lab.info \"echo '\"'${shutdown_intervals_content}'\"' > shutdown_intervals_for_all_nodes.txt; echo '\"'${network_topology_content}'\"' > network_topology.txt; echo '\"'${network_performance_content}'\"' > network_performance.txt; ./receivingNodeArm 28 1; bash\" '"
+	gnome-terminal --tab -- bash -c "ssh -t fosco@saclay.iot-lab.info 'ssh -t root@node-a8-1.saclay.iot-lab.info \"echo '\"'${shutdown_intervals_content}'\"' > shutdown_intervals_for_all_nodes.txt; echo '\"'${network_topology_content}'\"' > network_topology.txt; echo '\"'${network_performance_content}'\"' > network_performance.txt; gdb --args receivingNodeArm 28 1; bash\" '"
 
 function execute_sender_number_with_disconnection_line {
 	sender_command="echo '\"'${shutdown_intervals_content}'\"' > shutdown_intervals_for_all_nodes.txt | ip addr show eth0 scope global | sed -e'\''s/^.*inet6 \([^ ]*\)\/.*$/\1/;t;d'\'' | xargs -I{} ./sendingNodeArm {} ${3}"
@@ -84,7 +84,7 @@ function execute_sender_number_with_disconnection_line {
 # }
 
 echo "Press any key to continue"
-spd-say -l es "lu ese baño no esta bien miga"
+spd-say -l es "migomigomigomigo"
 while [ true ] ; do
 	read -t 3 -n 1
 if [ $? = 0 ] ; then

@@ -60,7 +60,7 @@
 - <FALTA> Agregar un timeout al envio de tareas de prueba cosa que despues de x tiempo decida cortar con la espera y arrancar con los nodos que contestaron, guardando a los demas como nodos ocupados (excluidos) por ahora.
 
 
-- compilar y enviar binarios
+- <LISTO> compilar y enviar binarios
 - <FALTA TESTEAR> Nodos apagados, no desconectados. Testeando
 
 
@@ -78,6 +78,9 @@
 Redundancia: 
 	- Replicar tareas y enviarselas a varios nodos / Agruparlas y usar redundancia raid segun la relacion #nodos/#tareas. Si estoy agrupando tareas esta bien enviar mas de una tarea en un mensaje.
 
+	- redundancia compartida por grupos: Redundancia tipo raid
+	- redundancia individual por tareas: Redundancia tratando de distribuir de una en una todas las tareas y ocupar los nodos lo mas posible
+
 	- Criticidad == Calidad de servicio que se quiere determina cuanta redundancia y cuanto uso de nodos hago, segun gasto.
 		- Esperar al timeout/No esperar al timeout.
-		- Seleccionar calidad de nodos segun cuanto pagan.
+		- Seleccionar calidad de nodos segun criticidad (?).

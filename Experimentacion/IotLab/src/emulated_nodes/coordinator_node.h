@@ -22,6 +22,7 @@
 #include "../nodes_destination_translator.h"
 #include "../message_helper.h"
 #include "../priorities_mutex.h"
+#include "../redundancy_mode.h"
 
 #include "../../../simgrid/opportunistic_network_experiments/utils/utils.cpp"
 
@@ -86,6 +87,12 @@ private:
 	std::map<std::string, WorkerStatistics> listen_for_workers_statistics_messages(int workers_size);
 
 	std::string get_map_binary();
+	RedundancyMode get_redundancy_mode();
+
+	// Distributes the tasks on the buckets as evenly as possible in groups
+	std::list<std::list<PendingMapTask*>*> distribute_replication_between_buckets(int amount_of_partitions, std::list<PendingMapTask *> maps_in_buckets);
+	// One task for each bucket and then fill up any empty bucket with copies of the other buckets (as evenly as possible)
+	std::list<std::list<PendingMapTask*>*> distribute_tasks_individually_and_replicate_to_fill_empty_nodes(int amount_of_partitions, std::list<PendingMapTask *> maps_in_buckets);
 
 	std::list<PendingMapTask*> pending_maps;
 
