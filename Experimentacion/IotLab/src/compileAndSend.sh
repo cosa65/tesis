@@ -84,7 +84,7 @@ function execute_sender_number_with_disconnection_line {
 # }
 
 echo "Press any key to continue"
-spd-say -l es "migomigomigomigo"
+spd-say "migomigomigomigo"
 while [ true ] ; do
 	read -t 3 -n 1
 if [ $? = 0 ] ; then

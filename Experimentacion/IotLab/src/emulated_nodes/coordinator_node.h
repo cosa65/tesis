@@ -57,10 +57,12 @@ private:
 		}
 	};
 
+	void setup_worker_states_map(const std::list<std::string> &workers);
 	void distribute_and_send_maps(std::list<long> map_tasks_in_flops, int initial_threshold);
 
 	int handle_map_result_received(MessageHelper::MessageData message_data);
 
+	std::thread setup_periodic_benchmarks(long period_in_seconds);
 	void check_completion_threshold_and_resend_if_necessary();
 	void setup_resend_on_timeout();
 	void resend_pending_tasks_on_timeout();

@@ -17,6 +17,8 @@ void CoordinatorNode::start(std::list<long> map_tasks_in_flops, std::list<std::s
 	this -> workers = workers;
 	MessageHelper::start();
 
+	setup_worker_states_map(workers);
+
 	this -> finished = false;
 	this -> finished_initial_distribution_mutex.lock();
 
@@ -62,6 +64,9 @@ void CoordinatorNode::start(std::list<long> map_tasks_in_flops, std::list<std::s
 			MessageHelper::MessageData message_data = *message_data_ptr;
 
 			if (message_data.is_benchmark_task()) {
+				std::string worker_id = MessageHelper::get_value_for("worker:", message_data.content);
+				efficiency_by_worker_id[worker_id] -> remove_task(-1);
+
 				update_performance(message_data);
 
 				continue;
@@ -100,7 +105,19 @@ void CoordinatorNode::start(std::list<long> map_tasks_in_flops, std::list<std::s
 	this -> initial_benchmark_mutex.lock();
 	this -> initial_benchmark_mutex.unlock();
 
+	long benchmark_cycle_sleep_time_in_seconds = 10;
+
 	auto timeout_task_thread = std::async(std::launch::async, [this]() { this -> resend_pending_tasks_on_timeout(); });
+	auto periodic_benchmarks_thread = setup_periodic_benchmarks(benchmark_cycle_sleep_time_in_seconds);
+
+	periodic_benchmarks_thread.join();
+}
+
+void CoordinatorNode::setup_worker_states_map(const std::list<std::string> &workers) {
+	for (std::string worker_id : workers) {
+		NodeState *worker_state = new NodeState(worker_id);
+		this -> efficiency_by_worker_id[worker_id] = worker_state;	
+	}
 }
 
 void CoordinatorNode::distribute_and_send_maps(std::list<long> map_tasks_in_flops, int initial_threshold) {
@@ -196,7 +213,7 @@ void CoordinatorNode::distribute_and_send_maps(std::list<long> map_tasks_in_flop
 	// for (auto pending_map_comm : pending_map_comms_to_send) {
 	// 	int success = pending_map_comm.get();
 
-	// 	//IMPORTANTE agregar chequeo
+	// 	//IMPORTANTE agregar chequeo (nuse)
 	// }
 
 	this -> finished_initial_distribution_mutex.unlock();
@@ -301,6 +318,27 @@ int CoordinatorNode::handle_map_result_received(MessageHelper::MessageData messa
 	}
 
 	return pending_maps_size;
+}
+
+// Returns the thread that executes the periodic benchmarks
+std::thread CoordinatorNode::setup_periodic_benchmarks(long period_in_seconds) {
+	return std::thread([this, period_in_seconds] {
+		auto period = std::chrono::seconds(period_in_seconds);
+
+		this -> initial_benchmark_mutex.lock();
+		this -> initial_benchmark_mutex.unlock();
+
+		while (true) {
+			if (this -> finished.load()) {
+				break;
+			}
+
+			std::this_thread::sleep_for(period);
+
+			std::cout << "[PERIODIC_BENCHMARKS_THREAD] Resending benchmark tasks" << std::endl;
+			send_benchmark_test_to_all_nodes();			
+		}
+	});
 }
 
 void CoordinatorNode::check_completion_threshold_and_resend_if_necessary() {
@@ -530,6 +568,7 @@ std::list<std::string> CoordinatorNode::update_workers_states_with_cancelled_tas
 }
 
 void CoordinatorNode::send_benchmark_test_to_all_nodes() {
+	std::cout << "\033[1;33mCoordinatorNode::send_benchmark_test_to_all_nodes\033[0m" << std::endl;
 	for (std::string worker_id : this -> workers) {
 		this -> benchmark_tasks_send_times[worker_id] = send_benchmark_task_to(worker_id);
 	}
@@ -550,8 +589,6 @@ double CoordinatorNode::send_benchmark_task_to(std::string worker_id) {
 	std::string binary_buffer = get_map_binary();
 	int binary_size = binary_buffer.length();
 
-	std::cout << "\033[1;31m<DEBUG>Got map binary of size: " << binary_size << "\033[0m" << std::endl;
-
 	std::string task_data = "map_index:-1,iterations:100";
 	std::string message = "tasks:" + task_data + ",binary:" + binary_buffer + ",destination_ip:" + worker_id;
 
@@ -562,6 +599,8 @@ double CoordinatorNode::send_benchmark_task_to(std::string worker_id) {
 	int port = worker_id == next_step_ip ? 8080 : 8082;
 
 	MessageHelper::send_message(message, next_step_ip, "eth0", port);
+
+	this -> efficiency_by_worker_id[worker_id] -> add_task(-1);
 
 	return send_message;
 }
@@ -583,10 +622,9 @@ void CoordinatorNode::listen_for_benchmark_tasks_and_update_performance() {
 		std::cout << "\033[1;31m<DEBUG> workers_and_maps_access_mutex: 582 \033[0m" << std::endl;
 		this -> workers_and_maps_access_mutex.lock();
 		{
-			NodeState *worker_state = new NodeState(worker);
+			NodeState *worker_state = this -> efficiency_by_worker_id[worker];
 			worker_state -> add_response_time(response_time);
 
-			this -> efficiency_by_worker_id[worker] = worker_state;
 			this -> idle_workers.push(worker_state);
 		}
 		std::cout << "\033[1;31m<DEBUG> workers_and_maps_access_mutex: 591 \033[0m" << std::endl;

@@ -46,7 +46,10 @@ void NodeState::remove_task(int task_id) {
 }
 
 bool NodeState::node_is_idle() {
-	return this -> current_tasks_set.empty();
+	bool is_performing_benchmark = this -> current_tasks_set.find(-1) != this -> current_tasks_set.end();
+	bool is_performing_only_benchmark = this -> current_tasks_set.size() == 1 && is_performing_benchmark;
+
+	return this -> current_tasks_set.empty() || is_performing_only_benchmark;
 }
 
 double NodeState::get_node_performance() {
