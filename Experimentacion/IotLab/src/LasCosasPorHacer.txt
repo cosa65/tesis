@@ -84,3 +84,18 @@ Redundancia:
 	- Criticidad == Calidad de servicio que se quiere determina cuanta redundancia y cuanto uso de nodos hago, segun gasto.
 		- Esperar al timeout/No esperar al timeout.
 		- Seleccionar calidad de nodos segun criticidad (?).
+
+
+
+
+- <FALTA TESTEAR> Se envian benchmarks cada x segundos
+	- <QUEDA PARA DESPUES> Si el nodo está muy ocupado en el momento (muy cargado de tareas), se guarda como benchmark pendiente y cada vez que se recibe un resultado de ese nodo se reevalúa si es posible enviar el benchmark.
+
+- MapReduce llega mas tarde, el nodo esta preparado pero no arranca hasta que le llega el mapreduce (tareas con la # de iteraciones que toma cada una).
+
+- Puede llegar mas de un MapReduce y los ejecute en orden, termina un MapReduce y arranca otro.
+	- Los MapReduce pueden ser ejecutados concurrentemente.
+		Ideas:
+			- Cada tarea sigue siendo independiente, pero guarda mas info/ Tengo PendingMapReduce con todas las tasks.
+			- Para saber si ya termino un MapReduce voy a necesitar el PendingMapReduce seguro.
+				- Puedo tener un timeout para las tasks seteado por el usuario para cada PendingMapReduce.

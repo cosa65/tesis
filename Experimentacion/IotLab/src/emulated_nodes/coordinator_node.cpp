@@ -30,73 +30,17 @@ void CoordinatorNode::start(std::list<long> map_tasks_in_flops, std::list<std::s
 	this -> initial_benchmark_mutex.lock();
 
 	// Begin listening before sending maps
-	auto map_results_listener_thread = std::async(std::launch::async, [this, map_tasks_in_flops, workers, initial_threshold]() { 
-		std::list<std::future<int>> threads;
-
-		int benchmarks_left = workers.size();
-
+	auto map_results_listener_thread = std::async(std::launch::async, [this](std::list<long> map_tasks_in_flops, std::list<std::string> workers) { 
 		int benchmark_timeout_seconds = 1;
-		while (benchmarks_left > 0) {
-			std::cout << node_timer -> time_log() << "benchmarks_left: " << benchmarks_left << std::endl;
-			std::cout << node_timer -> time_log() << "Listening for benchmark task" << std::endl;
-			MessageHelper::MessageData *message_data_ptr = MessageHelper::listen_for_message(socket_file_descriptor, benchmark_timeout_seconds);
 
-			std::cout << node_timer -> time_log() << "Received something" << std::endl;
-
-			// Check if message has timed out
-			if (message_data_ptr == NULL) {
-				break;
-			}
-
-			update_performance(*message_data_ptr);
-
-			benchmarks_left--;
-		}
-
-		std::cout << node_timer -> time_log() << "Finished exclusive part of benchmarking with " << benchmarks_left << " nodes still not having answered benchmark" << std::endl;
-
+		int benchmarks_left = this -> listen_for_initial_benchmarks(workers, benchmark_timeout_seconds);
+		
+		std::cout << this -> node_timer -> time_log() << "Finished exclusive part of benchmarking with " << benchmarks_left << " nodes still not having answered benchmark" << std::endl;
+		
 		this -> initial_benchmark_mutex.unlock();
 
-		while(!(this -> finished.load())) {
-			std::cout << node_timer -> time_log() << "[COORDINATOR] Listening for map result" << std::endl;
-			// Blocking get, actor is blocked until it receives message
-			MessageHelper::MessageData *message_data_ptr = MessageHelper::listen_for_message(socket_file_descriptor);
-			MessageHelper::MessageData message_data = *message_data_ptr;
-
-			if (message_data.is_benchmark_task()) {
-				std::string worker_id = MessageHelper::get_value_for("worker:", message_data.content);
-				efficiency_by_worker_id[worker_id] -> remove_task(-1);
-
-				update_performance(message_data);
-
-				continue;
-			}
-
-			this -> finished_initial_distribution_mutex.lock();
-			this -> finished_initial_distribution_mutex.unlock();
-
-			if (this -> finished.load()) {
-				return;
-			}
-
-			std::cout << node_timer -> time_log() << "[COORDINATOR] handle_map_result_received message_data: " << message_data.content << std::endl;
-
-			std::future<int> map_handle_thread = std::async(std::launch::async, [this, message_data]() { 
-				int maps_left = this -> handle_map_result_received(message_data);
-
-				std::cout << "maps_left is: " << maps_left << std::endl;
-				if (maps_left == 0) {
-					this -> finished = true;
-					// this -> finished_execution_mutex.unlock();
-				}
-
-				return maps_left;
-			});
-
-			threads.push_back(std::move(map_handle_thread));
-		}
-		std::cout << "[COORDINATOR] I left from the main threads while true for some reason, finished state is: " << this -> finished.load() << std::endl;
-	});
+		return this -> listen_for_map_results(map_tasks_in_flops);
+	}, map_tasks_in_flops, workers);
 
 	send_benchmark_test_to_all_nodes();
 
@@ -605,32 +549,100 @@ double CoordinatorNode::send_benchmark_task_to(std::string worker_id) {
 	return send_message;
 }
 
-void CoordinatorNode::listen_for_benchmark_tasks_and_update_performance() {
-	// std::list<std::future<void>> benchmark_tasks;
+void CoordinatorNode::listen_for_map_results(std::list<long> map_tasks_in_flops) {
+	std::list<std::future<int>> threads;
 
-	for (int i = 0; i < this -> workers.size(); i++) {
-		MessageHelper::MessageData *message_data_ptr = MessageHelper::listen_for_message(this -> socket_file_descriptor);
-		
-		std::cout << "Received message data here" << std::endl;
+	while(!(this -> finished.load())) {
+		std::cout << node_timer -> time_log() << "[COORDINATOR] Listening for map result" << std::endl;
+		// Blocking get, actor is blocked until it receives message
+		MessageHelper::MessageData *message_data_ptr = MessageHelper::listen_for_message(socket_file_descriptor);
+		MessageHelper::MessageData message_data = *message_data_ptr;
 
-		auto message_tuple = message_data_ptr -> unpack_message("map_index:", ",worker:");
+		if (message_data.is_benchmark_task()) {
+			std::string worker_id = MessageHelper::get_value_for("worker:", message_data.content);
+			efficiency_by_worker_id[worker_id] -> remove_task(-1);
 
-		std::string worker = std::get<1>(message_tuple);
-		double receive_time = this -> node_timer -> current_time_in_ms();
-		
-		double response_time = receive_time - (this -> benchmark_tasks_send_times[worker]);
-		std::cout << "\033[1;31m<DEBUG> workers_and_maps_access_mutex: 582 \033[0m" << std::endl;
-		this -> workers_and_maps_access_mutex.lock();
-		{
-			NodeState *worker_state = this -> efficiency_by_worker_id[worker];
-			worker_state -> add_response_time(response_time);
+			update_performance(message_data);
 
-			this -> idle_workers.push(worker_state);
+			continue;
 		}
-		std::cout << "\033[1;31m<DEBUG> workers_and_maps_access_mutex: 591 \033[0m" << std::endl;
-		this -> workers_and_maps_access_mutex.unlock();
+
+		this -> finished_initial_distribution_mutex.lock();
+		this -> finished_initial_distribution_mutex.unlock();
+
+		if (this -> finished.load()) {
+			return;
+		}
+
+		std::cout << node_timer -> time_log() << "[COORDINATOR] handle_map_result_received message_data: " << message_data.content << std::endl;
+
+		std::future<int> map_handle_thread = std::async(std::launch::async, [this, message_data]() { 
+			int maps_left = this -> handle_map_result_received(message_data);
+
+			std::cout << "maps_left is: " << maps_left << std::endl;
+			if (maps_left == 0) {
+				this -> finished = true;
+				// this -> finished_execution_mutex.unlock();
+			}
+
+			return maps_left;
+		});
+
+		threads.push_back(std::move(map_handle_thread));
 	}
+	std::cout << "[LISTEN_FOR_MAP_RESULTS] Finished! this -> finished state is: " << this -> finished.load() << std::endl;
 }
+
+// Returns the amount of benchmark tasks that are left, these will be listened for and handled anyways, but the MapReduce execution will begin now
+int CoordinatorNode::listen_for_initial_benchmarks(std::list<std::string> workers, int benchmark_timeout_seconds) {
+	int benchmarks_left = workers.size();
+
+	while (benchmarks_left > 0) {
+		std::cout << node_timer -> time_log() << "benchmarks_left: " << benchmarks_left << std::endl;
+		std::cout << node_timer -> time_log() << "Listening for benchmark task" << std::endl;
+		MessageHelper::MessageData *message_data_ptr = MessageHelper::listen_for_message(this -> socket_file_descriptor, benchmark_timeout_seconds);
+
+		std::cout << node_timer -> time_log() << "Received something" << std::endl;
+
+		// Check if message has timed out
+		if (message_data_ptr == NULL) {
+			break;
+		}
+
+		update_performance(*message_data_ptr);
+
+		benchmarks_left--;
+	}
+
+	return benchmarks_left;
+}
+
+// void CoordinatorNode::listen_for_benchmark_ctasks_and_update_performance() {
+// 	// std::list<std::future<void>> benchmark_tasks;
+
+// 	for (int i = 0; i < this -> workers.size(); i++) {
+// 		MessageHelper::MessageData *message_data_ptr = MessageHelper::listen_for_message(this -> socket_file_descriptor);
+		
+// 		std::cout << "Received message data here" << std::endl;
+
+// 		auto message_tuple = message_data_ptr -> unpack_message("map_index:", ",worker:");
+
+// 		std::string worker = std::get<1>(message_tuple);
+// 		double receive_time = this -> node_timer -> current_time_in_ms();
+		
+// 		double response_time = receive_time - (this -> benchmark_tasks_send_times[worker]);
+// 		std::cout << "\033[1;31m<DEBUG> workers_and_maps_access_mutex: 582 \033[0m" << std::endl;
+// 		this -> workers_and_maps_access_mutex.lock();
+// 		{
+// 			NodeState *worker_state = this -> efficiency_by_worker_id[worker];
+// 			worker_state -> add_response_time(response_time);
+
+// 			this -> idle_workers.push(worker_state);
+// 		}
+// 		std::cout << "\033[1;31m<DEBUG> workers_and_maps_access_mutex: 591 \033[0m" << std::endl;
+// 		this -> workers_and_maps_access_mutex.unlock();
+// 	}
+// }
 
 void CoordinatorNode::update_performance(MessageHelper::MessageData message_data) {
 	auto message_tuple = message_data.unpack_message("map_index:", ",worker:");

@@ -81,7 +81,9 @@ private:
 	void send_cancel_message_to(int map_index, std::string worker_id);
 
 	void gather_all_workers_performance();
-	void listen_for_benchmark_tasks_and_update_performance();
+	void listen_for_map_results(std::list<long> map_tasks_in_flops);
+	int listen_for_initial_benchmarks(std::list<std::string> workers, int benchmark_timeout_seconds);
+	// void listen_for_benchmark_tasks_and_update_performances();
 
 	void update_performance(MessageHelper::MessageData message_data);
 
