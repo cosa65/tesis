@@ -1,5 +1,6 @@
 #include <thread>
 #include <future>
+#include <chrono>
 
 #include "log_keeper.h"
 #include "network_installer.h"
@@ -64,7 +65,16 @@ std::string begin_handler_for_role_receipt(
 
 		// Antes de arrancar, el coordinator deberia recibir un ack mas de todos los worker para saber que estan todos escuchando como workers
 		// (sino podria terminar enviando la task sin que esten ya en modo worker escuchando)
-		coordinator.start(map_tasks_in_flops, worker_ips, initial_threshold, timeout, partitioned_redundancy_mode_enabled, threshold_of_execution_mode_enabled);
+		
+		std::thread coordinator_thread = std::thread([&](){ coordinator.start(worker_ips, timeout, partitioned_redundancy_mode_enabled, threshold_of_execution_mode_enabled); });
+
+		int period_in_seconds = 30;
+		auto period = std::chrono::seconds(period_in_seconds);
+		std::this_thread::sleep_for(period);
+
+		coordinator.distribute_and_send_maps(map_tasks_in_flops, initial_threshold);
+
+		coordinator_thread.join();
 	} else {
 		std::cout << "Role didn't match any expected value, received role: " << role << " received ip: " << ip << std::endl;
 	}

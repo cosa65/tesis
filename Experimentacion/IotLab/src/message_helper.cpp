@@ -17,6 +17,10 @@ int MessageHelper::send_message(std::string payload, std::string destination_ipv
 	// SOCK_DGRAM = UDP, SOCK_STREAM = TCP
 	int socket_file_descriptor = socket(AF_INET6, SOCK_DGRAM, 0);
 
+	if (socket_file_descriptor == -1) {
+		std::cout << "Error in socket creation: " << strerror(socket_file_descriptor) << std::endl;
+	}
+
 	struct sockaddr_in6 socket_struct;
 	socket_struct.sin6_family = AF_INET6;
 
@@ -37,6 +41,8 @@ int MessageHelper::send_message(std::string payload, std::string destination_ipv
 	    std::cout << "Error in send_message: " << strerror(errno) << std::endl;
         return -1;
 	}
+
+	close(socket_file_descriptor);
 
 	MessageHelper::sent_messages++;
 	return 1;
@@ -70,11 +76,15 @@ MessageHelper::MessageData *MessageHelper::listen_for_message(int socket_file_de
 	int socket_file_descriptor_without_timeout = socket_with_receive_timeout(socket_file_descriptor, NO_TIMEOUT);
 
 	// Blocking to receive message
-	ssize_t count = recvfrom(socket_file_descriptor_without_timeout, receive_buffer, sizeof(receive_buffer), 0, (struct sockaddr*)&src_addr, &src_addr_len);
+	ssize_t count = recvfrom(socket_file_descriptor, receive_buffer, sizeof(receive_buffer), 0, (struct sockaddr*)&src_addr, &src_addr_len);
 
 	// Check if listen timed out
 	if (count == -1) {
-		std::cout << "ES UN ERROR POSTA ESTO MIGO " << errno << std::endl;
+		if ((errno != EAGAIN) && (errno != EWOULDBLOCK)) {
+			std::cout << "Error listening for message: " << errno << std::endl;
+		} else {
+			std::cout << "Timeout listening for message" << std::endl;
+		}
 
 		return NULL;
 	}
@@ -103,7 +113,7 @@ MessageHelper::MessageData *MessageHelper::listen_for_message(int socket_file_de
 	int socket_file_descriptor_with_timeout = socket_with_receive_timeout(socket_file_descriptor, timeout_in_seconds);
 
 	// Blocking to receive message
-	ssize_t count = recvfrom(socket_file_descriptor_with_timeout, receive_buffer, sizeof(receive_buffer), 0, (struct sockaddr*)&src_addr, &src_addr_len);
+	ssize_t count = recvfrom(socket_file_descriptor, receive_buffer, sizeof(receive_buffer), 0, (struct sockaddr*)&src_addr, &src_addr_len);
 
 	// Check if listen timed out
 	if (count == -1) {

@@ -64,6 +64,8 @@ private:
 
 	std::string binary_name;
 
+	bool stored_binary = false;
+
 	// This mutex is used to send a signal to the thread that executes tasks when it is sleeping because up that point the pending_tasks list was empty
 	std::mutex waiting_for_pending_tasks_mutex_signal;
 	std::atomic<bool> main_thread_waiting_on_new_tasks;

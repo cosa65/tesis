@@ -40,14 +40,14 @@ public:
 	CoordinatorNode(int socket_file_descriptor, std::string coordinator_ip, NodeShutdownManager *node_shutdown_manager, NodesDestinationTranslator *translator, LogKeeper *log_keeper, NodeTimer *node_timer);
 
 	void start(
-		std::list<long> map_tasks_in_flops,
 		std::list<std::string> workers, 
-		int initial_threshold, 
 		int timeout, 
 		bool partitioned_redundancy_mode_enabled, 
 		bool threshold_of_execution_mode_enabled
 	);
 
+	void distribute_and_send_maps(std::list<long> map_tasks_in_flops, int initial_threshold);
+	
 private:
 
 	class PerformancePtrsCmp {
@@ -58,7 +58,6 @@ private:
 	};
 
 	void setup_worker_states_map(const std::list<std::string> &workers);
-	void distribute_and_send_maps(std::list<long> map_tasks_in_flops, int initial_threshold);
 
 	int handle_map_result_received(MessageHelper::MessageData message_data);
 
@@ -81,7 +80,7 @@ private:
 	void send_cancel_message_to(int map_index, std::string worker_id);
 
 	void gather_all_workers_performance();
-	void listen_for_map_results(std::list<long> map_tasks_in_flops);
+	void listen_for_map_results();
 	int listen_for_initial_benchmarks(std::list<std::string> workers, int benchmark_timeout_seconds);
 	// void listen_for_benchmark_tasks_and_update_performances();
 
@@ -107,7 +106,6 @@ private:
 	// Used to aid guessing which worker to pick when resending
 	std::map<std::string, NodeState *> efficiency_by_worker_id;
 	long average_execution_time; 
-
 	int total_maps;
 	int threshold;
 	int timeout;

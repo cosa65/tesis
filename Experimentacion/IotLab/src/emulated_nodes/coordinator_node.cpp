@@ -9,7 +9,7 @@ CoordinatorNode::CoordinatorNode(int socket_file_descriptor, std::string coordin
 	node_timer(node_timer)
 	{}
 
-void CoordinatorNode::start(std::list<long> map_tasks_in_flops, std::list<std::string> workers, int initial_threshold, int timeout, bool partitioned_redundancy_mode_enabled, bool threshold_of_execution_mode_enabled) {
+void CoordinatorNode::start(std::list<std::string> workers, int timeout, bool partitioned_redundancy_mode_enabled, bool threshold_of_execution_mode_enabled) {
 	this -> timeout = timeout; 
 	this -> partitioned_redundancy_mode_enabled = partitioned_redundancy_mode_enabled;
 	this -> threshold_of_execution_mode_enabled = threshold_of_execution_mode_enabled;
@@ -30,31 +30,38 @@ void CoordinatorNode::start(std::list<long> map_tasks_in_flops, std::list<std::s
 	this -> initial_benchmark_mutex.lock();
 
 	// Begin listening before sending maps
-	auto map_results_listener_thread = std::async(std::launch::async, [this](std::list<long> map_tasks_in_flops, std::list<std::string> workers) { 
-		int benchmark_timeout_seconds = 1;
+	auto map_results_listener_thread = std::thread([this](std::list<std::string> workers) { 
+		int benchmark_timeout_seconds = 10;
 
 		int benchmarks_left = this -> listen_for_initial_benchmarks(workers, benchmark_timeout_seconds);
 		
 		std::cout << this -> node_timer -> time_log() << "Finished exclusive part of benchmarking with " << benchmarks_left << " nodes still not having answered benchmark" << std::endl;
 		
+		std::cout << "\033[1;31mLLEGUE HASTA ACA 40\033[0m" << std::endl;
+
 		this -> initial_benchmark_mutex.unlock();
 
-		return this -> listen_for_map_results(map_tasks_in_flops);
-	}, map_tasks_in_flops, workers);
+		std::cout << "\033[1;31mLLEGUE HASTA ACA 44\033[0m" << std::endl;
+
+		this -> listen_for_map_results();
+	}, workers);
 
 	send_benchmark_test_to_all_nodes();
 
-	auto distribution_task_thread = std::async(std::launch::async, [this, map_tasks_in_flops, initial_threshold]() { return this -> distribute_and_send_maps(map_tasks_in_flops, initial_threshold); });
+	// auto distribution_task_thread = std::async(std::launch::async, [this, map_tasks_in_flops, initial_threshold]() { return this -> distribute_and_send_maps(map_tasks_in_flops, initial_threshold); });
 
 	this -> initial_benchmark_mutex.lock();
 	this -> initial_benchmark_mutex.unlock();
 
 	long benchmark_cycle_sleep_time_in_seconds = 10;
 
+	std::cout << "\033[1;31mLLEGUE HASTA ACA 58\033[0m" << std::endl;
+
 	auto timeout_task_thread = std::async(std::launch::async, [this]() { this -> resend_pending_tasks_on_timeout(); });
 	auto periodic_benchmarks_thread = setup_periodic_benchmarks(benchmark_cycle_sleep_time_in_seconds);
 
 	periodic_benchmarks_thread.join();
+	map_results_listener_thread.join();
 }
 
 void CoordinatorNode::setup_worker_states_map(const std::list<std::string> &workers) {
@@ -67,6 +74,8 @@ void CoordinatorNode::setup_worker_states_map(const std::list<std::string> &work
 void CoordinatorNode::distribute_and_send_maps(std::list<long> map_tasks_in_flops, int initial_threshold) {
 	this -> initial_benchmark_mutex.lock();
 	this -> initial_benchmark_mutex.unlock();
+
+	std::cout << "\033[1;31mLLEGUE HASTA ACA 78\033[0m" << std::endl;
 
 	std::cout << "map_tasks_in_flops: " << std::endl;
 	for (long task : map_tasks_in_flops) {
@@ -125,28 +134,31 @@ void CoordinatorNode::distribute_and_send_maps(std::list<long> map_tasks_in_flop
 		int binary_size = binary_buffer.length();
 
 		std::list<PendingMapTask*> maps_partition = **maps_partition_ptr_it;
-
+std::cout <<"137" << std::endl;
 		std::string task_data;
-
+std::cout <<"139" << std::endl;
 		for (PendingMapTask *pending_map_task : maps_partition) {
 			pending_map_task -> add_new_worker(final_destination_ip);
 			worker_state -> add_task(pending_map_task -> map_index);
-
+			std::cout <<"143" << std::endl;
 			task_data += pending_map_task -> get_task_data();
 			task_data += " ";
 		}
-
+		std::cout <<"147" << std::endl;
 		// std::string task_data = "iterations:" + iterations_str + ",index:" + std::to_string(current_task_index);
 		std::string message = "tasks:" + task_data + ",binary:" + binary_buffer + ",destination_ip:" + final_destination_ip;
 
 		std::cout << node_timer -> time_log() << "Preparing to send map task: " << task_data.c_str() << std::endl;
 
-		std::string *message_to_send = new std::string(message);
+		// std::string *message_to_send = new std::string(message);
 		std::string current_step_ip = this -> translator -> next_step_ip_to(final_destination_ip);
 
 		int port = final_destination_ip == current_step_ip ? 8080 : 8082;
 
-		auto send_task_thread = std::async(std::launch::async, [message, current_step_ip, port]() { MessageHelper::send_message(message, current_step_ip, "eth0", port); });
+		auto send_task_thread = std::async(std::launch::async, [message, current_step_ip, port]() { 
+			MessageHelper::send_message(message, current_step_ip, "eth0", port); 
+			// delete message_to_send;
+		});
 	}
 
 	std::cout << "\033[1;31m<DEBUG> workers_and_maps_access_mutex: 266 \033[0m" << std::endl;
@@ -171,6 +183,8 @@ int CoordinatorNode::handle_map_result_received(MessageHelper::MessageData messa
 		std::cout << node_timer -> time_log() << "[NODE_SHUTDOWN_MANAGER] blocked message" << std::endl; 
 		return 1;
 	}
+
+	std::cout << node_timer -> time_log() << "[NODE_SHUTDOWN_MANAGER] message wasn't blocked due to shutdown" << std::endl;
 
 	auto message_tuple = message_data.unpack_message("map_index:", ",worker:");
 	std::string index_str = std::get<0>(message_tuple), sender = std::get<1>(message_tuple);
@@ -260,7 +274,7 @@ int CoordinatorNode::handle_map_result_received(MessageHelper::MessageData messa
 	for (std::string worker_id : workers_to_cancel_task_on) {
 		send_cancel_message_to(finished_map_index, worker_id);
 	}
-
+	
 	return pending_maps_size;
 }
 
@@ -271,6 +285,8 @@ std::thread CoordinatorNode::setup_periodic_benchmarks(long period_in_seconds) {
 
 		this -> initial_benchmark_mutex.lock();
 		this -> initial_benchmark_mutex.unlock();
+
+		std::cout << "\033[1;31mLLEGUE HASTA ACA 289\033[0m" << std::endl;
 
 		while (true) {
 			if (this -> finished.load()) {
@@ -356,8 +372,6 @@ bool CoordinatorNode::resend_pending_tasks() {
 	// 	return false;
 	// }
 
-	
-	
 	std::cout << "\033[1;31m<DEBUG> workers_and_maps_access_mutex: 428 \033[0m" << std::endl;
 	this -> workers_and_maps_access_mutex.lock();
 
@@ -549,7 +563,7 @@ double CoordinatorNode::send_benchmark_task_to(std::string worker_id) {
 	return send_message;
 }
 
-void CoordinatorNode::listen_for_map_results(std::list<long> map_tasks_in_flops) {
+void CoordinatorNode::listen_for_map_results() {
 	std::list<std::future<int>> threads;
 
 	while(!(this -> finished.load())) {
@@ -576,8 +590,10 @@ void CoordinatorNode::listen_for_map_results(std::list<long> map_tasks_in_flops)
 
 		std::cout << node_timer -> time_log() << "[COORDINATOR] handle_map_result_received message_data: " << message_data.content << std::endl;
 
-		std::future<int> map_handle_thread = std::async(std::launch::async, [this, message_data]() { 
-			int maps_left = this -> handle_map_result_received(message_data);
+		std::future<int> map_handle_thread = std::async(std::launch::async, [this, message_data_ptr]() { 
+			int maps_left = this -> handle_map_result_received(*message_data_ptr);
+
+			delete message_data_ptr;
 
 			std::cout << "maps_left is: " << maps_left << std::endl;
 			if (maps_left == 0) {
@@ -600,6 +616,9 @@ int CoordinatorNode::listen_for_initial_benchmarks(std::list<std::string> worker
 	while (benchmarks_left > 0) {
 		std::cout << node_timer -> time_log() << "benchmarks_left: " << benchmarks_left << std::endl;
 		std::cout << node_timer -> time_log() << "Listening for benchmark task" << std::endl;
+
+		// int socket_with_timeout = MessageHelper::socket_with_receive_timeout(this -> socket_file_descriptor, benchmark_timeout_seconds);
+
 		MessageHelper::MessageData *message_data_ptr = MessageHelper::listen_for_message(this -> socket_file_descriptor, benchmark_timeout_seconds);
 
 		std::cout << node_timer -> time_log() << "Received something" << std::endl;

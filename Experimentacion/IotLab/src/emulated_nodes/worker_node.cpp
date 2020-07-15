@@ -70,10 +70,12 @@ void WorkerNode::start(int socket_file_descriptor, int tasks_resend_socket_file_
 		std::cout << node_timer -> time_log() << "[MAIN_THREAD]" << "Caught pending_tasks_access_mutex" << std::endl;
 		WorkerTask *current_task = this -> pending_tasks.front();
 		this -> pending_tasks.pop_front();
+
 		pending_tasks_access_mutex.unlock();
 
 		std::cout << node_timer -> time_log() << "[MAIN_THREAD]" << "Running task " << current_task -> map_index << std::endl;
 		int op_result = this -> handle_map_task(*current_task);
+		delete current_task;
 	}
 }
 
@@ -151,6 +153,8 @@ void WorkerNode::tasks_for_host_listener(int socket_file_descriptor) {
 				[cancel_task_index] (const WorkerTask *task) { return task -> map_index == cancel_task_index; }
 			);
 
+			this -> pending_tasks.erase(task_to_remove_it, this -> pending_tasks.end());
+
 			pending_tasks_access_mutex.unlock(PrioritiesMutex::PriorityOption::high);
 
 			continue;
@@ -167,7 +171,10 @@ void WorkerNode::tasks_for_host_listener(int socket_file_descriptor) {
 		std::string thread_id = ss.str();
 		std::string binary_name;
 
-		binary_name = store_binary(binary_content, thread_id);
+		if (!this -> stored_binary) {
+			binary_name = store_binary(binary_content, "");
+			this -> stored_binary = true;
+		}
 
 		std::cout << this -> node_timer -> time_log() << "\033[1;32m[TASKS_FOR_HOST_THREAD]\033[0m" << "Received map task. tasks_str: " << tasks_str << std::endl;
 
@@ -180,9 +187,11 @@ void WorkerNode::tasks_for_host_listener(int socket_file_descriptor) {
 				waiting_for_pending_tasks_mutex_signal.unlock();
 			}
 			
-			std::list<WorkerTask *> new_worker_tasks = WorkerTask::string_to_worker_tasks(tasks_str, binary_name);
+			std::list<WorkerTask *> new_worker_tasks = WorkerTask::string_to_worker_tasks(tasks_str, "map_task"/*binary_name*/);
 
 			std::cout << node_timer -> time_log() << "\033[1;32m[TASKS_FOR_HOST_THREAD]\033[0m" << "Adding new tasks" << std::endl;
+
+
 
 			this -> pending_tasks.splice(this -> pending_tasks.end(), new_worker_tasks);
 			// Once we use this instead of splice, we need to make sure new_worker_tasks is already ordered by criticality
@@ -294,7 +303,7 @@ void WorkerNode::send_local_worker_statistics() {
 std::string WorkerNode::store_binary(std::string binary_content, std::string unique_id) {
 	std::cout << "Storing binary_content, length is: " << binary_content.length() << ", size is: " << binary_content.size() << std::endl;
 
-	std::string binary_name = "map_task" + std::to_string(this -> bin_id);
+	std::string binary_name = "map_task";// + std::to_string(this -> bin_id);
 
 	std::ofstream file(binary_name);
 	file << binary_content;

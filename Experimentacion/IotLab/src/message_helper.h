@@ -10,6 +10,7 @@
 #include <arpa/inet.h>
 #include <fcntl.h>
 #include <string.h> 
+#include <unistd.h>
 
 #include <sstream>
 #include <tuple>
@@ -57,8 +58,9 @@ public:
 
 	static int get_sent_messages();
 
-private:
 	static int socket_with_receive_timeout(int socket_file_descriptor, int seconds);
+	
+private:
 	static std::string to_string(sockaddr s, socklen_t address_length);
 
 	static int sent_messages;
