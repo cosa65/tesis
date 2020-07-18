@@ -99,3 +99,7 @@ Redundancia:
 			- Cada tarea sigue siendo independiente, pero guarda mas info/ Tengo PendingMapReduce con todas las tasks.
 			- Para saber si ya termino un MapReduce voy a necesitar el PendingMapReduce seguro.
 				- Puedo tener un timeout para las tasks seteado por el usuario para cada PendingMapReduce.
+
+
+- Pensar una manera mas copada de hacer el resend, para que tenga en cuenta criticidad
+	- Implementar una/muchas politicas de revision de todos los pending map reduce para seleccionar tareas a enviar y a que nodos.

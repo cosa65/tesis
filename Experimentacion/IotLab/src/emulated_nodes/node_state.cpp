@@ -37,16 +37,16 @@ void NodeState::add_response_time(double newest_response_time) {
 	}
 }
 
-void NodeState::add_task(int task_id) {
-	this -> current_tasks_set.insert(task_id);
+void NodeState::add_task(std::string task_id_str) {
+	this -> current_tasks_set.insert(task_id_str);
 }
 
-void NodeState::remove_task(int task_id) {
-	this -> current_tasks_set.erase(task_id);
+void NodeState::remove_task(std::string task_id_str) {
+	this -> current_tasks_set.erase(task_id_str);
 }
 
 bool NodeState::node_is_idle() {
-	bool is_performing_benchmark = this -> current_tasks_set.find(-1) != this -> current_tasks_set.end();
+	bool is_performing_benchmark = this -> current_tasks_set.find("-1") != this -> current_tasks_set.end();
 	bool is_performing_only_benchmark = this -> current_tasks_set.size() == 1 && is_performing_benchmark;
 
 	return this -> current_tasks_set.empty() || is_performing_only_benchmark;

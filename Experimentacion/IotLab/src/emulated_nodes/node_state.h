@@ -10,8 +10,8 @@ public:
 
 	void add_response_time(double newest_response_time);
 
-	void add_task(int task_id);
-	void remove_task(int task_id);
+	void add_task(std::string task_id_str);
+	void remove_task(std::string task_id_str);
 	bool node_is_idle();
 
 	double get_node_performance();
@@ -28,5 +28,5 @@ private:
 
 	// Maximum size 4 (we'll try changing this number), since network is very dynamic older values may not be accurate at all
 	std::list<double> latest_response_times;
-	std::unordered_set<int> current_tasks_set;
+	std::unordered_set<std::string> current_tasks_set;
 };

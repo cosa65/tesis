@@ -62,7 +62,7 @@ void WorkerNode::start(int socket_file_descriptor, int tasks_resend_socket_file_
 		std::cout << "Pending tasks [";
 
 		for (auto pending_task : this -> pending_tasks) {
-			std::cout << pending_task -> map_index << " "; 
+			std::cout << pending_task -> task_index << " "; 
 		}
 
 		std::cout << "]" << std::endl;
@@ -73,7 +73,7 @@ void WorkerNode::start(int socket_file_descriptor, int tasks_resend_socket_file_
 
 		pending_tasks_access_mutex.unlock();
 
-		std::cout << node_timer -> time_log() << "[MAIN_THREAD]" << "Running task " << current_task -> map_index << std::endl;
+		std::cout << node_timer -> time_log() << "[MAIN_THREAD]" << "Running task " << current_task -> task_index << std::endl;
 		int op_result = this -> handle_map_task(*current_task);
 		delete current_task;
 	}
@@ -127,7 +127,6 @@ void WorkerNode::tasks_for_host_listener(int socket_file_descriptor) {
 			std::cout << "\033[1;32m[TASKS_FOR_HOST_THREAD]\033[0m" << "Ending owned tasks thread" << std::endl;
 
 			// If unlocked with empty list, then the main thread will check if 
-
 			waiting_for_pending_tasks_mutex_signal.unlock();
 
 			return;
@@ -139,10 +138,9 @@ void WorkerNode::tasks_for_host_listener(int socket_file_descriptor) {
 			continue;
 		}
 
-		std::string cancel_task_index_str = MessageHelper::get_value_for("cancel_task_index:", message_data.content);
+		std::string cancel_task_index = MessageHelper::get_value_for("cancel_task_index:", message_data.content);
 
-		if (!cancel_task_index_str.empty()) {
-			int cancel_task_index = std::stoi(cancel_task_index_str);
+		if (!cancel_task_index.empty()) {
 			std::cout << this -> node_timer -> time_log() << "\033[1;94m[TASKS_FOR_HOST_THREAD]\033[0m" << "Received cancel task " << cancel_task_index << " message, removing" << std::endl;
 
 			pending_tasks_access_mutex.lock(PrioritiesMutex::PriorityOption::high);
@@ -150,7 +148,7 @@ void WorkerNode::tasks_for_host_listener(int socket_file_descriptor) {
 			std::list<WorkerTask *>::iterator task_to_remove_it = std::remove_if(
 				this -> pending_tasks.begin(),
 				this -> pending_tasks.end(),
-				[cancel_task_index] (const WorkerTask *task) { return task -> map_index == cancel_task_index; }
+				[cancel_task_index] (const WorkerTask *task) { return task -> task_index == cancel_task_index; }
 			);
 
 			this -> pending_tasks.erase(task_to_remove_it, this -> pending_tasks.end());
@@ -216,15 +214,17 @@ int WorkerNode::handle_map_task(WorkerTask worker_task) {
 	}
 
 	std::stringstream ss;
-	ss << "map_index:" << worker_task.map_index << ",worker:" << this -> worker_ip << ",destination_ip:" << this -> ip_to_coordinator;
+	ss << "task_index:" << worker_task.task_index << ",worker:" << this -> worker_ip << ",destination_ip:" << this -> ip_to_coordinator;
 	std::string message = ss.str();
 
 	std::string next_step_ip = this -> translator -> next_step_ip_to(this -> ip_to_coordinator);
 
 	int port = this -> ip_to_coordinator == next_step_ip ? 8080 : 8082;
 
+	std::cout << "Sending finished task message with content: " << message << std::endl;
+	
 	MessageHelper::send_message(message, next_step_ip, "eth0", port);
-	std::cout << node_timer -> time_log() << "Finished map operation for map_index " << worker_task.map_index << " and sent result through: " << next_step_ip << std::endl;
+	std::cout << node_timer -> time_log() << "Finished map operation for map_index " << worker_task.task_index << " and sent result through: " << next_step_ip << std::endl;
 
 	return op_result;
 }

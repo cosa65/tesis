@@ -72,7 +72,7 @@ std::string begin_handler_for_role_receipt(
 		auto period = std::chrono::seconds(period_in_seconds);
 		std::this_thread::sleep_for(period);
 
-		coordinator.distribute_and_send_maps(map_tasks_in_flops, initial_threshold);
+		coordinator.distribute_and_send_maps(initial_threshold, map_tasks_in_flops);
 
 		coordinator_thread.join();
 	} else {

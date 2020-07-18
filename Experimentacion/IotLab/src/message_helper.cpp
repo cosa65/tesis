@@ -310,7 +310,7 @@ std::string MessageHelper::MessageData::content_without_final_destination() {
 }
 
 bool MessageHelper::MessageData::is_benchmark_task() {
-	return get_value_for("map_index:", this -> content) == "-1";
+	return get_value_for("task_index:", this -> content) == "-1";
 }
 
 // std::string MessageHelper::MessageData::get_value_for(std::string key) {

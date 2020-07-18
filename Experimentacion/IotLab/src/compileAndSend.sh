@@ -1,8 +1,8 @@
 
 echo "-----------------------------------------Compiling receivingNode--------------------------------------------"
-arm-linux-gnueabi-g++ -Wl,--whole-archive -lpthread -Wl,--no-whole-archive -Wno-psabi -std=c++11 -O0 -fno-inline-functions -pthread -static receivingNode.cpp message_helper.cpp nodes_destination_translator.cpp network_installer.cpp node_timer.cpp log_keeper.cpp node_shutdown_manager.cpp emulated_nodes/node_state.cpp emulated_nodes/coordinator_node.cpp emulated_nodes/worker_node.cpp -g -o receivingNodeArm
+arm-linux-gnueabi-g++ -Wl,--whole-archive -lpthread -Wl,--no-whole-archive -Wno-psabi -std=c++11 -O0 -fno-inline-functions -pthread -static receivingNode.cpp message_helper.cpp nodes_destination_translator.cpp network_installer.cpp node_timer.cpp log_keeper.cpp node_shutdown_manager.cpp emulated_nodes/pending_map_reduce.cpp emulated_nodes/node_state.cpp emulated_nodes/coordinator_node.cpp emulated_nodes/worker_node.cpp -g -o receivingNodeArm
 echo "------------------------------------------Compiling sendingNode---------------------------------------------"
-arm-linux-gnueabi-g++ -Wl,--whole-archive -lpthread -Wl,--no-whole-archive -Wno-psabi -std=c++11 -O0 -fno-inline-functions -pthread -static sendingNode.cpp message_helper.cpp nodes_destination_translator.cpp network_installer.cpp node_timer.cpp log_keeper.cpp node_shutdown_manager.cpp emulated_nodes/node_state.cpp emulated_nodes/coordinator_node.cpp emulated_nodes/worker_node.cpp -g -o sendingNodeArm
+arm-linux-gnueabi-g++ -Wl,--whole-archive -lpthread -Wl,--no-whole-archive -Wno-psabi -std=c++11 -O0 -fno-inline-functions -pthread -static sendingNode.cpp message_helper.cpp nodes_destination_translator.cpp network_installer.cpp node_timer.cpp log_keeper.cpp node_shutdown_manager.cpp emulated_nodes/pending_map_reduce.cpp emulated_nodes/node_state.cpp emulated_nodes/coordinator_node.cpp emulated_nodes/worker_node.cpp -g -o sendingNodeArm
 echo "<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<Everything compiled successfully!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>"
 
 rsync -avzhe ssh receivingNodeArm fosco@saclay.iot-lab.info:/senslab/users/fosco

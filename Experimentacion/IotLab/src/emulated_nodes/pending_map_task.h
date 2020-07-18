@@ -4,18 +4,21 @@
 #include <map>
 #include <list>
 
+#include "task_index.h"
+
 #include "../time_helper.h"
 
 struct PendingMapTask {
 	// map_index is an integer that represents the index of the subarray that is being mapped (so its value range is from 0 .. array_size/subarray_size - 1)
-	PendingMapTask(int map_index, long iterations) {
-		this -> map_index = map_index;
-		this -> iterations = iterations;
+	PendingMapTask(TaskIndex task_index, long iterations) : 
+	task_index(task_index),
+	iterations(iterations) 
+	{
 		this -> finished = false;
 	}
 
 	std::string get_task_data() {
-		std::string task_data = "map_index:" + std::to_string(this -> map_index) + ",iterations:" + std::to_string(this -> iterations);
+		std::string task_data = "task_index:" + this -> task_index.to_string() + ",iterations:" + std::to_string(this -> iterations);
 		return task_data;
 	}
 
@@ -33,7 +36,7 @@ struct PendingMapTask {
 		this -> finished = true;
 	}
 
-	int map_index;
+	TaskIndex task_index;
 	long iterations;
 	std::map<std::string, double> current_workers_by_worker_ids;
 	bool finished;

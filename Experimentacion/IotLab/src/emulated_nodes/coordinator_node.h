@@ -26,12 +26,13 @@
 
 #include "../../../simgrid/opportunistic_network_experiments/utils/utils.cpp"
 
+#include "pending_map_reduce.h"
 #include "pending_map_task.h"
 #include "node_state.h"
+#include "task_index.h"
 
 #include "../worker_statistics.h"
 
-typedef int MapIndex;
 typedef double PointInTime;
 typedef double TimeSpan;
 
@@ -46,7 +47,7 @@ public:
 		bool threshold_of_execution_mode_enabled
 	);
 
-	void distribute_and_send_maps(std::list<long> map_tasks_in_flops, int initial_threshold);
+	void distribute_and_send_maps(int initial_threshold, std::list<long> map_tasks_in_flops);
 	
 private:
 
@@ -62,42 +63,42 @@ private:
 	int handle_map_result_received(MessageHelper::MessageData message_data);
 
 	std::thread setup_periodic_benchmarks(long period_in_seconds);
-	void check_completion_threshold_and_resend_if_necessary();
-	void setup_resend_on_timeout();
+	void check_completion_threshold_and_resend_if_necessary(PendingMapReduce *pending_map_reduce_ptr);
+	void reset_resend_on_timeout_timer();
 	void resend_pending_tasks_on_timeout();
-	bool resend_pending_tasks();
+	bool resend_pending_tasks(PendingMapReduce *pending_map_reduce_ptr);
 	void save_logs();
 
 	PendingMapTask *add_pending_map_sent_to_worker(PendingMapTask *pending_map_ptr, std::string worker_id);
-	void update_worker_node_state_with_finished_task(std::string worker_id, int map_index);
+	void update_worker_node_state_with_finished_task(std::string worker_id, TaskIndex task_index);
 	std::list<std::string> update_workers_states_with_cancelled_task(PendingMapTask *finished_task);
 
+	void send_bucketed_tasks_to_available_workers(std::list<std::list<PendingMapTask*>*> tasks_by_bucket);
 	void send_benchmark_test_to_all_nodes();
 	std::list<std::string> update_nodes_state_with_finished_task(PendingMapTask *finished_task, std::string worker_id);
 
 	// Returns send time
 	double send_benchmark_task_to(std::string worker_id);
-	void send_cancel_message_to(int map_index, std::string worker_id);
+	void send_cancel_message_to(std::string task_index, std::string worker_id);
 
 	void gather_all_workers_performance();
 	void listen_for_map_results();
 	int listen_for_initial_benchmarks(std::list<std::string> workers, int benchmark_timeout_seconds);
-	// void listen_for_benchmark_tasks_and_update_performances();
+	std::map<std::string, WorkerStatistics> listen_for_workers_statistics_messages(int workers_size);
 
 	void update_performance(MessageHelper::MessageData message_data);
 
 	void finish_workers_and_gather_statistics();
-	std::map<std::string, WorkerStatistics> listen_for_workers_statistics_messages(int workers_size);
 
+	PendingMapReduce *get_pending_map_reduce_of_index(int map_reduce_index);
 	std::string get_map_binary();
-	RedundancyMode get_redundancy_mode();
 
 	// Distributes the tasks on the buckets as evenly as possible in groups
 	std::list<std::list<PendingMapTask*>*> distribute_replication_between_buckets(int amount_of_partitions, std::list<PendingMapTask *> maps_in_buckets);
-	// One task for each bucket and then fill up any empty bucket with copies of the other buckets (as evenly as possible)
+	
 	std::list<std::list<PendingMapTask*>*> distribute_tasks_individually_and_replicate_to_fill_empty_nodes(int amount_of_partitions, std::list<PendingMapTask *> maps_in_buckets);
 
-	std::list<PendingMapTask*> pending_maps;
+	std::list<PendingMapReduce*> pending_map_reduces;
 
 	std::list<std::string> workers;
 
@@ -106,11 +107,12 @@ private:
 	// Used to aid guessing which worker to pick when resending
 	std::map<std::string, NodeState *> efficiency_by_worker_id;
 	long average_execution_time; 
-	int total_maps;
-	int threshold;
 	int timeout;
 	bool partitioned_redundancy_mode_enabled;
 	bool threshold_of_execution_mode_enabled;
+
+	// Used to assign indexes to new map reduces;
+	int free_map_reduce_index = 0;
 
 	// This initial state is saved for logging purposes (since above threshold flag is eventually disabled during execution)
 	bool initial_threshold_of_execution_mode_enabled;
