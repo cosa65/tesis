@@ -100,6 +100,13 @@ Redundancia:
 			- Para saber si ya termino un MapReduce voy a necesitar el PendingMapReduce seguro.
 				- Puedo tener un timeout para las tasks seteado por el usuario para cada PendingMapReduce.
 
-
 - Pensar una manera mas copada de hacer el resend, para que tenga en cuenta criticidad
 	- Implementar una/muchas politicas de revision de todos los pending map reduce para seleccionar tareas a enviar y a que nodos.
+
+
+- <No estoy seguro de como meter esto, porque ahora la politica de resend se elige para garantizar que se reenvien todas las tareas, pero preservar el splice por si es necesario mas tarde> Resend reordena las tareas internamente en el PendingMapReduce segun cuales fueran reenviadas y cuales no como se hacia antes cuando no existia PendingMapReduce.
+
+
+- DECISION DE BENCHMARKING: El coordinador deberia elegir como quiere manejar cuando un nodo tiene el benchmark sin contestar, que prioridad darle en comparacion con uno que ya respondio el benchmark pero tiene benchmark peor que el benchmark vencido del nodo que no respondio todavia. Quizas esperar con un cierto timeout a que responda algun mensaje, sea benchmark o otro tarea y si no respondio lo saca del pool hasta que responda? Y una vez que responde pasa a una fase de test en la que solo se le manda un benchmark antes de devolverlo al pool de nodos
+				- PREGUNTA: CUANDO DECIDO REENVIAR LA TAREA DE BENCHMARK??? SI ESTA YA OCUPADO CON OTRAS TAREAS POR AHI SE COMPLICA MAS EL ASUNTO AL PEDO
+				

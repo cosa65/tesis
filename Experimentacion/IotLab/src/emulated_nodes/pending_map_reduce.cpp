@@ -16,10 +16,10 @@ std::list<std::list<PendingMapTask*>*> PendingMapReduce::get_distributed_tasks_b
 	std::list<std::list<PendingMapTask*>*> tasks_bucketed_by_worker;
 
 	if (redundancy_mode == RedundancyMode::shared_replication_by_groups) {
-		std::cout << "Index: " << this -> index << ", chose shared replication by groups" << std::endl;
+		std::cout << "Index: " << this -> index << ", chose shared replication by groups, buckets_available: " << buckets_available << std::endl;
 		tasks_bucketed_by_worker = distribute_replication_between_buckets(buckets_available, this -> pending_maps);
 	} else if (redundancy_mode ==  RedundancyMode::individual_tasks_replication) {
-		std::cout << "Index: " << this -> index << ", chose individual tasks replication" << std::endl;
+		std::cout << "Index: " << this -> index << ", chose individual tasks replication, buckets_available: " << buckets_available << std::endl;
 		tasks_bucketed_by_worker = distribute_tasks_individually_and_replicate_to_fill_empty_nodes(buckets_available, this -> pending_maps);
 	}
 
@@ -45,6 +45,10 @@ int PendingMapReduce::get_pending_maps_size() {
 }
 
 RedundancyMode PendingMapReduce::get_redundancy_mode(int workers_available) {
+	if (this -> index == 1) {
+		std::cout << "index 1" << std::endl;
+	}
+
 	return this -> pending_maps.size() > workers_available ? shared_replication_by_groups : individual_tasks_replication;
 }
 
@@ -80,6 +84,10 @@ std::list<std::list<PendingMapTask*>*> PendingMapReduce::distribute_replication_
 	int amount_of_partitions, 
 	std::list<PendingMapTask *> maps_in_buckets)
 {
+	if (this -> index == 1) {
+		std::cout << "index 1" << std::endl;
+	}
+
 	std::list<std::list<PendingMapTask*>*> partitioned_tasks = Utils::separate_in_partitions(maps_in_buckets, amount_of_partitions);
 
 	// This index is used to know where to insert the empty list that matches the current partition 

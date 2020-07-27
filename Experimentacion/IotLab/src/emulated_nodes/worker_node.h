@@ -73,5 +73,6 @@ private:
 	// std::mutex pending_tasks_access_mutex;
 	PrioritiesMutex pending_tasks_access_mutex;
 	
+	bool pending_benchmark = false;
 	std::list<WorkerTask *> pending_tasks;
 };

@@ -86,11 +86,15 @@ private:
 	int listen_for_initial_benchmarks(std::list<std::string> workers, int benchmark_timeout_seconds);
 	std::map<std::string, WorkerStatistics> listen_for_workers_statistics_messages(int workers_size);
 
+	void ending_trigger_handler();
+
 	void update_performance(MessageHelper::MessageData message_data);
 
 	void finish_workers_and_gather_statistics();
 
 	PendingMapReduce *get_pending_map_reduce_of_index(int map_reduce_index);
+	void remove_map_reduce_of_index(int map_reduce_index);
+
 	std::string get_map_binary();
 
 	// Distributes the tasks on the buckets as evenly as possible in groups
@@ -145,4 +149,7 @@ private:
 	NodesDestinationTranslator *translator;
 	NodeTimer *node_timer;
 	LogKeeper *log_keeper;
+
+
+	// bool debug_trigger = false;
 };

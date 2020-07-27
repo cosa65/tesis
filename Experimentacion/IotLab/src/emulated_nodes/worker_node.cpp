@@ -41,6 +41,12 @@ void WorkerNode::start(int socket_file_descriptor, int tasks_resend_socket_file_
  	);
 
 	while(true) {
+		// If signal was given because the execution is ended, then end main thread
+		if (this -> ended.load()) {
+			std::cout << node_timer -> time_log() << "[MAIN_THREAD]" << "Ending" << std::endl;
+			return;
+		}
+
 		if (this -> pending_tasks.empty()) {
 			this -> main_thread_waiting_on_new_tasks = true;
 
@@ -50,21 +56,13 @@ void WorkerNode::start(int socket_file_descriptor, int tasks_resend_socket_file_
 			this -> main_thread_waiting_on_new_tasks = false;
 		}
 
-		// If signal was given because the execution is ended, then end main thread
-		if (this -> ended.load()) {
-			std::cout << node_timer -> time_log() << "[MAIN_THREAD]" << "Ending" << std::endl;
-			return;
-		}
-
 		std::cout << node_timer -> time_log() << "[MAIN_THREAD]" << "Waiting for pending_tasks_access_mutex" << std::endl;
 		pending_tasks_access_mutex.lock();
 
 		std::cout << "Pending tasks [";
-
 		for (auto pending_task : this -> pending_tasks) {
 			std::cout << pending_task -> task_index << " "; 
 		}
-
 		std::cout << "]" << std::endl;
 
 		std::cout << node_timer -> time_log() << "[MAIN_THREAD]" << "Caught pending_tasks_access_mutex" << std::endl;
@@ -75,6 +73,11 @@ void WorkerNode::start(int socket_file_descriptor, int tasks_resend_socket_file_
 
 		std::cout << node_timer -> time_log() << "[MAIN_THREAD]" << "Running task " << current_task -> task_index << std::endl;
 		int op_result = this -> handle_map_task(*current_task);
+
+		if (op_result == SHUTDOWN_DURING_EXECUTION) {
+			this -> pending_tasks.erase(this -> pending_tasks.begin(), this -> pending_tasks.end());
+		}
+
 		delete current_task;
 	}
 }
@@ -100,6 +103,7 @@ void WorkerNode::tasks_forwarding_listener(int tasks_resend_socket_file_descript
 			// If the node is disconnected during this time, then we can't receive the message (so we imitate this behaviour by ignoring it)
 			if (!(this -> node_shutdown_manager -> can_receive_message(message_data))) {
 				std::cout << node_timer -> time_log() << "\033[1;33m[TASKS_FORWARDING_THREAD]\033[0m" << "blocked message" << std::endl; 
+
 				continue;
 			}
 
@@ -190,12 +194,25 @@ void WorkerNode::tasks_for_host_listener(int socket_file_descriptor) {
 			std::cout << node_timer -> time_log() << "\033[1;32m[TASKS_FOR_HOST_THREAD]\033[0m" << "Adding new tasks" << std::endl;
 
 
+			bool is_benchmark_task = new_worker_tasks.front() -> task_index == "-1";
+
+			if (is_benchmark_task) {
+				if (this -> pending_benchmark) {
+					std::cout << "\033[1;32m[TASKS_FOR_HOST_THREAD]\033[0m" << "pending_tasks_access_mutex.unlock()" << std::endl;
+					pending_tasks_access_mutex.unlock();
+
+					continue;
+				}
+
+				this -> pending_benchmark = true;
+			}
 
 			this -> pending_tasks.splice(this -> pending_tasks.end(), new_worker_tasks);
+
 			// Once we use this instead of splice, we need to make sure new_worker_tasks is already ordered by criticality
 			// this -> pending_tasks.merge(new_worker_tasks, criticality_comparator);
-
 		}
+
 		std::cout << "\033[1;32m[TASKS_FOR_HOST_THREAD]\033[0m" << "pending_tasks_access_mutex.unlock()" << std::endl;
 		pending_tasks_access_mutex.unlock();
 	}
@@ -206,11 +223,16 @@ int WorkerNode::handle_map_task(WorkerTask worker_task) {
 
 	if (op_result == SHUTDOWN_DURING_EXECUTION) {
 		std::cout << "\033[1;31mNode was shut down during at least part of the execution, so task result will be dumped and nothing sent\033[0m" << std::endl;
+
 		return op_result;
 	}
 
 	if (this -> ended.load()) {
 		return op_result;
+	}
+	
+	if (worker_task.task_index == "-1") {
+		this -> pending_benchmark = false;
 	}
 
 	std::stringstream ss;
@@ -222,7 +244,8 @@ int WorkerNode::handle_map_task(WorkerTask worker_task) {
 	int port = this -> ip_to_coordinator == next_step_ip ? 8080 : 8082;
 
 	std::cout << "Sending finished task message with content: " << message << std::endl;
-	
+
+
 	MessageHelper::send_message(message, next_step_ip, "eth0", port);
 	std::cout << node_timer -> time_log() << "Finished map operation for map_index " << worker_task.task_index << " and sent result through: " << next_step_ip << std::endl;
 
