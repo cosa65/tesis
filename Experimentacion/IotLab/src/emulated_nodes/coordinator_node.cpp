@@ -49,7 +49,7 @@ void CoordinatorNode::start(std::list<std::string> workers, int timeout, bool pa
 	this -> initial_benchmark_mutex.lock();
 	this -> initial_benchmark_mutex.unlock();
 
-	long benchmark_cycle_sleep_time_in_seconds = 10;
+	long benchmark_cycle_sleep_time_in_seconds = 100;
 
 	auto timeout_task_thread = std::async(std::launch::async, [this]() { this -> resend_pending_tasks_on_timeout(); });
 	auto periodic_benchmarks_thread = setup_periodic_benchmarks(benchmark_cycle_sleep_time_in_seconds);
@@ -70,6 +70,8 @@ void CoordinatorNode::setup_worker_states_map(const std::list<std::string> &work
 void CoordinatorNode::distribute_and_send_maps(int initial_threshold, std::list<long> map_tasks_in_flops) {
 	this -> initial_benchmark_mutex.lock();
 	this -> initial_benchmark_mutex.unlock();
+
+	std::cout << "\033[1;32m--------------------------------------------------------------ADDING NEW MAP REDUCE WITH INDEX " << this -> free_map_reduce_index << "\033[0m--------------------------------------------------------------" << std::endl;
 
 	std::cout << "map_tasks_in_flops: " << std::endl;
 	for (long task : map_tasks_in_flops) {
@@ -171,7 +173,7 @@ int CoordinatorNode::handle_map_result_received(MessageHelper::MessageData messa
 		// Update sender state apart from the other responsible nodes in order to avoid adding it to the workers_to_cancel_task_on list
 		update_worker_node_state_with_finished_task(sender, task_index);
 
-		std::list<std::string> workers_to_cancel_task_on = update_workers_states_with_cancelled_task(finished_map_task_ptr);
+		workers_to_cancel_task_on = update_workers_states_with_cancelled_task(finished_map_task_ptr);
 
 		delete finished_map_task_ptr;
 	} else {
@@ -202,8 +204,6 @@ int CoordinatorNode::handle_map_result_received(MessageHelper::MessageData messa
 
 		return pending_maps_size;
 	}
-
-
 
 	std::cout << "\033[1;31m<DEBUG> workers_and_maps_access_mutex: 165 \033[0m" << std::endl;
 	this -> workers_and_maps_access_mutex.unlock();
@@ -249,11 +249,13 @@ void CoordinatorNode::check_completion_threshold_and_resend_if_necessary(Pending
 	this -> workers_and_maps_access_mutex.unlock();
 
 	// Fix total_maps
-	int percentage_pending = (float)pending_maps_size / (float)total_maps * 100;
+	// int percentage_pending = (float)pending_maps_size / (float)total_maps * 100;
 
-	std::cout << node_timer -> time_log() << "[THRESHOLD] Percentage of pending tasks is " << percentage_pending << " vs threshold to begin resending tasks of: " << threshold << std::endl;
+	int percentage_idle_nodes = ((float)this -> idle_workers.size() / (float)this -> efficiency_by_worker_id.size()) * 100;
 
-	if (threshold >= percentage_pending) {
+	std::cout << node_timer -> time_log() << "[THRESHOLD] Percentage of pending tasks is " << percentage_idle_nodes << " vs threshold to begin resending tasks of: " << threshold << std::endl;
+
+	if (threshold <= percentage_idle_nodes) {
 		std::cout << node_timer -> time_log() << "[THRESHOLD] Threshold on pending map tasks reached! Checking and resending tasks that haven't been received yet" << std::endl;
 		bool did_resend_pending_tasks = resend_pending_tasks(pending_map_reduce_ptr);
 
@@ -264,7 +266,7 @@ void CoordinatorNode::check_completion_threshold_and_resend_if_necessary(Pending
 
 		// Update threshold once it has been used
 		if (threshold >= 2 && pending_maps_size >= 1) {
-			pending_map_reduce_ptr -> set_threshold(threshold / 2);
+			// pending_map_reduce_ptr -> set_threshold(threshold / 2);
 		} else {
 			std::cout << node_timer -> time_log() << "[THRESHOLD] Threshold execution mode disabled" << std::endl;
 			threshold_of_execution_mode_enabled = false;
@@ -319,7 +321,7 @@ bool CoordinatorNode::resend_pending_tasks(PendingMapReduce *pending_map_reduce_
 	std::cout << "\033[1;31m<DEBUG> workers_and_maps_access_mutex: 428 \033[0m" << std::endl;
 	this -> workers_and_maps_access_mutex.lock();
 
-	std::cout << node_timer -> time_log() << "Begun resending tasks" << std::endl; 
+	std::cout << node_timer -> time_log() << "Begun resending tasks" << std::endl;
 
 	std::list<std::list<PendingMapTask*>*> tasks_by_bucket = pending_map_reduce_ptr -> get_distributed_tasks_by_bucket(this -> idle_workers.size());
 

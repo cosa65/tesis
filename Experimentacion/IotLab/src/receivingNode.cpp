@@ -58,7 +58,7 @@ std::string begin_handler_for_role_receipt(
 
 		std::list<long> map_tasks_in_flops_1 = { 600,200,300,400,500,600,700,800,900,100 };
 		
-		int initial_threshold = 75;
+		int initial_threshold = 25;
 		int timeout = 10;
 		bool partitioned_redundancy_mode_enabled = 1;
 		bool threshold_of_execution_mode_enabled = 1;
@@ -76,7 +76,7 @@ std::string begin_handler_for_role_receipt(
 
 		coordinator.distribute_and_send_maps(initial_threshold, map_tasks_in_flops);
 
-		// coordinator.distribute_and_send_maps(initial_threshold, map_tasks_in_flops_1);
+		coordinator.distribute_and_send_maps(initial_threshold, map_tasks_in_flops_1);
 
 		coordinator_thread.join();
 	} else {
