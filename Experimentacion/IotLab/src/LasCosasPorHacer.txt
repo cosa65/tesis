@@ -109,4 +109,14 @@ Redundancia:
 
 - DECISION DE BENCHMARKING: El coordinador deberia elegir como quiere manejar cuando un nodo tiene el benchmark sin contestar, que prioridad darle en comparacion con uno que ya respondio el benchmark pero tiene benchmark peor que el benchmark vencido del nodo que no respondio todavia. Quizas esperar con un cierto timeout a que responda algun mensaje, sea benchmark o otro tarea y si no respondio lo saca del pool hasta que responda? Y una vez que responde pasa a una fase de test en la que solo se le manda un benchmark antes de devolverlo al pool de nodos
 				- PREGUNTA: CUANDO DECIDO REENVIAR LA TAREA DE BENCHMARK??? SI ESTA YA OCUPADO CON OTRAS TAREAS POR AHI SE COMPLICA MAS EL ASUNTO AL PEDO
-				
+
+AHORA: 
+	- Decidir como asignar criticalidad a diferentes tareas y como manejar tareas de distinta criticalidad. Como evitar inanicion?
+
+		- N = # de MapReduces activos.
+		- Criticidad1..N = {1, 2, 3}
+		- Prioridad_i = Criticidad_i * Tmpo_de_vida_i / #Tareas_pendientes_i
+
+		- Aparte de esto, si un MR ya ligo un resend, darle prioridad a otro MR
+
+		- Idea: Esperar a acumular threshold % nodos libres antes de triggerear un resend?
