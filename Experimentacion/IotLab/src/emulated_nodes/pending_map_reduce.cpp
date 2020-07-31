@@ -1,9 +1,12 @@
 #include "pending_map_reduce.h"
 
-PendingMapReduce::PendingMapReduce(int index, int initial_threshold, std::list<PendingMapTask *> pending_maps) :
+PendingMapReduce::PendingMapReduce(int index, int initial_threshold, int criticality, double start_time, std::list<PendingMapTask *> pending_maps, NodeTimer *node_timer) :
 	index(index),
 	threshold(initial_threshold),
-	pending_maps(pending_maps)
+	criticality(criticality),
+	start_time(start_time),
+	pending_maps(pending_maps),
+	node_timer(node_timer)
 {
 	this -> total_maps = pending_maps.size();
 }
@@ -40,20 +43,45 @@ int PendingMapReduce::get_total_maps() {
 	return this -> total_maps;
 }
 
+int PendingMapReduce::get_criticality() {
+	return this -> criticality;
+}
+
 int PendingMapReduce::get_pending_maps_size() {
 	return this -> pending_maps.size();
 }
 
-RedundancyMode PendingMapReduce::get_redundancy_mode(int workers_available) {
-	if (this -> index == 1) {
-		std::cout << "index 1" << std::endl;
-	}
+int PendingMapReduce::get_times_of_send() {
+	return this -> times_of_send;
+}
 
+double PendingMapReduce::get_priority() {
+	double start_time_in_seconds = this -> start_time / (double)1000;
+
+	double adjusted_start_time_in_seconds = start_time_in_seconds >= 1.0 ? start_time_in_seconds : 1.0; 
+
+	double priority = (this -> criticality * adjusted_start_time_in_seconds) * get_pending_maps_size();
+
+	std::cout << "--------------------------------- Priority of " << this -> index << " ---------------------------------" << std::endl;
+	std::cout << "criticality: " << this -> criticality << std::endl;
+	std::cout << "adjusted_start_time_in_seconds: " << adjusted_start_time_in_seconds << std::endl;
+	std::cout << "get_pending_maps_size(): " << get_pending_maps_size() << std::endl;
+	std::cout << "priority: " << priority << std::endl;
+	std::cout << "-----------------------------------------------------------------------------------------------------" << std::endl;
+
+	return priority;
+}
+
+RedundancyMode PendingMapReduce::get_redundancy_mode(int workers_available) {
 	return this -> pending_maps.size() > workers_available ? shared_replication_by_groups : individual_tasks_replication;
 }
 
 void PendingMapReduce::set_threshold(int threshold) {
 	this -> threshold = threshold;
+}
+
+int PendingMapReduce::set_times_of_send(int times_of_send) {
+	this -> times_of_send = times_of_send;
 }
 
 PendingMapTask *PendingMapReduce::set_map_task_as_finished(int task_map_index) {
@@ -79,15 +107,20 @@ PendingMapTask *PendingMapReduce::set_map_task_as_finished(int task_map_index) {
 	return finished_task;
 }
 
+// Lower priority value means more important
+bool PendingMapReduce::operator<(PendingMapReduce &e1) {
+	return this -> get_priority() > e1.get_priority();
+}
+
+double PendingMapReduce::get_lifetime() {
+	return this -> node_timer -> current_time_in_ms() - this -> start_time;
+}
+
 // Distributes the tasks on the buckets as equally as possible
 std::list<std::list<PendingMapTask*>*> PendingMapReduce::distribute_replication_between_buckets(
 	int amount_of_partitions, 
 	std::list<PendingMapTask *> maps_in_buckets)
 {
-	if (this -> index == 1) {
-		std::cout << "index 1" << std::endl;
-	}
-
 	std::list<std::list<PendingMapTask*>*> partitioned_tasks = Utils::separate_in_partitions(maps_in_buckets, amount_of_partitions);
 
 	// This index is used to know where to insert the empty list that matches the current partition 
@@ -96,9 +129,9 @@ std::list<std::list<PendingMapTask*>*> PendingMapReduce::distribute_replication_
 	int index_of_current_partition = 0;
 
 	// Each list in this list corresponds to one partition
-	
+
 	std::list<std::list<PendingMapTask*>*> redundancy_tasks_to_distribute = Utils::generate_list_with_empty_lists<PendingMapTask*>(amount_of_partitions);
-	
+
 	// If map_tasks_in_flops aren´t perfectly split by amount_of_redundancy_partitions, then we should vary the brunt of redundancy in different partitions
 	// We can do this by having each partition_to_make_redundant_separated's redundancy tasks begin in different indexes
 	// (with splice looking at the % of the partitioned_tasks, which we will call remainder_of_tasks)
@@ -144,7 +177,7 @@ std::list<std::list<PendingMapTask*>*> PendingMapReduce::distribute_replication_
 		index_of_current_partition++;
 
 		int nonempty_amount_of_redundancy_subpartitions = std::max((partition_to_make_redundant_size / amount_of_redundancy_partitions), 1);
-		
+
 		// Sizes may not be perfectly split due to redundancy distribution of partitions that weren't perfectly divided
 		index_redundancy_splice += nonempty_amount_of_redundancy_subpartitions;
 		index_redundancy_splice = index_redundancy_splice % amount_of_redundancy_partitions;
@@ -174,4 +207,3 @@ std::list<std::list<PendingMapTask*>*> PendingMapReduce::distribute_tasks_indivi
 
 	return partitioned_tasks;
 }
-

@@ -10,26 +10,37 @@
 #include "pending_map_task.h"
 
 #include "../redundancy_mode.h"
+#include "../node_timer.h"
 
 #include "../../../simgrid/opportunistic_network_experiments/utils/utils.cpp"
 
 class PendingMapReduce {
 public:
 
-	PendingMapReduce(int index, int initial_threshold, std::list<PendingMapTask *> pending_maps);
+	PendingMapReduce(int index, int initial_threshold, int criticality, double start_time, std::list<PendingMapTask *> pending_maps, NodeTimer *node_timer);
+
+	// PendingMapReduce(const PendingMapReduce &pending_map_reduce);
 
 	std::list<std::list<PendingMapTask*>*> get_distributed_tasks_by_bucket(int buckets_available);
 
 	int get_index();
 	int get_threshold();
 	int get_total_maps();
+	int get_criticality();
 	int get_pending_maps_size();
+	int get_times_of_send();
+	double get_priority();
 
 	void set_threshold(int threshold);
+	int set_times_of_send(int times_of_send);
 	// Returns the finished map task or NULL if it wasn't found (which means that the task was already finished)
 	PendingMapTask *set_map_task_as_finished(int map_task_index);
 
+	bool operator<(PendingMapReduce &e1);
+
 private:
+
+	double get_lifetime();
 
 	// Distributes the tasks on the buckets as evenly as possible in groups
 	std::list<std::list<PendingMapTask*>*> distribute_replication_between_buckets(
@@ -48,7 +59,13 @@ private:
 	int index;
 	int threshold;
 	int total_maps;
+	int criticality;
+	double start_time;
 	std::list<PendingMapTask *> pending_maps;
 
+	NodeTimer *node_timer;
+
 	std::mutex pending_maps_access_mutex;
+
+	int times_of_send = 0;
 };

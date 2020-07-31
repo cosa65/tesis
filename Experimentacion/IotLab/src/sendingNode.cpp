@@ -34,11 +34,12 @@ int main(int argc, char *argv[]) {
 
 	sleep(10);
 
-	MessageHelper::send_message(content, network_organizer_ipv6, network_organizer_interface);
+	MessageHelper::send_message(content, network_organizer_ipv6, network_organizer_interface, 8085);
 
 	int socket_file_descriptor = MessageHelper::bind_listen(host_ip, "eth0", 8080);
+	int node_setup_file_descriptor = MessageHelper::bind_listen(host_ip, "eth0", 8085);
 
-	MessageHelper::MessageData *message_data_ptr = MessageHelper::listen_for_message(socket_file_descriptor);
+	MessageHelper::MessageData *message_data_ptr = MessageHelper::listen_for_message(node_setup_file_descriptor);
 	MessageHelper::MessageData message_data = *message_data_ptr;
 
 	std::cout << "Received message: " << message_data.content << std::endl;

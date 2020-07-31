@@ -17,13 +17,14 @@ void compile_map_binary() {
 std::string begin_handler_for_role_receipt(
 	std::string listener_ip,
 	std::string listener_interface, 
-	int socket_file_descriptor, 
+	int socket_file_descriptor,
+	int node_setup_file_descriptor,
 	NodeShutdownManager *node_shutdown_manager, 
 	NodesDestinationTranslator *translator,
 	LogKeeper *log_keeper,
 	NodeTimer *node_timer)
 {
-	MessageHelper::MessageData *message_data_ptr = MessageHelper::listen_for_message(socket_file_descriptor);
+	MessageHelper::MessageData *message_data_ptr = MessageHelper::listen_for_message(node_setup_file_descriptor);
 	MessageHelper::MessageData message_data = *message_data_ptr;
 
 	std::cout << "Received message: " << message_data.content << std::endl;
@@ -44,19 +45,21 @@ std::string begin_handler_for_role_receipt(
 		std::cout << "I'm the coordinator" << std::endl;
 
 		std::list<long> map_tasks_in_flops = {
-			600,200,300,400,500,600,700,800,900,100,
-			110,120,130,140,150,100,110,120,130,140,
-			150,100,110,120,130,140,150,100,110,120,
-			600,200,300,400,500,600,700,800,900,100,
-			110,120,130,140,150,100,110,120,130,140,
-			150,100,110,120,130,140,150,100,110,120,
-			600,200,300,400,500,600,700,800,900,100,
-			600,200,300,400,500,600,700,800,900,100,
-			600,200,300,400,500,600,700,800,900,100,
 			600,200,300,400,500,600,700,800,900,100
+			// 110,120,130,140,150,100,110,120,130,140,
+			// 150,100,110,120,130,140,150,100,110,120,
+			// 600,200,300,400,500,600,700,800,900,100,
+			// 110,120,130,140,150,100,110,120,130,140,
+			// 150,100,110,120,130,140,150,100,110,120,
+			// 600,200,300,400,500,600,700,800,900,100,
+			// 600,200,300,400,500,600,700,800,900,100,
+			// 600,200,300,400,500,600,700,800,900,100,
+			// 600,200,300,400,500,600,700,800,900,100
 		};
 
-		std::list<long> map_tasks_in_flops_1 = { 600,200,300,400,500,600,700,800,900,100 };
+		std::list<long> map_tasks_in_flops_1 = { 600,200,300,400,500};//,600,700,800,900,100 };
+		std::list<long> map_tasks_in_flops_2 = { 600,200,300,400,500};//,600,700,800,900,100 };
+		std::list<long> map_tasks_in_flops_3 = { 600,200,300,400,500};//,600,700,800,900,100 };
 		
 		int initial_threshold = 25;
 		int timeout = 10;
@@ -74,9 +77,11 @@ std::string begin_handler_for_role_receipt(
 		auto period = std::chrono::seconds(period_in_seconds);
 		std::this_thread::sleep_for(period);
 
-		coordinator.distribute_and_send_maps(initial_threshold, map_tasks_in_flops);
+		coordinator.distribute_and_send_maps(initial_threshold, 1, map_tasks_in_flops);
 
-		coordinator.distribute_and_send_maps(initial_threshold, map_tasks_in_flops_1);
+		coordinator.distribute_and_send_maps(initial_threshold, 1, map_tasks_in_flops_1);
+		coordinator.distribute_and_send_maps(initial_threshold, 1, map_tasks_in_flops_2);
+		coordinator.distribute_and_send_maps(initial_threshold, 1, map_tasks_in_flops_3);
 
 		coordinator_thread.join();
 	} else {
@@ -116,10 +121,11 @@ int main(int argc, char *argv[]) {
 	std::string network_coordinator_ipv6 = "2001:660:3207:400::1";
 	std::string network_coordinator_interface = "eth0";
 	int socket_file_descriptor = MessageHelper::bind_listen(network_coordinator_ipv6, network_coordinator_interface, 8080);
+	int node_setup_file_descriptor = MessageHelper::bind_listen(network_coordinator_ipv6, network_coordinator_interface, 8085);
 
 	NetworkInstaller network_installer = NetworkInstaller(network_coordinator_ipv6, network_coordinator_interface);
 
-	std::map<int, std::string> index_to_ip_map = network_installer.listen_for_worker_ips(amount_of_worker_nodes, socket_file_descriptor);
+	std::map<int, std::string> index_to_ip_map = network_installer.listen_for_worker_ips(amount_of_worker_nodes, node_setup_file_descriptor);
 	
 	NodesDestinationTranslator *translator = new NodesDestinationTranslator();
 	std::vector<std::string> nodes_connections = translator -> load_network_topology_from_file(1, index_to_ip_map, network_coordinator_ipv6);
@@ -132,6 +138,7 @@ int main(int argc, char *argv[]) {
 		network_coordinator_ipv6, 
 		network_coordinator_interface, 
 		socket_file_descriptor, 
+		node_setup_file_descriptor,
 		node_shutdown_manager, 
 		translator,
 		log_keeper, 

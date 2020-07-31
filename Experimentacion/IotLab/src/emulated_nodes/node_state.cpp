@@ -71,7 +71,7 @@ std::string NodeState::get_node_id() {
 	return this -> node_id;
 }
 
-bool NodeState::operator<(NodeState e1) {
+bool NodeState::operator<(NodeState &e1) {
 	return get_node_performance() < e1.get_node_performance();
 }
 

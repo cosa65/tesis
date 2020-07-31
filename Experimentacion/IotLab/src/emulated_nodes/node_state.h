@@ -17,7 +17,7 @@ public:
 	double get_node_performance();
 	std::string get_node_id();
 
-	bool operator<(NodeState e1);
+	bool operator<(NodeState &e1);
 
 	double response_time_mean();
 private:

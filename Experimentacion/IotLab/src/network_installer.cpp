@@ -56,13 +56,13 @@ void NetworkInstaller::create_network_and_send_links(std::vector<std::string> co
 		int node_performance = nodes_performances[worker_index - 1];
 
 		std::string message_content = "role:worker,ip:" + this -> network_organizer_ipv6 + ",ip_translations:" + worker_connections_as_ip + ",performance:" + std::to_string(node_performance);
-		MessageHelper::send_message(message_content, worker_ip, "eth0");		
+		MessageHelper::send_message(message_content, worker_ip, "eth0", 8085);		
 	}
 
 	std::string worker_ips_split_by_space = MessageHelper::concatenate_with_separator(worker_ips, " ");
 
 // std::copy(strings_list.begin(), strings_list.end(), std::ostream_iterator<std::string>(std::cout, "\n"));
-	MessageHelper::send_message("role:coordinator,ip:" + worker_ips_split_by_space + ",ip_translations:" + connections_as_index[0], this -> network_organizer_ipv6, this -> network_organizer_interface);
+	MessageHelper::send_message("role:coordinator,ip:" + worker_ips_split_by_space + ",ip_translations:" + connections_as_index[0], this -> network_organizer_ipv6, this -> network_organizer_interface, 8085);
 }
 
 std::string NetworkInstaller::translate_worker_indexes_to_ip(std::string worker_connections_as_indexes, std::map<int, std::string> index_to_ip_map) {

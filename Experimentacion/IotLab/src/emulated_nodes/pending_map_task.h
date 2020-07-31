@@ -30,6 +30,10 @@ struct PendingMapTask {
 		current_workers_by_worker_ids[worker_id] = TimeHelper::now_in_milliseconds();
 	}
 
+	void remove_worker(std::string worker_id) {
+		current_workers_by_worker_ids.erase(worker_id);
+	}
+
 	void mark_as_finished(std::string finishing_worker) {
 		current_workers_by_worker_ids.erase(finishing_worker);
 

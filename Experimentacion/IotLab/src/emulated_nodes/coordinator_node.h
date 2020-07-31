@@ -9,6 +9,8 @@
 #include <vector>
 #include <tuple>
 #include <queue>
+#include <set>
+
 #include <functional>
 
 #include <thread>
@@ -36,7 +38,7 @@
 typedef double PointInTime;
 typedef double TimeSpan;
 
-class CoordinatorNode {
+class CoordinatorNode { 
 public:
 	CoordinatorNode(int socket_file_descriptor, std::string coordinator_ip, NodeShutdownManager *node_shutdown_manager, NodesDestinationTranslator *translator, LogKeeper *log_keeper, NodeTimer *node_timer);
 
@@ -47,14 +49,15 @@ public:
 		bool threshold_of_execution_mode_enabled
 	);
 
-	void distribute_and_send_maps(int initial_threshold, std::list<long> map_tasks_in_flops);
+	void distribute_and_send_maps(int initial_threshold, int criticality, std::list<long> map_tasks_in_flops);
 	
 private:
 
+	template <class T>
 	class PerformancePtrsCmp {
 	public:
-		bool operator() (NodeState* node1_ptr, NodeState* node2_ptr) {
-			return *node1_ptr < *node2_ptr;
+		bool operator() (T* ptr_1, T* ptr_2) {
+			return *ptr_1 < *ptr_2;
 		}
 	};
 
@@ -63,10 +66,10 @@ private:
 	int handle_map_result_received(MessageHelper::MessageData message_data);
 
 	std::thread setup_periodic_benchmarks(long period_in_seconds);
-	void check_completion_threshold_and_resend_if_necessary(PendingMapReduce *pending_map_reduce_ptr);
+	void check_available_nodes_and_send_tasks_if_necessary(PendingMapReduce *pending_map_reduce_ptr);
 	void reset_resend_on_timeout_timer();
 	void resend_pending_tasks_on_timeout();
-	bool resend_pending_tasks(PendingMapReduce *pending_map_reduce_ptr);
+	bool resend_pending_tasks();
 	void save_logs();
 
 	PendingMapTask *add_pending_map_sent_to_worker(PendingMapTask *pending_map_ptr, std::string worker_id);
@@ -92,21 +95,30 @@ private:
 
 	void finish_workers_and_gather_statistics();
 
-	PendingMapReduce *get_pending_map_reduce_of_index(int map_reduce_index);
+	PendingMapReduce *pop_pending_map_reduce_of_index(int map_reduce_index);
+	// void push_pending_map_reduce(PendingMapReduce *pending_map_reduce);
 	void remove_map_reduce_of_index(int map_reduce_index);
 
 	std::string get_map_binary();
+
+	void reorder_map_reduces(PendingMapReduce *changed_map_reduce);
 
 	// Distributes the tasks on the buckets as evenly as possible in groups
 	std::list<std::list<PendingMapTask*>*> distribute_replication_between_buckets(int amount_of_partitions, std::list<PendingMapTask *> maps_in_buckets);
 	
 	std::list<std::list<PendingMapTask*>*> distribute_tasks_individually_and_replicate_to_fill_empty_nodes(int amount_of_partitions, std::list<PendingMapTask *> maps_in_buckets);
 
-	std::list<PendingMapReduce*> pending_map_reduces;
+	
+	std::set<PendingMapReduce *, PerformancePtrsCmp<PendingMapReduce>> pending_map_reduces;
+
+	std::set<PendingMapReduce *, PerformancePtrsCmp<PendingMapReduce>> disabled_pending_map_reduces;
+
+	std::map<int, PendingMapReduce *> pending_map_reduces_by_index;
+	// std::list<PendingMapReduce*> pending_map_reduces;
 
 	std::list<std::string> workers;
 
-	std::priority_queue<NodeState*, std::vector<NodeState *>, PerformancePtrsCmp> idle_workers;
+	std::priority_queue<NodeState*, std::vector<NodeState *>, PerformancePtrsCmp<NodeState>> idle_workers;
 	
 	// Used to aid guessing which worker to pick when resending
 	std::map<std::string, NodeState *> efficiency_by_worker_id;
@@ -133,6 +145,7 @@ private:
 	std::mutex initial_benchmark_mutex;
 
 	std::mutex workers_and_maps_access_mutex;
+	std::mutex pending_map_reduces_mutex;
 	// PrioritiesMutex workers_and_maps_access_mutex;
 
 	int socket_file_descriptor;

@@ -118,5 +118,54 @@ AHORA:
 		- Prioridad_i = Criticidad_i * Tmpo_de_vida_i / #Tareas_pendientes_i
 
 		- Aparte de esto, si un MR ya ligo un resend, darle prioridad a otro MR
+			- Idea: Reevaluo cual es el proximo MR cada vez que me llega una tarea terminada, y ahi chequeo segun cuantas tareas queden y cuantos nodos hayan libres si sigo esperando para resendear o mando de una con la cantidad de nodos libres que haya.
+
+			- Idea distinta: en vez de contar los resend de todo el MR, mejor tomar las tareas asignadas a N cantidad de nodos de cada MapReduce, asi tareas que ya estan asignadas a varios nodos no ligan un resend porque una que fue perdida en varios necesita ser reenviada.
 
 		- Idea: Esperar a acumular threshold % nodos libres antes de triggerear un resend?
+
+		- threshold: Uso el threshold para habilitar mapreduces/deshabilitarlos para ser enviados, pero esto podria producir inanicion en mapreduces que no estan siendo enviados, como juegan/se balancean el threshold y la prioridad? 
+			- Uso el threshold y el timeout, si se triggerea el timeout primero lo agrego al pool de mapreduces disponibles para ser reenviados asi nomá y yafu.
+			 ----> un timeout para cada uno.
+
+
+	- Cambiar la forma en que el coordinador envia tareas a los nodos worker para que sea mas realista, nodos manejan una tarea a la vez (en vez de un grupo entero a la vez) y una vez que el coordinador recibe un resultado de una tarea la cancela en todos los otros nodos que la tengan asignada
+
+	- Pasar la corrida de un experimento de ser un MapReduce y nada mas a estar escuchando pedidos de MapReduce y manejarlos a medida que le llegan
+		- Enviar tareas testigos de manera periodica.
+		- Manejar muchos MapReduces al mismo tiempo
+			- Manejar criticidad evitando inanicion y tratando de terminar los mapreduces mas cerca de ser terminados  <--- 
+				- Mire un poco de papers, deberia basarme en alguna cosa o probar armarme algo simple? Ya tengo pensado algo
+			- Balancearlos para ver que elijo teniendo en cuenta criticidad y las otras cosas, pero tambien ver como usar el threshold
+				- Pensar como integrar threshold a esto, esperar a juntar nodos o enviar a los que haya disponibles? 
+				- Y ademas tener en cuenta si ya fue reenviada hace poco
+
+
+				- Cada map reduce tiene su propio valor de threshold (por ahora es siempre el mismo valor), 
+					- una vez que reenvió todas sus tareas a los nodos disponibles:
+						- lo quito de la cola de MRs activos y 
+						- lo paso a la cola de MRs pendientes pasivos,
+						- además de esto, arranca un contador del timeout de este MR
+					- cada vez que recibe una tarea completada de este MR:
+						- chequea el threshold
+							- si ya lo alcanzó 
+								- vuelve a agregarlo a la cola de MRs pendientes activos 
+								- lo quita de los pasivos
+								- resetea el timeout
+
+					- cuando se triggerea el timeout 
+						- vuelve a agregarlo a la cola de MRs pendientes activos 
+							- lo quita de los pasivos
+							- resetea el timeout
+
+				- Cada map reduce tiene su propio valor de timeout
+					- Cuando envia todas las tareas a los nodos disponibles:
+						-
+
+					- si no alcanzo el threshold pero no hay otros MRs libres podria hacer que reenvie igual quizas (esto quizas solo con criticidad bien alta)
+
+
+				- FALTA UN MECANISMO PARA DARME CUENTA CUANDO UN NODO ESTA MUERTO (algun tipo de timeout, no necesariamente las tareas testigo)
+
+				- PREGUNTA: LOS NODOS WORKER DEBERIAN TENER UN MAXIMO DE CUANTAS TAREAS LES PUEDO ENVIAR AL MISMO TIEMPO, ESE MAXIMO DEBERIA SER REGULADO DEL LADO DEL COORDINADOR O DEL WORKER? TIENE MAS SENTIDO REGULARLA DEL LADO DEL COORDINADOR ME PARECE. Razon para que tengan el maximo: Mejor que no tengan tiempo idle si se puede evitar. Mantener la cola de tareas pendientes en cada worker llena.
+					- setear un maximo de tareas para cada nodo y decidir de acuerdo a eso, no a si esta idle o no
