@@ -41,12 +41,6 @@ void WorkerNode::start(int socket_file_descriptor, int tasks_resend_socket_file_
  	);
 
 	while(true) {
-		// If signal was given because the execution is ended, then end main thread
-		if (this -> ended.load()) {
-			std::cout << node_timer -> time_log() << "[MAIN_THREAD]" << "Ending" << std::endl;
-			return;
-		}
-
 		if (this -> pending_tasks.empty()) {
 			this -> main_thread_waiting_on_new_tasks = true;
 
@@ -58,6 +52,7 @@ void WorkerNode::start(int socket_file_descriptor, int tasks_resend_socket_file_
 
 		std::cout << node_timer -> time_log() << "[MAIN_THREAD]" << "Waiting for pending_tasks_access_mutex" << std::endl;
 		pending_tasks_access_mutex.lock();
+		std::cout << node_timer -> time_log() << "[MAIN_THREAD]" << "Caught pending_tasks_access_mutex" << std::endl;
 
 		std::cout << "Pending tasks [";
 		for (auto pending_task : this -> pending_tasks) {
@@ -65,7 +60,12 @@ void WorkerNode::start(int socket_file_descriptor, int tasks_resend_socket_file_
 		}
 		std::cout << "]" << std::endl;
 
-		std::cout << node_timer -> time_log() << "[MAIN_THREAD]" << "Caught pending_tasks_access_mutex" << std::endl;
+		// If signal was given because the execution is ended, then end main thread
+		if (this -> ended.load()) {
+			std::cout << node_timer -> time_log() << "[MAIN_THREAD]" << "Ending" << std::endl;
+			return;
+		}
+
 		WorkerTask *current_task = this -> pending_tasks.front();
 		this -> pending_tasks.pop_front();
 
@@ -91,6 +91,8 @@ void WorkerNode::tasks_forwarding_listener(int tasks_resend_socket_file_descript
 		// Not checking if forward because this end is off experiment (actual workers for no are assumed never to end on their own)
 		if (message_data.content == "end") {
 			send_local_worker_statistics();
+
+			std::terminate();
 
 			this -> ended = true;
 			MessageHelper::send_message("end", worker_ip, "eth0", 8080);
@@ -145,7 +147,7 @@ void WorkerNode::tasks_for_host_listener(int socket_file_descriptor) {
 		std::string cancel_task_index = MessageHelper::get_value_for("cancel_task_index:", message_data.content);
 
 		if (!cancel_task_index.empty()) {
-			std::cout << this -> node_timer -> time_log() << "\033[1;94m[TASKS_FOR_HOST_THREAD]\033[0m" << "Received cancel task " << cancel_task_index << " message, removing" << std::endl;
+			std::cout << this -> node_timer -> time_log() << "\033[1;32m[TASKS_FOR_HOST_THREAD]\033[0m" << "Received cancel task " << cancel_task_index << " message, removing" << std::endl;
 
 			pending_tasks_access_mutex.lock(PrioritiesMutex::PriorityOption::high);
 			

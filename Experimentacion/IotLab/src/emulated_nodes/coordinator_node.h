@@ -63,7 +63,7 @@ private:
 
 	void setup_worker_states_map(const std::list<std::string> &workers);
 
-	int handle_map_result_received(MessageHelper::MessageData message_data);
+	void handle_map_result_received(MessageHelper::MessageData message_data);
 
 	std::thread setup_periodic_benchmarks(long period_in_seconds);
 	void check_available_nodes_and_send_tasks_if_necessary(PendingMapReduce *pending_map_reduce_ptr);
@@ -76,7 +76,7 @@ private:
 	void update_worker_node_state_with_finished_task(std::string worker_id, TaskIndex task_index);
 	std::list<std::string> update_workers_states_with_cancelled_task(PendingMapTask *finished_task);
 
-	void send_bucketed_tasks_to_available_workers(std::list<std::list<PendingMapTask*>*> tasks_by_bucket);
+	void send_bucketed_tasks_to_available_workers(std::list<std::shared_ptr<std::list<PendingMapTask*>>> tasks_by_bucket);
 	void send_benchmark_test_to_all_nodes();
 	std::list<std::string> update_nodes_state_with_finished_task(PendingMapTask *finished_task, std::string worker_id);
 

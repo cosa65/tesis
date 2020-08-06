@@ -7,6 +7,8 @@
 
 #include <mutex>
 
+#include <memory>
+
 #include "pending_map_task.h"
 
 #include "../redundancy_mode.h"
@@ -21,7 +23,7 @@ public:
 
 	// PendingMapReduce(const PendingMapReduce &pending_map_reduce);
 
-	std::list<std::list<PendingMapTask*>*> get_distributed_tasks_by_bucket(int buckets_available);
+	std::list<std::shared_ptr<std::list<PendingMapTask*>>> get_distributed_tasks_by_bucket(int buckets_available);
 
 	int get_index();
 	int get_threshold();
@@ -43,16 +45,18 @@ private:
 	double get_lifetime();
 
 	// Distributes the tasks on the buckets as evenly as possible in groups
-	std::list<std::list<PendingMapTask*>*> distribute_replication_between_buckets(
+	std::list<std::shared_ptr<std::list<PendingMapTask*>>> distribute_replication_between_buckets(
 		int amount_of_partitions,
 		std::list<PendingMapTask *> maps_in_buckets
 	);
 
 	// One task for each bucket and then fill up any empty bucket with copies of the other buckets (as evenly as possible)
-	std::list<std::list<PendingMapTask*>*> distribute_tasks_individually_and_replicate_to_fill_empty_nodes(
+	std::list<std::shared_ptr<std::list<PendingMapTask*>>> distribute_tasks_individually_and_replicate_to_fill_empty_nodes(
 		int amount_of_partitions,
 		std::list<PendingMapTask *> maps_in_buckets
 	);
+
+	void add_grouped_redundancy_to_bucketed_tasks(std::list<std::shared_ptr<std::list<PendingMapTask*>>> &partitioned_tasks);
 
 	RedundancyMode get_redundancy_mode(int workers_available);
 
@@ -65,7 +69,7 @@ private:
 
 	NodeTimer *node_timer;
 
-	std::mutex pending_maps_access_mutex;
+	// std::mutex pending_maps_access_mutex;
 
 	int times_of_send = 0;
 };

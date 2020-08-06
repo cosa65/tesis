@@ -1,0 +1,3 @@
+- Resolver eleccion de politica de redundancia, individual o agrupada
+
+- Resolver politica de mezcla de nodos/tareas
