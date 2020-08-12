@@ -1,4 +1,4 @@
-Definiciones:
+echo -e "\n\n" >> Definiciones:
 
 
 Walltime

@@ -1,9 +1,17 @@
-
-echo "-----------------------------------------Compiling receivingNode--------------------------------------------"
-arm-linux-gnueabi-g++ -Wl,--whole-archive -lpthread -Wl,--no-whole-archive -Wno-psabi -std=c++11 -O0 -fno-inline-functions -pthread -static receivingNode.cpp message_helper.cpp nodes_destination_translator.cpp network_installer.cpp node_timer.cpp log_keeper.cpp node_shutdown_manager.cpp emulated_nodes/pending_map_reduce.cpp emulated_nodes/node_state.cpp emulated_nodes/coordinator_node.cpp emulated_nodes/worker_node.cpp -g -o receivingNodeArm
-echo "------------------------------------------Compiling sendingNode---------------------------------------------"
-arm-linux-gnueabi-g++ -Wl,--whole-archive -lpthread -Wl,--no-whole-archive -Wno-psabi -std=c++11 -O0 -fno-inline-functions -pthread -static sendingNode.cpp message_helper.cpp nodes_destination_translator.cpp network_installer.cpp node_timer.cpp log_keeper.cpp node_shutdown_manager.cpp emulated_nodes/pending_map_reduce.cpp emulated_nodes/node_state.cpp emulated_nodes/coordinator_node.cpp emulated_nodes/worker_node.cpp -g -o sendingNodeArm
-echo "<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<Everything compiled successfully!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>"
+if [[ $1 == "normal" ]];
+then 
+	echo "-----------------------------------------Compiling receivingNode--------------------------------------------"
+	arm-linux-gnueabi-g++ -Wl,--whole-archive -lpthread -Wl,--no-whole-archive -Wno-psabi -std=c++11 -pthread -static receivingNode.cpp message_helper.cpp nodes_destination_translator.cpp network_installer.cpp node_timer.cpp log_keeper.cpp node_shutdown_manager.cpp workers_assigner.cpp emulated_nodes/pending_map_reduce.cpp emulated_nodes/node_state.cpp emulated_nodes/coordinator_node.cpp emulated_nodes/worker_node.cpp -o receivingNodeArm
+	echo "------------------------------------------Compiling sendingNode---------------------------------------------"
+	arm-linux-gnueabi-g++ -Wl,--whole-archive -lpthread -Wl,--no-whole-archive -Wno-psabi -std=c++11 -pthread -static sendingNode.cpp message_helper.cpp nodes_destination_translator.cpp network_installer.cpp node_timer.cpp log_keeper.cpp node_shutdown_manager.cpp workers_assigner.cpp emulated_nodes/pending_map_reduce.cpp emulated_nodes/node_state.cpp emulated_nodes/coordinator_node.cpp emulated_nodes/worker_node.cpp -o sendingNodeArm
+	echo "<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<Everything compiled successfully!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>"
+else
+	echo "-----------------------------------------Compiling receivingNode DEBUG--------------------------------------------"
+	arm-linux-gnueabi-g++ -Wl,--whole-archive -lpthread -Wl,--no-whole-archive -Wno-psabi -std=c++11 -O0 -fno-inline-functions -pthread -static receivingNode.cpp message_helper.cpp nodes_destination_translator.cpp network_installer.cpp node_timer.cpp log_keeper.cpp node_shutdown_manager.cpp emulated_nodes/pending_map_reduce.cpp emulated_nodes/node_state.cpp emulated_nodes/coordinator_node.cpp emulated_nodes/worker_node.cpp -g -o receivingNodeArm
+	echo "------------------------------------------Compiling sendingNode DEBUG---------------------------------------------"
+	arm-linux-gnueabi-g++ -Wl,--whole-archive -lpthread -Wl,--no-whole-archive -Wno-psabi -std=c++11 -O0 -fno-inline-functions -pthread -static sendingNode.cpp message_helper.cpp nodes_destination_translator.cpp network_installer.cpp node_timer.cpp log_keeper.cpp node_shutdown_manager.cpp emulated_nodes/pending_map_reduce.cpp emulated_nodes/node_state.cpp emulated_nodes/coordinator_node.cpp emulated_nodes/worker_node.cpp -g -o sendingNodeArm
+	echo "<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<Everything compiled successfully!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>"
+fi
 
 rsync -avzhe ssh receivingNodeArm fosco@saclay.iot-lab.info:/senslab/users/fosco
 rsync -avzhe ssh map_single_task.cpp fosco@saclay.iot-lab.info:/senslab/users/fosco
@@ -77,12 +85,18 @@ wait
 network_topology_content=$(cat network_topology.txt)
 network_performance_content=$(cat network_performance.txt)
 shutdown_intervals_content=$(cat shutdown_intervals_for_all_nodes.txt)
-	gnome-terminal --tab -- bash -c "ssh -t fosco@saclay.iot-lab.info 'ssh -t root@node-a8-1.saclay.iot-lab.info \"echo '\"'${shutdown_intervals_content}'\"' > shutdown_intervals_for_all_nodes.txt; echo '\"'${network_topology_content}'\"' > network_topology.txt; echo '\"'${network_performance_content}'\"' > network_performance.txt; gdb --args receivingNodeArm 28 1; bash\" '"
+
+if [[ $1 == "normal" ]];
+then 
+	gnome-terminal --tab -- bash -c "ssh -t fosco@saclay.iot-lab.info 'ssh -t root@node-a8-1.saclay.iot-lab.info \"echo '\"'${shutdown_intervals_content}'\"' > shutdown_intervals_for_all_nodes.txt; echo '\"'${network_topology_content}'\"' > network_topology.txt; echo '\"'${network_performance_content}'\"' > network_performance.txt; ./receivingNodeArm 28 1; bash\" '";
+else
+	gnome-terminal --tab -- bash -c "ssh -t fosco@saclay.iot-lab.info 'ssh -t root@node-a8-1.saclay.iot-lab.info \"echo '\"'${shutdown_intervals_content}'\"' > shutdown_intervals_for_all_nodes.txt; echo '\"'${network_topology_content}'\"' > network_topology.txt; echo '\"'${network_performance_content}'\"' > network_performance.txt; gdb --args receivingNodeArm 28 1; bash\" '";
+fi
+
 
 function execute_sender_number_with_disconnection_line {
 	sender_command="echo '\"'${shutdown_intervals_content}'\"' > shutdown_intervals_for_all_nodes.txt | ip addr show eth0 scope global | sed -e'\''s/^.*inet6 \([^ ]*\)\/.*$/\1/;t;d'\'' | xargs -I{} ./sendingNodeArm {} ${3}"
 	gnome-terminal --tab -- bash -c "ssh -t -oStrictHostKeyChecking=no fosco@${1}.iot-lab.info 'ssh -t root@node-${2} \"${sender_command}; bash\" '"
-	((line++))
 }
 
 # function execute_sender_number_with_disconnection_line_debug {
@@ -90,16 +104,24 @@ function execute_sender_number_with_disconnection_line {
 # 	gnome-terminal --tab -- bash -c "ssh -t -oStrictHostKeyChecking=no fosco@${1}.iot-lab.info 'ssh -t root@node-${2} \"${sender_command}\" '"
 # }
 
-echo "Press any key to continue"
-spd-say "migomigomigomigo"
-while [ true ] ; do
-	read -t 3 -n 1
-if [ $? = 0 ] ; then
-	break;
+if [[ $1 == "normal" ]];
+then 
+	echo "Starting"
 else
-	echo "waiting for the keypress"
+	echo "Press any key to continue"
+
+	# spd-say "migomigomigomigo"
+
+	while [ true ] ; do
+		read -t 3 -n 1
+		if [ $? = 0 ] ; then
+			break;
+		else
+			echo "waiting for the keypress"
+		fi
+	done
 fi
-done
+
 
 execute_sender_number_with_disconnection_line saclay a8-2.saclay.iot-lab.info 2
 execute_sender_number_with_disconnection_line saclay a8-3.saclay.iot-lab.info 3

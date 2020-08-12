@@ -92,7 +92,7 @@ void WorkerNode::tasks_forwarding_listener(int tasks_resend_socket_file_descript
 		if (message_data.content == "end") {
 			send_local_worker_statistics();
 
-			std::terminate();
+			// std::terminate();
 
 			this -> ended = true;
 			MessageHelper::send_message("end", worker_ip, "eth0", 8080);

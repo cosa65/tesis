@@ -17,6 +17,8 @@
 #include <future>
 #include <mutex>
 
+#include <memory>
+
 #include <unistd.h>
 
 #include "../log_keeper.h"
@@ -59,6 +61,10 @@ private:
 		bool operator() (T* ptr_1, T* ptr_2) {
 			return *ptr_1 < *ptr_2;
 		}
+
+		bool operator() (std::shared_ptr<T> ptr_1, std::shared_ptr<T> ptr_2) {
+			return *ptr_1 < *ptr_2;
+		}
 	};
 
 	void setup_worker_states_map(const std::list<std::string> &workers);
@@ -66,19 +72,20 @@ private:
 	void handle_map_result_received(MessageHelper::MessageData message_data);
 
 	std::thread setup_periodic_benchmarks(long period_in_seconds);
-	void check_available_nodes_and_send_tasks_if_necessary(PendingMapReduce *pending_map_reduce_ptr);
+	void check_available_nodes_and_send_tasks_if_necessary(std::shared_ptr<PendingMapReduce>pending_map_reduce_ptr);
 	void reset_resend_on_timeout_timer();
 	void resend_pending_tasks_on_timeout();
-	bool resend_pending_tasks();
+	void resend_pending_tasks();
+	void resend_pending_tasks_for_map_reduce(std::shared_ptr<PendingMapReduce>pending_map_reduce_ptr);
 	void save_logs();
 
-	PendingMapTask *add_pending_map_sent_to_worker(PendingMapTask *pending_map_ptr, std::string worker_id);
+	std::shared_ptr<PendingMapTask>add_pending_map_sent_to_worker(std::shared_ptr<PendingMapTask>pending_map_ptr, std::string worker_id);
 	void update_worker_node_state_with_finished_task(std::string worker_id, TaskIndex task_index);
-	std::list<std::string> update_workers_states_with_cancelled_task(PendingMapTask *finished_task);
+	std::list<std::string> update_workers_states_with_cancelled_task(std::shared_ptr<PendingMapTask>finished_task);
 
-	void send_bucketed_tasks_to_available_workers(std::list<std::shared_ptr<std::list<PendingMapTask*>>> tasks_by_bucket);
+	void send_bucketed_tasks_to_available_workers(std::list<std::shared_ptr<std::list<std::shared_ptr<PendingMapTask>>>> tasks_by_bucket);
 	void send_benchmark_test_to_all_nodes();
-	std::list<std::string> update_nodes_state_with_finished_task(PendingMapTask *finished_task, std::string worker_id);
+	std::list<std::string> update_nodes_state_with_finished_task(std::shared_ptr<PendingMapTask>finished_task, std::string worker_id);
 
 	// Returns send time
 	double send_benchmark_task_to(std::string worker_id);
@@ -95,33 +102,33 @@ private:
 
 	void finish_workers_and_gather_statistics();
 
-	PendingMapReduce *pop_pending_map_reduce_of_index(int map_reduce_index);
-	// void push_pending_map_reduce(PendingMapReduce *pending_map_reduce);
+	std::shared_ptr<PendingMapReduce>pop_pending_map_reduce_of_index(int map_reduce_index);
+	// void push_pending_map_reduce(std::shared_ptr<PendingMapReduce>pending_map_reduce);
 	void remove_map_reduce_of_index(int map_reduce_index);
 
 	std::string get_map_binary();
+	int assigned_workers_size_to_map_reduce(std::shared_ptr<PendingMapReduce>map_reduce_ptr);
 
-	void reorder_map_reduces(PendingMapReduce *changed_map_reduce);
+	void reorder_map_reduces(std::shared_ptr<PendingMapReduce>changed_map_reduce);
 
 	// Distributes the tasks on the buckets as evenly as possible in groups
-	std::list<std::list<PendingMapTask*>*> distribute_replication_between_buckets(int amount_of_partitions, std::list<PendingMapTask *> maps_in_buckets);
+	std::list<std::list<std::shared_ptr<PendingMapTask>>*> distribute_replication_between_buckets(int amount_of_partitions, std::list<std::shared_ptr<PendingMapTask>> maps_in_buckets);
 	
-	std::list<std::list<PendingMapTask*>*> distribute_tasks_individually_and_replicate_to_fill_empty_nodes(int amount_of_partitions, std::list<PendingMapTask *> maps_in_buckets);
+	std::list<std::list<std::shared_ptr<PendingMapTask>>*> distribute_tasks_individually_and_replicate_to_fill_empty_nodes(int amount_of_partitions, std::list<std::shared_ptr<PendingMapTask>> maps_in_buckets);
 
 	
-	std::set<PendingMapReduce *, PerformancePtrsCmp<PendingMapReduce>> pending_map_reduces;
+	std::set<std::shared_ptr<PendingMapReduce>, PerformancePtrsCmp<PendingMapReduce>> pending_map_reduces;
 
-	std::set<PendingMapReduce *, PerformancePtrsCmp<PendingMapReduce>> disabled_pending_map_reduces;
+	std::set<std::shared_ptr<PendingMapReduce>, PerformancePtrsCmp<PendingMapReduce>> disabled_pending_map_reduces;
 
-	std::map<int, PendingMapReduce *> pending_map_reduces_by_index;
-	// std::list<PendingMapReduce*> pending_map_reduces;
+	std::map<int, std::shared_ptr<PendingMapReduce>> pending_map_reduces_by_index;
 
 	std::list<std::string> workers;
 
-	std::priority_queue<NodeState*, std::vector<NodeState *>, PerformancePtrsCmp<NodeState>> idle_workers;
+	std::priority_queue<std::shared_ptr<NodeState>, std::vector<std::shared_ptr<NodeState>>, PerformancePtrsCmp<NodeState>> idle_workers;
 	
 	// Used to aid guessing which worker to pick when resending
-	std::map<std::string, NodeState *> efficiency_by_worker_id;
+	std::map<std::string, std::shared_ptr<NodeState>> efficiency_by_worker_id;
 	long average_execution_time; 
 	int timeout;
 	bool partitioned_redundancy_mode_enabled;
@@ -157,12 +164,10 @@ private:
 	std::atomic<bool> timeout_has_been_reset;
 
 	std::map<std::string, double> benchmark_tasks_send_times;
+	std::list<std::tuple<int, double>> finished_map_reduces_duration_times;
 
 	NodeShutdownManager *node_shutdown_manager;
 	NodesDestinationTranslator *translator;
 	NodeTimer *node_timer;
 	LogKeeper *log_keeper;
-
-
-	// bool debug_trigger = false;
 };

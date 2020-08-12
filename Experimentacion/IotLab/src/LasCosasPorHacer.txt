@@ -165,10 +165,12 @@ AHORA:
 					- si no alcanzo el threshold pero no hay otros MRs libres podria hacer que reenvie igual quizas (esto quizas solo con criticidad bien alta)
 
 
-				- FALTA UN MECANISMO PARA DARME CUENTA CUANDO UN NODO ESTA MUERTO (algun tipo de timeout, no necesariamente las tareas testigo)
-
 				- PREGUNTA: LOS NODOS WORKER DEBERIAN TENER UN MAXIMO DE CUANTAS TAREAS LES PUEDO ENVIAR AL MISMO TIEMPO, ESE MAXIMO DEBERIA SER REGULADO DEL LADO DEL COORDINADOR O DEL WORKER? TIENE MAS SENTIDO REGULARLA DEL LADO DEL COORDINADOR ME PARECE. Razon para que tengan el maximo: Mejor que no tengan tiempo idle si se puede evitar. Mantener la cola de tareas pendientes en cada worker llena.
 					- setear un maximo de tareas para cada nodo y decidir de acuerdo a eso, no a si esta idle o no
 
 				- Elijo politica de redundancia individual si tengo 1 o 2 nodos (y envio solo a ese nodo tantas tareas como pueda).
 					Solo cuando tengo 3 o mas puedo plantearme el uso de la redundancia agrupada, si no la redundancia se vuelve un peso demasiado grande sin demasiada ganancia 
+
+				- IMPORTANTE Falta hacer el WorkersAssigner que decide en base a cuantas veces ya estan pendientes las tareas de los mapreduces a quienes reenviar (ademas de tener en cuenta las prioridades). Para evitar que un MR gane siempre y termine acaparando los nodos de todos modos
+
+				- FALTA UN MECANISMO PARA DARME CUENTA CUANDO UN NODO ESTA MUERTO (algun tipo de timeout, no necesariamente las tareas testigo)
