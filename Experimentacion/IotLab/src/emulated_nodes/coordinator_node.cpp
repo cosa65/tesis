@@ -41,19 +41,19 @@ void CoordinatorNode::start(std::list<std::string> workers, int timeout, bool pa
 	this -> threshold_of_execution_mode_enabled = threshold_of_execution_mode_enabled;
 	this -> initial_threshold_of_execution_mode_enabled = threshold_of_execution_mode_enabled;
 	this -> workers = workers;
+
+	this -> initial_benchmark_mutex.lock();
+
 	MessageHelper::start();
 
 	setup_worker_states_map(workers);
 
 	this -> finished = false;
-	this -> finished_initial_distribution_mutex.lock();
 
 	this -> timeout_has_been_reset = false;
 
 	this -> node_timer -> start();
 	this -> node_shutdown_manager -> start();
-
-	this -> initial_benchmark_mutex.lock();
 
 	// Begin listening before sending maps
 	auto map_results_listener_thread = std::thread([this](std::list<std::string> workers) { 
@@ -89,21 +89,13 @@ void CoordinatorNode::start(std::list<std::string> workers, int timeout, bool pa
 void CoordinatorNode::setup_worker_states_map(const std::list<std::string> &workers) {
 	for (std::string worker_id : workers) {
 		std::shared_ptr<NodeState>worker_state = std::make_shared<NodeState>(worker_id);
-		this -> efficiency_by_worker_id[worker_id] = worker_state;
+		this -> node_states_by_worker_id[worker_id] = worker_state;
 	}
 }
 
 void CoordinatorNode::distribute_and_send_maps(int initial_threshold, int criticality, std::list<long> map_tasks_in_flops) {
 	this -> initial_benchmark_mutex.lock();
 	this -> initial_benchmark_mutex.unlock();
-
-	std::cout << "pending_map_reduces pre add: [ ";
-	for (auto mr : this -> pending_map_reduces) { 
-		std::cout << mr -> get_index() << ", ";
-	}
-	std::cout << "]" << std::endl;
-
-	std::cout << "\033[1;32m--------------------------------------------------------------ADDING NEW MAP REDUCE WITH INDEX " << this -> free_map_reduce_index << "\033[0m--------------------------------------------------------------" << std::endl;
 
 	std::cout << "map_tasks_in_flops: " << std::endl;
 	for (long task : map_tasks_in_flops) {
@@ -115,27 +107,29 @@ void CoordinatorNode::distribute_and_send_maps(int initial_threshold, int critic
 
 	std::list<std::shared_ptr<PendingMapTask>> map_tasks;
 
+	int current_map_reduce_index = this -> free_map_reduce_index;
+	this -> free_map_reduce_index++;
+
 	int current_task_index = 0;
 	for (long iterations : map_tasks_in_flops) {
-		TaskIndex task_index = TaskIndex(this -> free_map_reduce_index, current_task_index);
+		TaskIndex task_index = TaskIndex(current_map_reduce_index, current_task_index);
 
 		std::shared_ptr<PendingMapTask>pending_map_task = std::make_shared<PendingMapTask>(task_index, iterations);
 		current_task_index++;
 
 		map_tasks.push_back(pending_map_task);
 	}
-	
+
 	std::cout << "\033[1;31m<DEBUG> workers_and_maps_access_mutex: 92\033[0m" << std::endl;
-	this -> workers_and_maps_access_mutex.lock();
+	this -> workers_and_maps_access_mutex.lock(PrioritiesMutex::PriorityOption::high);
 
 	std::cout << "\033[1;31m<DEBUG> pending_map_reduces_mutex: 104 \033[0m" << std::endl;
-	this -> pending_map_reduces_mutex.lock();
+	this -> pending_map_reduces_mutex.lock(PrioritiesMutex::PriorityOption::high);
 
- 	std::shared_ptr<PendingMapReduce>new_pending_map_reduce_ptr = std::make_shared<PendingMapReduce>(this -> free_map_reduce_index, initial_threshold, criticality, new_map_reduce_request_time, map_tasks, this -> node_timer);
+ 	std::shared_ptr<PendingMapReduce> new_pending_map_reduce_ptr = std::make_shared<PendingMapReduce>(current_map_reduce_index, initial_threshold, criticality, new_map_reduce_request_time, map_tasks, this -> node_timer);
 
-	this -> pending_map_reduces.insert(new_pending_map_reduce_ptr);
 	this -> pending_map_reduces_by_index[new_pending_map_reduce_ptr -> get_index()] = new_pending_map_reduce_ptr;
- 	this -> free_map_reduce_index++;
+	this -> pending_map_reduces.insert(new_pending_map_reduce_ptr);	
 
  	// if (this -> idle_workers.size() > 0) {
 		// std::list<std::shared_ptr<std::list<std::shared_ptr<PendingMapTask>>>> tasks_by_bucket = new_pending_map_reduce_ptr -> get_distributed_tasks_by_bucket(this -> idle_workers.size());
@@ -155,15 +149,19 @@ void CoordinatorNode::distribute_and_send_maps(int initial_threshold, int critic
  	// 	// store_map_reduce_as_pending(new_pending_map_reduce_ptr);
  	// }
 
+ 	std::cout << "pending map reduce added: " << new_pending_map_reduce_ptr -> get_index() << std::endl;
+
+ 	std::cout << "pending_map_reduces post add: [ ";
+	for (auto mr : this -> pending_map_reduces) { 
+		std::cout << mr -> get_index() << ", ";
+	}
+	std::cout << "]" << std::endl;
+
+	std::cout << "\033[1;31m<DEBUG> workers_and_maps_access_mutex unlock: 92 \033[0m" << std::endl;
+	this -> workers_and_maps_access_mutex.unlock(PrioritiesMutex::PriorityOption::high);
+
 	std::cout << "\033[1;31m<DEBUG> pending_map_reduces_mutex unlock: 104 \033[0m" << std::endl;
-	this -> pending_map_reduces_mutex.unlock();
-
-	std::cout << "\033[1;31m<DEBUG> workers_and_maps_access_mutex: 266 \033[0m" << std::endl;
-	this -> workers_and_maps_access_mutex.unlock();
-
-	std::cout << node_timer -> time_log() << "Sending all " << new_pending_map_reduce_ptr -> get_pending_maps_size() << " prepared map tasks" << std::endl;
-
-	this -> finished_initial_distribution_mutex.unlock();
+	this -> pending_map_reduces_mutex.unlock(PrioritiesMutex::PriorityOption::high);
 }
 
 void CoordinatorNode::handle_map_result_received(MessageHelper::MessageData message_data) {
@@ -200,23 +198,23 @@ void CoordinatorNode::handle_map_result_received(MessageHelper::MessageData mess
 
 	std::cout << "pending_map_reduces before update: [ ";
 	for (auto mr : this -> pending_map_reduces) { 
-		std::cout << mr << ", ";
+		std::cout << mr << " index: [" << mr -> get_index() << "] size: " << mr -> get_pending_maps_size() << ", ";
 	}
 	std::cout << "]" << std::endl;
 
-	std::shared_ptr<PendingMapReduce>pending_map_reduce_ptr = pop_pending_map_reduce_of_index(task_index.map_reduce_index);
+	std::shared_ptr<PendingMapReduce> pending_map_reduce_ptr = pop_pending_map_reduce_of_index(task_index.map_reduce_index);
 
 	// If map reduce doesn't exist then it was already finished, so we ignore this result
 	if (pending_map_reduce_ptr != NULL) {
-		std::shared_ptr<PendingMapTask>finished_map_task_ptr = pending_map_reduce_ptr -> set_map_task_as_finished(task_index.map_index);
+		std::shared_ptr<PendingMapTask> finished_map_task_ptr = pending_map_reduce_ptr -> set_map_task_as_finished(task_index.map_index);
 
 		this -> pending_map_reduces.insert(pending_map_reduce_ptr);
 
-		std::cout << "pending_map_reduces after update: [ ";
-		for (auto mr : this -> pending_map_reduces) { 
-			std::cout << mr << ", ";
-		}
-		std::cout << "]" << std::endl;
+		// std::cout << "pending_map_reduces after update: [ ";
+		// for (auto mr : this -> pending_map_reduces) { 
+		// 	std::cout << mr << ", ";
+		// }
+		// std::cout << "]" << std::endl;
 
 		pending_maps_size = pending_map_reduce_ptr -> get_pending_maps_size();
 
@@ -261,6 +259,8 @@ void CoordinatorNode::handle_map_result_received(MessageHelper::MessageData mess
 		std::cout << node_timer -> time_log() << std::endl;
 		std::cout << "\033[1;32m--------------------------------------------------------------FINISHED MAP REDUCE WITH INDEX " << pending_map_reduce_ptr -> get_index() << "\033[0m--------------------------------------------------------------" << std::endl;
 		
+		this -> finished_map_reduces_str_debug.push_back(pending_map_reduce_ptr -> get_index());
+
 		this -> finished_map_reduces_duration_times.push_back({pending_map_reduce_ptr -> get_index(), execution_time});
 
 		remove_map_reduce_of_index(pending_map_reduce_ptr -> get_index());
@@ -343,7 +343,7 @@ void CoordinatorNode::check_available_nodes_and_send_tasks_if_necessary(std::sha
 	// // Fix total_maps
 	// // int percentage_pending = (float)pending_maps_size / (float)total_maps * 100;
 
-	// int percentage_idle_nodes = ((float)this -> idle_workers.size() / (float)this -> efficiency_by_worker_id.size()) * 100;
+	// int percentage_idle_nodes = ((float)this -> idle_workers.size() / (float)this -> node_states_by_worker_id.size()) * 100;
 
 	// std::cout << node_timer -> time_log() << "[THRESHOLD] Percentage of idle nodes is " << percentage_idle_nodes << " vs threshold to begin resending tasks of: " << threshold << std::endl;
 
@@ -399,9 +399,6 @@ void CoordinatorNode::resend_pending_tasks_on_timeout() {
 
 // Returns true if this resend was successful or false if it was cancelled because another resend was already taking place
 void CoordinatorNode::resend_pending_tasks() {
-	this -> finished_initial_distribution_mutex.lock();
-	this -> finished_initial_distribution_mutex.unlock();
-
 	std::cout << node_timer -> time_log() << "Resending pending tasks" << std::endl;
 
 	// If we failed to capture the lock, then that means a resend operation is already taking place, so we don't need to perform the resend_pending_task again
@@ -466,9 +463,7 @@ void CoordinatorNode::resend_pending_tasks_for_map_reduce(std::shared_ptr<Pendin
 
 	std::list<std::shared_ptr<std::list<std::shared_ptr<PendingMapTask>>>> tasks_by_bucket = pending_map_reduce_ptr -> get_distributed_tasks_by_bucket(assigned_workers_size);
 
-	std::cout << "idle_workers.size(): " << this -> idle_workers.size() << std::endl;
-	std::cout << "tasks_by_bucket: " << tasks_by_bucket.size() << std::endl;	
-	print_list_of_lists(tasks_by_bucket);
+	// print_list_of_lists(tasks_by_bucket);
 
 	send_bucketed_tasks_to_available_workers(tasks_by_bucket);
 }
@@ -494,7 +489,7 @@ void CoordinatorNode::save_logs() {
 	// 	std::string idle_time = workers_idle_times[worker];
 	// 	std::string node_performance_value; 
 
-	// 	std::shared_ptr<NodeState>node_performance_ptr = CoordinatorNode::efficiency_by_worker_id[worker];	
+	// 	std::shared_ptr<NodeState>node_performance_ptr = CoordinatorNode::node_states_by_worker_id[worker];	
 
 	// 	if (node_performance_ptr != NULL) {
 	// 		node_performance_value = std::to_string(node_performance_ptr -> get_node_performance());
@@ -545,7 +540,7 @@ void CoordinatorNode::save_logs() {
 // }
 
 void CoordinatorNode::update_worker_node_state_with_finished_task(std::string worker_id, TaskIndex task_index) {
-	std::shared_ptr<NodeState>worker_state = this -> efficiency_by_worker_id[worker_id];
+	std::shared_ptr<NodeState>worker_state = this -> node_states_by_worker_id[worker_id];
 
 	worker_state -> remove_task(task_index.to_string());
 
@@ -641,7 +636,7 @@ double CoordinatorNode::send_benchmark_task_to(std::string worker_id) {
 
 	MessageHelper::send_message(message, next_step_ip, "eth0", port);
 
-	this -> efficiency_by_worker_id[worker_id] -> add_task("-1");
+	this -> node_states_by_worker_id[worker_id] -> add_task("-1");
 
 	return send_message;
 }
@@ -658,14 +653,29 @@ void CoordinatorNode::listen_for_map_results() {
 
 		if (message_data.is_benchmark_task()) {
 			std::string worker_id = MessageHelper::get_value_for("worker:", message_data.content);
-			efficiency_by_worker_id[worker_id] -> remove_task("-1");
-			update_performance(message_data);
+
+			this -> workers_and_maps_access_mutex.lock();
+
+			node_states_by_worker_id[worker_id] -> remove_task("-1");
+			update_performance(message_data);			
+
+			this -> workers_and_maps_access_mutex.unlock();
 
 			continue;
 		}
 
-		this -> finished_initial_distribution_mutex.lock();
-		this -> finished_initial_distribution_mutex.unlock();
+		if (message_data.is_reset_message()) {
+			std::string worker_id = MessageHelper::get_value_for("worker:", message_data.content);
+
+			this -> workers_and_maps_access_mutex.lock(PrioritiesMutex::PriorityOption::high);
+
+			std::cout << this -> node_timer -> time_log() << "\033[1;32m Resetting state of node \033[0m" << worker_id << " which before had " << node_states_by_worker_id[worker_id] -> get_current_tasks_size() << " pending tasks" << std::endl;
+			node_states_by_worker_id[worker_id] -> remove_all_tasks();
+
+			this -> workers_and_maps_access_mutex.unlock(PrioritiesMutex::PriorityOption::high);
+			
+			continue;
+		}
 
 		if (this -> finished.load()) {
 			return;
@@ -699,7 +709,9 @@ int CoordinatorNode::listen_for_initial_benchmarks(std::list<std::string> worker
 			break;
 		}
 
+		this -> workers_and_maps_access_mutex.lock();
 		update_performance(*message_data_ptr);
+		this -> workers_and_maps_access_mutex.unlock();
 
 		benchmarks_left--;
 	}
@@ -709,7 +721,6 @@ int CoordinatorNode::listen_for_initial_benchmarks(std::list<std::string> worker
 
 std::map<std::string, WorkerStatistics> CoordinatorNode::listen_for_workers_statistics_messages(int workers_size) {
 	int statistics_descriptor = MessageHelper::bind_listen(this -> coordinator_ip, "eth0", 8081);
-
 
 	std::map<std::string, WorkerStatistics> idle_times_by_worker_ip;
 
@@ -765,17 +776,12 @@ void CoordinatorNode::update_performance(MessageHelper::MessageData message_data
 	std::cout << "Updating performance with message_data from: " << worker << std::endl;
 	
 	double response_time = receive_time - (this -> benchmark_tasks_send_times[worker]);
-	std::cout << "\033[1;31m<DEBUG> workers_and_maps_access_mutex: 582 \033[0m" << std::endl;
-	this -> workers_and_maps_access_mutex.lock();
-	{
+	
 		std::shared_ptr<NodeState> worker_state = std::make_shared<NodeState>(worker);
 		worker_state -> add_response_time(response_time);
 
-		this -> efficiency_by_worker_id[worker] = worker_state;
+		this -> node_states_by_worker_id[worker] = worker_state;
 		this -> idle_workers.push(worker_state);
-	}
-	std::cout << "\033[1;31m<DEBUG> workers_and_maps_access_mutex: 591 \033[0m" << std::endl;
-	this -> workers_and_maps_access_mutex.unlock();
 }
 
 void CoordinatorNode::finish_workers_and_gather_statistics() {
@@ -824,13 +830,20 @@ void CoordinatorNode::finish_workers_and_gather_statistics() {
 
 	log_file << std::endl << std::endl;
 
+	log_file << "Map reduces: " << "index: ";
+	for (int mapreduceint : this -> finished_map_reduces_str_debug) {
+		log_file << mapreduceint << " ";
+	}
+
+	log_file << std::endl << std::endl;
+
 	int i = 2;
 	for (std::string worker_ip : this -> workers) {
 		WorkerStatistics statistics = workers_statistics[worker_ip];
 
 		double percentage_idle_time = ((statistics.total_lifetime - statistics.total_execution_time) / statistics.total_lifetime) * 100.0;
 
-		auto node_state = this -> efficiency_by_worker_id[worker_ip];
+		auto node_state = this -> node_states_by_worker_id[worker_ip];
 
 		std::string node_performance_str;
 		if (node_state == NULL) {

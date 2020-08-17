@@ -87,7 +87,6 @@ Redundancia:
 
 
 
-
 - <FALTA TESTEAR> Se envian benchmarks cada x segundos
 	- <QUEDA PARA DESPUES> Si el nodo está muy ocupado en el momento (muy cargado de tareas), se guarda como benchmark pendiente y cada vez que se recibe un resultado de ese nodo se reevalúa si es posible enviar el benchmark.
 
@@ -174,3 +173,23 @@ AHORA:
 				- IMPORTANTE Falta hacer el WorkersAssigner que decide en base a cuantas veces ya estan pendientes las tareas de los mapreduces a quienes reenviar (ademas de tener en cuenta las prioridades). Para evitar que un MR gane siempre y termine acaparando los nodos de todos modos
 
 				- FALTA UN MECANISMO PARA DARME CUENTA CUANDO UN NODO ESTA MUERTO (algun tipo de timeout, no necesariamente las tareas testigo)
+
+
+
+				- Cancel messages should be multiplied by the bridge worker nodes that have access to them? Maybe check if it actually is useful?
+				- Think of a way to improve cancel message distribution, maybe a broadcast using some kind of bfs or something?
+
+				- Algo para variar performance de los nodos a lo larog de su ejecucion? O no yafu
+
+				- Pregunta: 
+					- Cuando reseteo el estado de un nodo porque se apago y prendio, me guardo el benchmark que ya tenia? O lo tiro?
+						- Si me lo guardo, convendria mandarle una benchmark inmediatamente por las dudas igual, no?
+						- Los periodos de apagado deberian funcionar de manera que el nodo coordinador se entere cuando se reconectan tanto los nodos apgados como aquellos para los que el nodo apagado hacia de puente. Esto seria porque por lo que realmente estamos representando
+							- IDEA: el coordinador resetea el estado del apagado y los que lo usaban de puente para simplificar el asunto, porque sino deberiamos encontrar una manera de saber que tareas resueltas se perdieron y cuales no.
+							
+							- Como hacemos para mitigar el impacto del nodo puente apagado en que se pierdan tareas? Que los nodos que no pueden enviar el mensaje esperen hasta que se pueda? Ahi no perdemos nada
+
+					- Cuando reseteo el estado de un nodo porque se apago, como hago con los nodos que lo usaban de puente? No van a poder comunicarse pero van a estar prendidos, entonces se pierden algunos pero otros no
+
+					- Acumular cancel messages y enviarlos de a batches para evitar floodear con estos mensajes la red (o esta bien?)
+

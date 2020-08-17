@@ -12,10 +12,12 @@ public:
 
 	void add_task(std::string task_id_str);
 	void remove_task(std::string task_id_str);
+	void remove_all_tasks();
 	bool node_is_idle();
 
 	double get_node_performance();
 	std::string get_node_id();
+	int get_current_tasks_size();
 
 	bool operator<(NodeState &e1);
 

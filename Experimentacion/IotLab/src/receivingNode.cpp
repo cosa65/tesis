@@ -45,22 +45,37 @@ std::string begin_handler_for_role_receipt(
 		std::cout << "I'm the coordinator" << std::endl;
 
 		std::list<long> map_tasks_in_flops = {
-			600,200,300,400//,500,600,700,800,900,100,
-			// 110,120,130,140,150,100,110,120,130,140,
-			// 150,100,110,120,130,140,150,100,110,120,
-			// 600,200,300,400,500,600,700,800,900,100,
-			// 110,120,130,140,150,100,110,120,130,140,
-			// 150,100,110,120,130,140,150,100,110,120,
-			// 600,200,300,400,500,600,700,800,900,100,
-			// 600,200,300,400,500,600,700,800,900,100,
-			// 600,200,300,400,500,600,700,800,900,100,
-			// 600,200,300,400,500,600,700,800,900,100
+			600,200,300,400,500,600,700,800,900,100,
+			110,120,130,140,150,100,110,120,130,140,
+			150,100,110,120,130,140,150,100,110,120,
+			600,200,300,400,500,600,700,800,900,100,
+			110,120,130,140,150,100,110,120,130,140,
+			150,100,110,120,130,140,150,100,110,120,
+			600,200,300,400,500,600,700,800,900,100,
+			600,200,300,400,500,600,700,800,900,100,
+			600,200,300,400,500,600,700,800,900,100,
+			600,200,300,400,500,600,700,800,900,100
 		};
 
-		std::list<long> map_tasks_in_flops_1 = { 600,200,300,400,500};//,600,700,800,900,100 };
-		std::list<long> map_tasks_in_flops_2 = { 600,200,300,400,500};//,600,700,800,900,100 };
-		std::list<long> map_tasks_in_flops_3 = { 600,200,300,400,500};//,600,700,800,900,100 };
-		
+		std::list<long> map_tasks_in_flops_1 = { 600,200,300,400,500,600,700,800,900,100 };
+		std::list<long> map_tasks_in_flops_2 = { 600,200,300,400,500,600,700,800,900,100 };
+		std::list<long> map_tasks_in_flops_3 = { 600,200,300,400,500,600,700,800,900,100 };
+		std::list<long> map_tasks_in_flops_4 = { 600,200,300,400,500,600,700,800,900,100 };
+		std::list<long> map_tasks_in_flops_5 = { 
+		600,200,300,400,500,600,700,800,900,100,
+			150,100,110,120,130,140,150,100,110,120,
+			600,200,300,400,500,600,700,800,900,100,
+			110,120,130,140,150,100,110,120,130,140,
+			150,100,110,120,130,140,150,100,110,120,
+			600,200,300,400,500,600,700,800,900,100,
+			600,200,300,400,500,600,700,800,900,100,
+		};
+		std::list<long> map_tasks_in_flops_6 = { 600,200,300,400,500,600,700,800,900,100 };
+		std::list<long> map_tasks_in_flops_7 = { 600,200,300,400,500,600,700,800,900,100 };
+		std::list<long> map_tasks_in_flops_8 = { 600,200,300,400,500,600,700,800,900,100 };
+		std::list<long> map_tasks_in_flops_9 = { 600,200,300,400,500,600,700,800,900,100 };
+		std::list<long> map_tasks_in_flops_10 = { 600,200,300,400,500,600,700,800,900,100 };
+
 		int initial_threshold = 25;
 		int timeout = 10;
 		bool partitioned_redundancy_mode_enabled = 1;
@@ -73,15 +88,50 @@ std::string begin_handler_for_role_receipt(
 		
 		std::thread coordinator_thread = std::thread([&](){ coordinator.start(worker_ips, timeout, partitioned_redundancy_mode_enabled, threshold_of_execution_mode_enabled); });
 
+		
+		auto distribute_0 = std::thread([&](){ coordinator.distribute_and_send_maps(initial_threshold, 1, map_tasks_in_flops); });
+		auto distribute_1 = std::thread([&](){ coordinator.distribute_and_send_maps(initial_threshold, 1, map_tasks_in_flops_1); });
+		auto distribute_2 = std::thread([&](){ coordinator.distribute_and_send_maps(initial_threshold, 1, map_tasks_in_flops_2); });
+		auto distribute_3 = std::thread([&](){ coordinator.distribute_and_send_maps(initial_threshold, 1, map_tasks_in_flops_3); });
+
 		int period_in_seconds = 30;
 		auto period = std::chrono::seconds(period_in_seconds);
 		std::this_thread::sleep_for(period);
 
-		coordinator.distribute_and_send_maps(initial_threshold, 1, map_tasks_in_flops);
+		auto distribute_4 = std::thread([&](){ coordinator.distribute_and_send_maps(initial_threshold, 1, map_tasks_in_flops_4); });
+		auto distribute_5 = std::thread([&](){ coordinator.distribute_and_send_maps(initial_threshold, 1, map_tasks_in_flops_5); });
 
-		coordinator.distribute_and_send_maps(initial_threshold, 1, map_tasks_in_flops_1);
-		coordinator.distribute_and_send_maps(initial_threshold, 1, map_tasks_in_flops_2);
-		coordinator.distribute_and_send_maps(initial_threshold, 1, map_tasks_in_flops_3);
+		period_in_seconds = 5;
+		period = std::chrono::seconds(period_in_seconds);
+		std::this_thread::sleep_for(period);
+
+		auto distribute_6 = std::thread([&](){ coordinator.distribute_and_send_maps(initial_threshold, 1, map_tasks_in_flops_6); });
+
+		period_in_seconds = 5;
+		period = std::chrono::seconds(period_in_seconds);
+		std::this_thread::sleep_for(period);
+
+		auto distribute_7 = std::thread([&](){ coordinator.distribute_and_send_maps(initial_threshold, 1, map_tasks_in_flops_7); });
+		auto distribute_8 = std::thread([&](){ coordinator.distribute_and_send_maps(initial_threshold, 1, map_tasks_in_flops_8); });
+
+		period_in_seconds = 10;
+		period = std::chrono::seconds(period_in_seconds);
+		std::this_thread::sleep_for(period);
+
+		auto distribute_9 = std::thread([&](){ coordinator.distribute_and_send_maps(initial_threshold, 1, map_tasks_in_flops_9); });
+		auto distribute_10 = std::thread([&](){ coordinator.distribute_and_send_maps(initial_threshold, 1, map_tasks_in_flops_10); });
+
+		distribute_0.join();
+		distribute_1.join();
+		distribute_2.join();
+		distribute_3.join();
+		distribute_4.join();
+		distribute_5.join();
+		distribute_6.join();
+		distribute_7.join();
+		distribute_8.join();
+		distribute_9.join();
+		distribute_10.join();
 
 		coordinator_thread.join();
 	} else {

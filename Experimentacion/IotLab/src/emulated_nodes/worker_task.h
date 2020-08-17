@@ -11,13 +11,9 @@ struct WorkerTask {
 
 		std::list<std::string> tasks_str_list = MessageHelper::split_by_spaces(tasks_str);
 
-		std::cout << "<DEBUG>" << "FINISHED SPLIT BY SPACES" << std::endl;
-
 		for (std::string task_str : tasks_str_list) {
 			std::string task_index = MessageHelper::get_value_for("task_index:", task_str);
 			long iterations = std::stol(MessageHelper::get_value_for(",iterations:", task_str));
-
-			std::cout << "<DEBUG>" << "IM IN THE FOR" << std::endl;
 
 			tasks_list.push_back(new WorkerTask(task_index, iterations, binary_name));
 		}

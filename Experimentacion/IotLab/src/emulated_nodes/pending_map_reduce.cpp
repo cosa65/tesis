@@ -105,6 +105,10 @@ std::shared_ptr<PendingMapTask>PendingMapReduce::set_map_task_as_finished(int ta
 
 // Lower priority value means more important
 bool PendingMapReduce::operator<(PendingMapReduce &e1) {
+	if (this -> get_priority() == e1.get_priority()) {
+		return this -> get_index() < e1.get_index();
+	}
+	
 	return this -> get_priority() > e1.get_priority();
 }
 

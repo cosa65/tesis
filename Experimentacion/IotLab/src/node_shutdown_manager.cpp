@@ -79,3 +79,11 @@ bool NodeShutdownManager::is_connected_now(double time_point) {
 
 	return true;
 }
+
+// template <typename Function>
+// void NodeShutdownManager::execute_on_turning_on(Function f) {
+// 	for (auto interval : this -> disconnection_intervals) {
+// 		this -> node_timer -> sleep_until(std::get<1>(interval));
+// 		f();
+// 	}
+// }

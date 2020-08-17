@@ -40,6 +40,15 @@ void WorkerNode::start(int socket_file_descriptor, int tasks_resend_socket_file_
 	 	}
  	);
 
+	auto shutdown_woke_up_messager = std::async(
+		std::launch::async,
+		[this] {
+			this -> node_shutdown_manager -> execute_on_turning_on([this] {
+				this -> send_notification_to_coordinator_of_shutdown_recuperation(); 
+			});
+		}
+	);
+
 	while(true) {
 		if (this -> pending_tasks.empty()) {
 			this -> main_thread_waiting_on_new_tasks = true;
@@ -109,16 +118,8 @@ void WorkerNode::tasks_forwarding_listener(int tasks_resend_socket_file_descript
 				continue;
 			}
 
-			std::string destination_ip = message_data.get_final_destination();
-
-			std::string next_step_ip = this -> translator -> next_step_ip_to(destination_ip);
-			std::string final_destination_ip = message_data.get_final_destination();
-
-			std::cout << node_timer -> time_log() << "\033[1;33m[TASKS_FORWARDING_THREAD]\033[0m" << "Forwarding message for another node over to next step: " << next_step_ip << ".\n\t\t Messages final destination is: " << message_data.get_final_destination() << std::endl;
-
-			int port = final_destination_ip == next_step_ip ? 8080 : 8082;
-
-			MessageHelper::send_message(message_data.content, next_step_ip, "eth0", port);
+			std::cout << node_timer -> time_log() << "\033[1;33m[TASKS_FORWARDING_THREAD]\033[0m" << "Forwarding message that is destined for: " << message_data.get_final_destination() << ".\n\t\t Messages final destination is: " << message_data.get_final_destination() << std::endl;
+			send_message_through_topology(message_data.content, message_data.get_final_destination());
 		}
 	}
 }
@@ -241,15 +242,10 @@ int WorkerNode::handle_map_task(WorkerTask worker_task) {
 	ss << "task_index:" << worker_task.task_index << ",worker:" << this -> worker_ip << ",destination_ip:" << this -> ip_to_coordinator;
 	std::string message = ss.str();
 
-	std::string next_step_ip = this -> translator -> next_step_ip_to(this -> ip_to_coordinator);
-
-	int port = this -> ip_to_coordinator == next_step_ip ? 8080 : 8082;
-
 	std::cout << "Sending finished task message with content: " << message << std::endl;
+	send_message_through_topology(message, this -> ip_to_coordinator);
 
-
-	MessageHelper::send_message(message, next_step_ip, "eth0", port);
-	std::cout << node_timer -> time_log() << "Finished map operation for map_index " << worker_task.task_index << " and sent result through: " << next_step_ip << std::endl;
+	std::cout << node_timer -> time_log() << "Finished map operation for map_index " << worker_task.task_index << " and sent result to coordinator through topology" << std::endl;
 
 	return op_result;
 }
@@ -302,28 +298,6 @@ int WorkerNode::run_operation(const long iterations, std::string binary_name) {
 	return FINISHED_EXECUTION_WITHOUT_PROBLEMS;
 }
 
-void WorkerNode::send_local_worker_statistics() {
-	double total_execution_time_to_send = this -> total_execution_time;
-
-	this -> operation_status_mutex.lock();
-	{
-		// We are sending statistics while worker is running an operation, so we should add the current executions partial time to the total
-		if (this -> running_operation) {
-			double now = this -> node_timer -> current_time_in_ms();
-			double current_operation_execution_time = now - this -> operation_start_time;
-
-			total_execution_time_to_send += current_operation_execution_time;
-		}
-	}
-	this -> operation_status_mutex.unlock();
-
-	std::stringstream ss;
-	ss << "total_execution_time:" << total_execution_time_to_send << ",total_lifetime:" << this -> node_timer -> current_time_in_ms() << ",sent_messages:" << MessageHelper::get_sent_messages() << ",worker:" << this -> worker_ip;
-	std::string message = ss.str();
-
-	MessageHelper::send_message(message, this -> ip_to_coordinator, "eth0", 8081);
-}
-
 // Returns binary name
 std::string WorkerNode::store_binary(std::string binary_content, std::string unique_id) {
 	std::cout << "Storing binary_content, length is: " << binary_content.length() << ", size is: " << binary_content.size() << std::endl;
@@ -354,4 +328,43 @@ bool WorkerNode::file_exists(std::string filepath) {
 	} else {
 		return false;
 	}
+}
+
+void WorkerNode::send_local_worker_statistics() {
+	double total_execution_time_to_send = this -> total_execution_time;
+
+	this -> operation_status_mutex.lock();
+	{
+		// We are sending statistics while worker is running an operation, so we should add the current executions partial time to the total
+		if (this -> running_operation) {
+			double now = this -> node_timer -> current_time_in_ms();
+			double current_operation_execution_time = now - this -> operation_start_time;
+
+			total_execution_time_to_send += current_operation_execution_time;
+		}
+	}
+	this -> operation_status_mutex.unlock();
+
+	std::stringstream ss;
+	ss << "total_execution_time:" << total_execution_time_to_send << ",total_lifetime:" << this -> node_timer -> current_time_in_ms() << ",sent_messages:" << MessageHelper::get_sent_messages() << ",worker:" << this -> worker_ip;
+	std::string message = ss.str();
+
+	MessageHelper::send_message(message, this -> ip_to_coordinator, "eth0", 8081);
+}
+
+void WorkerNode::send_notification_to_coordinator_of_shutdown_recuperation() {
+	std::stringstream ss;
+	ss << "reset_state" << node_timer -> time_log() << ",worker:" << this -> worker_ip << ",destination_ip:" << this -> ip_to_coordinator;
+	std::string message = ss.str();
+
+	std::cout << node_timer -> time_log() << "\033[1;34m[SHUTDOWN_RECUPERATION_THREAD]\033[0m" << "Sending notification that node has just turned on" << std::endl;
+
+	send_message_through_topology(message, this -> ip_to_coordinator);
+}
+
+void WorkerNode::send_message_through_topology(std::string message, std::string final_destination_ip) {
+	std::string next_step_ip = this -> translator -> next_step_ip_to(final_destination_ip);
+	int port = final_destination_ip == next_step_ip ? 8080 : 8082;
+
+	MessageHelper::send_message(message, next_step_ip, "eth0", port);	
 }

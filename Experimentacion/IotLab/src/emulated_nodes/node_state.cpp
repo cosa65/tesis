@@ -45,6 +45,10 @@ void NodeState::remove_task(std::string task_id_str) {
 	this -> current_tasks_set.erase(task_id_str);
 }
 
+void NodeState::remove_all_tasks() {
+	this -> current_tasks_set.clear();
+}
+
 bool NodeState::node_is_idle() {
 	bool is_performing_benchmark = this -> current_tasks_set.find("-1") != this -> current_tasks_set.end();
 	bool is_performing_only_benchmark = this -> current_tasks_set.size() == 1 && is_performing_benchmark;
@@ -69,6 +73,10 @@ double NodeState::get_node_performance() {
 
 std::string NodeState::get_node_id() {
 	return this -> node_id;
+}
+
+int NodeState::get_current_tasks_size() {
+	return this -> current_tasks_set.size();
 }
 
 bool NodeState::operator<(NodeState &e1) {

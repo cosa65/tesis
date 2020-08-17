@@ -19,6 +19,14 @@ public:
 	bool was_off_during(double start_time, double end_time);
 	bool is_connected_now(double time_point);
 
+	template <typename Function>
+	void execute_on_turning_on(Function f) {
+		for (auto interval : this -> disconnection_intervals) {
+			this -> node_timer -> sleep_until(std::get<1>(interval));
+			f();
+		}
+	}
+
 private:
 	NodeTimer *node_timer;
 	std::list< std::tuple<double, double> > disconnection_intervals;

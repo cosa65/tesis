@@ -38,10 +38,14 @@ private:
 
 	int handle_map_task(WorkerTask worker_task);
 	int run_operation(long iterations, std::string binary_name);
-	void send_local_worker_statistics();
 	std::string store_binary(std::string binary_content, std::string unique_id);
+	
+	void send_local_worker_statistics();
+	void send_notification_to_coordinator_of_shutdown_recuperation();
+	void send_message_through_topology(std::string message, std::string final_destination_ip);
 
 	bool file_exists(std::string filepath);
+
 
 	std::string worker_ip;
 	std::string ip_to_coordinator;

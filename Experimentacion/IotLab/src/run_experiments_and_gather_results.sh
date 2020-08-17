@@ -121,4 +121,9 @@ function run_experiment {
 
 # listen_for_esc_to_kill_process $$ &
 
+if [[ $1 = "fetch_result" ]]
+then
+	fetch_result
+fi
+
 run_experiment $1 $2

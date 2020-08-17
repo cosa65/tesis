@@ -31,6 +31,7 @@ public:
 		std::string get_final_destination();
 		std::string content_without_final_destination();
 		bool is_benchmark_task();
+		bool is_reset_message();
 
 		std::string content;
 		std::string sender_ipv6_address;

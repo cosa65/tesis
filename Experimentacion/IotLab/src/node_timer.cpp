@@ -33,3 +33,11 @@ double NodeTimer::now_since_epoch() {
 	auto duration = now.time_since_epoch();
 	return std::chrono::duration_cast<std::chrono::milliseconds>(duration).count();
 }
+
+void NodeTimer::sleep_until(double wake_up_time_in_ms) {
+	int sleep_time = wake_up_time_in_ms - current_time_in_ms();
+
+	if (sleep_time > 0) {
+		std::this_thread::sleep_for(std::chrono::milliseconds((long)sleep_time));
+	}
+}

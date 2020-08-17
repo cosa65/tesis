@@ -116,7 +116,6 @@ private:
 	
 	std::list<std::list<std::shared_ptr<PendingMapTask>>*> distribute_tasks_individually_and_replicate_to_fill_empty_nodes(int amount_of_partitions, std::list<std::shared_ptr<PendingMapTask>> maps_in_buckets);
 
-	
 	std::set<std::shared_ptr<PendingMapReduce>, PerformancePtrsCmp<PendingMapReduce>> pending_map_reduces;
 
 	std::set<std::shared_ptr<PendingMapReduce>, PerformancePtrsCmp<PendingMapReduce>> disabled_pending_map_reduces;
@@ -128,7 +127,7 @@ private:
 	std::priority_queue<std::shared_ptr<NodeState>, std::vector<std::shared_ptr<NodeState>>, PerformancePtrsCmp<NodeState>> idle_workers;
 	
 	// Used to aid guessing which worker to pick when resending
-	std::map<std::string, std::shared_ptr<NodeState>> efficiency_by_worker_id;
+	std::map<std::string, std::shared_ptr<NodeState>> node_states_by_worker_id;
 	long average_execution_time; 
 	int timeout;
 	bool partitioned_redundancy_mode_enabled;
@@ -142,8 +141,6 @@ private:
 
 	double *map_reduce_start_point;
 
-	// To avoid racing conditions on maps handler before finishing with initial distribution
-	std::mutex finished_initial_distribution_mutex;
 	std::mutex resend_pending_maps_mutex;
 	// Locks main thread so that all stored threads aren't lost when main thread exits
 	std::mutex finished_execution_mutex;
@@ -151,9 +148,9 @@ private:
 	// Stops map reduce from being sent until the initial benchmark has taken place (gathering information from as many nodes as possible)
 	std::mutex initial_benchmark_mutex;
 
-	std::mutex workers_and_maps_access_mutex;
-	std::mutex pending_map_reduces_mutex;
-	// PrioritiesMutex workers_and_maps_access_mutex;
+	// std::mutex workers_and_maps_access_mutex;
+	PrioritiesMutex pending_map_reduces_mutex;
+	PrioritiesMutex workers_and_maps_access_mutex;
 
 	int socket_file_descriptor;
 	std::string coordinator_ip;
@@ -165,6 +162,7 @@ private:
 
 	std::map<std::string, double> benchmark_tasks_send_times;
 	std::list<std::tuple<int, double>> finished_map_reduces_duration_times;
+	std::list<int> finished_map_reduces_str_debug;
 
 	NodeShutdownManager *node_shutdown_manager;
 	NodesDestinationTranslator *translator;

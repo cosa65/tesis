@@ -313,35 +313,8 @@ bool MessageHelper::MessageData::is_benchmark_task() {
 	return get_value_for("task_index:", this -> content) == "-1";
 }
 
-// std::string MessageHelper::MessageData::get_value_for(std::string key) {
-// 	std::string raw_message = this -> content;
+bool MessageHelper::MessageData::is_reset_message() {
+	int position = this -> content.find("reset_state");
 
-// 	std::string key_string_literal = key;
-
-// 	int key_start_with_delimiter = raw_message.find(key_string_literal);
-
-// 	if (key_start_with_delimiter == std::string::npos) {
-// 		// std::cout << "Final destination not found" << std::endl;
-// 		return "";
-// 	}
-
-// 	int value_start = key_start_with_delimiter + key_string_literal.length();
-
-// 	int value_end = raw_message.find(",", value_start);
-
-// 	if (value_end == std::string::npos) {
-// 		value_end = raw_message.length();
-// 	}
-
-// 	// This counts both as the starting position and the size at which we want to cut our raw_message
-// 	int destination_size = value_end - value_start;
-	
-// 	std::string value = raw_message.substr(value_start, destination_size);
-	
-// 	value.erase(std::remove(value.begin(), value.end(), ' '), value.end());
-
-// 	// std::string::iterator end_pos = std::remove(value.begin(), value.end(), ' ');
-// 	// value.erase(end_pos, value.end());
-
-// 	return value;
-// }
+	return position != std::string::npos;
+}
