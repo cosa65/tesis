@@ -56,7 +56,7 @@ void CoordinatorNode::start(std::list<std::string> workers, int timeout, bool pa
 	this -> node_shutdown_manager -> start();
 
 	// Begin listening before sending maps
-	auto map_results_listener_thread = std::thread([this](std::list<std::string> workers) { 
+	auto map_results_listener_thread = std::thread([this](std::list<std::string> workers) {
 		int benchmark_timeout_seconds = 10;
 		int benchmarks_left = this -> listen_for_initial_benchmarks(workers, benchmark_timeout_seconds);
 
@@ -729,20 +729,10 @@ std::map<std::string, WorkerStatistics> CoordinatorNode::listen_for_workers_stat
 	for (int i = 0; i < workers_size; i++) {
 		MessageHelper::MessageData *message_data_ptr = MessageHelper::listen_for_message(statistics_descriptor);
 		
-
-		auto message_tuple = message_data_ptr -> unpack_message("total_execution_time:", ",total_lifetime:", ",sent_messages:", ",worker:");
-		std::string total_execution_time_str = std::get<0>(message_tuple), 
-			total_lifetime_str = std::get<1>(message_tuple), 
-			sent_messages_str = std::get<2>(message_tuple), 
-			worker_ip = std::get<3>(message_tuple);
-
+		std::string worker_ip = message_data_ptr -> get_value_for(",worker:");
 		std::cout << "Received data for worker_ip: " << worker_ip << std::endl;
 
-		long total_execution_time = stol(total_execution_time_str);
-		long total_lifetime = stol(total_lifetime_str);
-		int sent_messages = stoi(sent_messages_str);
-
-		WorkerStatistics worker_statistics = WorkerStatistics(total_execution_time, total_lifetime, sent_messages);
+		WorkerStatistics worker_statistics = WorkerStatistics(message_data_ptr);
 
 		idle_times_by_worker_ip[worker_ip] = worker_statistics;
 	}
@@ -853,7 +843,15 @@ void CoordinatorNode::finish_workers_and_gather_statistics() {
 			node_performance_str = std::to_string(response_time_mean);
 		}
 
-		log_file << "Worker " << i << ", ip: " << worker_ip << ", total runtime: " << statistics.total_lifetime << ", total execution time: " << statistics.total_execution_time << ", idle time: " << percentage_idle_time << "%" << ", sent_messages: " << statistics.sent_messages << ", performance mean: " << node_performance_str << std::endl;
+		log_file << "Worker " << i << 
+		", ip: " << worker_ip << 
+		", total runtime: " << statistics.total_lifetime << 
+		", total execution time: " << statistics.total_execution_time << 
+		", idle time: " << percentage_idle_time << "%" << 
+		", sent_messages: " << statistics.sent_messages << 
+		", total_solved_tasks: " << statistics.total_solved_tasks << 
+		", pending_tasks: " << statistics.pending_tasks <<
+		", performance mean: " << node_performance_str << std::endl;
 		i++;
 	}
 

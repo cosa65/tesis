@@ -79,4 +79,6 @@ private:
 	
 	bool pending_benchmark = false;
 	std::list<WorkerTask *> pending_tasks;
+
+	int total_solved_tasks = 0;
 };

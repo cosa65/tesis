@@ -192,4 +192,3 @@ AHORA:
 					- Cuando reseteo el estado de un nodo porque se apago, como hago con los nodos que lo usaban de puente? No van a poder comunicarse pero van a estar prendidos, entonces se pierden algunos pero otros no
 
 					- Acumular cancel messages y enviarlos de a batches para evitar floodear con estos mensajes la red (o esta bien?)
-

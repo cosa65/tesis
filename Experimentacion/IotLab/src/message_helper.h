@@ -28,8 +28,10 @@ public:
 		std::tuple<std::string, std::string> unpack_message(std::string first_separator, std::string second_separator);
 		std::tuple<std::string, std::string, std::string> unpack_message(std::string first_separator, std::string second_separator, std::string third_separator);
 		std::tuple<std::string, std::string, std::string, std::string> unpack_message(std::string first_separator, std::string second_separator, std::string third_separator, std::string fourth_separator);
+		std::tuple<std::string, std::string, std::string, std::string, std::string> unpack_message(std::string first_separator, std::string second_separator, std::string third_separator, std::string fourth_separator, std::string fifth_separator);
 		std::string get_final_destination();
 		std::string content_without_final_destination();
+		std::string get_value_for(std::string key);
 		bool is_benchmark_task();
 		bool is_reset_message();
 

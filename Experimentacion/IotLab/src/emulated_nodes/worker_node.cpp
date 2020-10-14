@@ -295,6 +295,7 @@ int WorkerNode::run_operation(const long iterations, std::string binary_name) {
 
 	this -> operation_status_mutex.unlock();
 
+	this -> total_solved_tasks++;
 	return FINISHED_EXECUTION_WITHOUT_PROBLEMS;
 }
 
@@ -346,7 +347,13 @@ void WorkerNode::send_local_worker_statistics() {
 	this -> operation_status_mutex.unlock();
 
 	std::stringstream ss;
-	ss << "total_execution_time:" << total_execution_time_to_send << ",total_lifetime:" << this -> node_timer -> current_time_in_ms() << ",sent_messages:" << MessageHelper::get_sent_messages() << ",worker:" << this -> worker_ip;
+	ss << "total_execution_time:" << total_execution_time_to_send << 
+	",total_lifetime:" << this -> node_timer -> current_time_in_ms() <<
+	",sent_messages:" << MessageHelper::get_sent_messages() << 
+	",total_solved_tasks:" << this -> total_solved_tasks << 
+	",pending_tasks:" << this -> pending_tasks.size() << 
+	",worker:" << this -> worker_ip;
+
 	std::string message = ss.str();
 
 	MessageHelper::send_message(message, this -> ip_to_coordinator, "eth0", 8081);

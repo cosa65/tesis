@@ -15,8 +15,8 @@ public:
 	void remove_all_tasks();
 	bool node_is_idle();
 
-	double get_node_performance();
 	std::string get_node_id();
+	double get_node_performance();
 	int get_current_tasks_size();
 
 	bool operator<(NodeState &e1);

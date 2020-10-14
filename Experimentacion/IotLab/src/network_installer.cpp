@@ -11,6 +11,7 @@ std::map<int, std::string> NetworkInstaller::listen_for_worker_ips(int workers_s
 
 	for (int i = 0; i < workers_size; i++) {
 		MessageHelper::MessageData *message_data_ptr = MessageHelper::listen_for_message(socket_file_descriptor);
+
 		MessageHelper::MessageData message_data = *message_data_ptr;
 
 		std::cout << "Received message: " << message_data.content << " from address: " << message_data.sender_ipv6_address << " " << std::endl;

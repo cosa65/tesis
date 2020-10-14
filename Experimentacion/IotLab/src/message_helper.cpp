@@ -290,7 +290,7 @@ std::tuple<std::string, std::string, std::string, std::string> MessageHelper::Me
 }
 
 std::string MessageHelper::MessageData::get_final_destination() {
-	return get_value_for("destination_ip:", this -> content);
+	return this -> get_value_for("destination_ip:");
 }
 
 // Important: This function assumes destination_ip is the last element shown
@@ -309,8 +309,12 @@ std::string MessageHelper::MessageData::content_without_final_destination() {
 	return message;
 }
 
+std::string MessageHelper::MessageData::get_value_for(std::string key) {
+	return MessageHelper::get_value_for(key, this -> content);
+}
+
 bool MessageHelper::MessageData::is_benchmark_task() {
-	return get_value_for("task_index:", this -> content) == "-1";
+	return MessageHelper::get_value_for("task_index:", this -> content) == "-1";
 }
 
 bool MessageHelper::MessageData::is_reset_message() {
