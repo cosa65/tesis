@@ -35,6 +35,8 @@
 #include "node_state.h"
 #include "task_index.h"
 
+#include "logging/node_logging_data.h"
+
 #include "../worker_statistics.h"
 
 typedef double PointInTime;
@@ -79,7 +81,7 @@ private:
 	void resend_pending_tasks_for_map_reduce(std::shared_ptr<PendingMapReduce>pending_map_reduce_ptr);
 	void save_logs();
 
-	std::shared_ptr<PendingMapTask>add_pending_map_sent_to_worker(std::shared_ptr<PendingMapTask>pending_map_ptr, std::string worker_id);
+	std::shared_ptr<PendingMapTask> add_pending_map_sent_to_worker(std::shared_ptr<PendingMapTask>pending_map_ptr, std::string worker_id);
 	void update_worker_node_state_with_finished_task(std::string worker_id, TaskIndex task_index);
 	std::list<std::string> update_workers_states_with_cancelled_task(std::shared_ptr<PendingMapTask>finished_task);
 
@@ -155,13 +157,17 @@ private:
 	int socket_file_descriptor;
 	std::string coordinator_ip;
 
+	int amount_of_cancel_messages_sent = 0;
+
 	std::chrono::system_clock::time_point timeout_resend_time_point;
 
 	std::atomic<bool> finished;
 	std::atomic<bool> timeout_has_been_reset;
 
 	std::map<std::string, double> benchmark_tasks_send_times;
-	std::list<std::tuple<int, double>> finished_map_reduces_duration_times;
+
+	std::list<std::shared_ptr<NodeLoggingData>> finished_map_reduces_node_logging_data;
+
 	std::list<int> finished_map_reduces_str_debug;
 
 	NodeShutdownManager *node_shutdown_manager;

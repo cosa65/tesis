@@ -9,6 +9,7 @@ PendingMapReduce::PendingMapReduce(int index, int initial_threshold, int critica
 	node_timer(node_timer)
 {
 	this -> total_maps = pending_maps.size();
+	this -> original_total_maps = this -> total_maps;
 }
 
 std::list<std::shared_ptr<std::list<std::shared_ptr<PendingMapTask>>>> PendingMapReduce::get_distributed_tasks_by_bucket(int buckets_available) {
@@ -37,6 +38,10 @@ int PendingMapReduce::get_threshold() {
 
 int PendingMapReduce::get_total_maps() {
 	return this -> total_maps;
+}
+
+int PendingMapReduce::get_original_total_maps() {
+	return this -> original_total_maps;
 }
 
 int PendingMapReduce::get_criticality() {

@@ -261,7 +261,13 @@ void CoordinatorNode::handle_map_result_received(MessageHelper::MessageData mess
 		
 		this -> finished_map_reduces_str_debug.push_back(pending_map_reduce_ptr -> get_index());
 
-		this -> finished_map_reduces_duration_times.push_back({pending_map_reduce_ptr -> get_index(), execution_time});
+		std::shared_ptr<NodeLoggingData> logging_data_ptr = NodeLoggingData::from(pending_map_reduce_ptr, finish_time);
+
+		// this -> finished_map_reduces_duration_times.push_back({pending_map_reduce_ptr -> get_index(), execution_time});
+		// this -> finished_map_reduces_start_times[pending_map_reduce_ptr -> get_index()] = start_time;
+
+		
+		this -> finished_map_reduces_node_logging_data.push_back(logging_data_ptr);
 
 		remove_map_reduce_of_index(pending_map_reduce_ptr -> get_index());
 
@@ -303,6 +309,7 @@ void CoordinatorNode::handle_map_result_received(MessageHelper::MessageData mess
 
 	for (std::string worker_id : workers_to_cancel_task_on) {
 		send_cancel_message_to(task_index_str, worker_id);
+		this -> amount_of_cancel_messages_sent++;
 	}
 	
 	return;
@@ -810,12 +817,17 @@ void CoordinatorNode::finish_workers_and_gather_statistics() {
 	std::ofstream log_file(filename);
 	log_file << "Coordinator total runtime: " << this -> node_timer -> current_time_in_ms() << ", sent messages: " << sent_messages << std::endl;
 
-	log_file << "Map reduces duration times: " << std::endl;
-	for (auto duration_map_reduce_tuple : this -> finished_map_reduces_duration_times) {
-		int map_reduce_index = std::get<0>(duration_map_reduce_tuple);
-		double map_reduce_duration = std::get<1>(duration_map_reduce_tuple);
+	log_file << "Total cancel messages sent: " << this -> amount_of_cancel_messages_sent << std::endl;
 
-		log_file << "index: " << map_reduce_index << " time: " << map_reduce_duration << std::endl;
+	log_file << "Map reduces duration times: " << std::endl;
+	for (std::shared_ptr<NodeLoggingData> logging_data_ptr : this -> finished_map_reduces_node_logging_data) {
+
+		int map_reduce_index = logging_data_ptr -> index;
+		double map_reduce_start_time = logging_data_ptr -> start_time;
+		double map_reduce_duration = logging_data_ptr -> execution_time;
+		int map_reduce_map_count = logging_data_ptr -> amount_of_maps;
+
+		log_file << "index: " << map_reduce_index << ", amount of maps: " << map_reduce_map_count << ", start time: " << map_reduce_start_time << ", duration time: " << map_reduce_duration << std::endl;
 	}
 
 	log_file << std::endl << std::endl;
