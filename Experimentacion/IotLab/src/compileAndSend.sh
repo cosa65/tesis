@@ -1,3 +1,9 @@
+if [ $# -eq 0 ]
+  then
+    echo "Example to run: ./compileAndSend.sh normal default"
+		exit 1
+fi
+
 if [[ $1 == "normal" ]];
 then 
 	echo "-----------------------------------------Compiling receivingNode--------------------------------------------"
@@ -82,9 +88,11 @@ ssh fosco@strasbourg.iot-lab.info "rsync -avzhe ssh sendingNodeArm root@node-a8-
 ssh fosco@strasbourg.iot-lab.info "rsync -avzhe ssh sendingNodeArm root@node-a8-14.strasbourg.iot-lab.info:/home/root" & 
 wait
 
-network_topology_content=$(cat network_topology.txt)
-network_performance_content=$(cat network_performance.txt)
-shutdown_intervals_content=$(cat shutdown_intervals_for_all_nodes.txt)
+experiment_directory_pathto="../experiments/$2"
+
+network_topology_content=$(cat ${experiment_directory_pathto}/network_topology.txt)
+network_performance_content=$(cat ${experiment_directory_pathto}/network_performance.txt)
+shutdown_intervals_content=$(cat ${experiment_directory_pathto}/shutdown_intervals_for_all_nodes.txt)
 
 if [[ $1 == "normal" ]];
 then 
@@ -97,6 +105,11 @@ fi
 function execute_sender_number_with_disconnection_line {
 	sender_command="echo '\"'${shutdown_intervals_content}'\"' > shutdown_intervals_for_all_nodes.txt | ip addr show eth0 scope global | sed -e'\''s/^.*inet6 \([^ ]*\)\/.*$/\1/;t;d'\'' | xargs -I{} ./sendingNodeArm {} ${3}"
 	gnome-terminal --tab -- bash -c "ssh -t -oStrictHostKeyChecking=no fosco@${1}.iot-lab.info 'ssh -t root@node-${2} \"${sender_command}; bash\" '"
+}
+
+function fetch_results {
+	ssh fosco@saclay.iot-lab.info "rsync -avzhe ssh root@node-a8-1.saclay.iot-lab.info:/home/root/workers_logs.txt workers_logs.txt"
+	rsync -avzhe ssh fosco@saclay.iot-lab.info:/senslab/users/fosco/workers_logs.txt workers_logs.txt
 }
 
 # function execute_sender_number_with_disconnection_line_debug {

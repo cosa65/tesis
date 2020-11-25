@@ -1,0 +1,46 @@
+Coordinator total runtime: 1.36458e+06, sent messages: 5335
+Total cancel messages sent: 1312
+Map reduces duration times: 
+index: 3, amount of maps: 10, start time: 6, duration time: 43488
+index: 2, amount of maps: 10, start time: 6, duration time: 51293
+index: 0, amount of maps: 10, start time: -1, duration time: 52944
+index: 5, amount of maps: 10, start time: 30000, duration time: 24061
+index: 1, amount of maps: 100, start time: 4, duration time: 56224
+index: 6, amount of maps: 10, start time: 34999, duration time: 25509
+index: 7, amount of maps: 10, start time: 39998, duration time: 27134
+index: 9, amount of maps: 10, start time: 50000, duration time: 18227
+index: 10, amount of maps: 10, start time: 50005, duration time: 25313
+index: 8, amount of maps: 10, start time: 40005, duration time: 36374
+index: 4, amount of maps: 70, start time: 29997, duration time: 56719
+
+
+Map reduces: index: 3 2 0 5 1 6 7 9 10 8 4 
+
+Worker 2, ip: 2001:660:3207:400::2, total runtime: 1, total execution time: 77631, idle time: -7.763e+06%, sent_messages: 157, total_solved_tasks: 155, pending_tasks: 0, performance mean: 383.000000
+Worker 3, ip: 2001:660:3207:400::3, total runtime: 1, total execution time: 83340, idle time: -8.3339e+06%, sent_messages: 328, total_solved_tasks: 170, pending_tasks: 0, performance mean: 346.000000
+Worker 4, ip: 2001:660:3207:400::16, total runtime: 1, total execution time: 76087, idle time: -7.6086e+06%, sent_messages: 491, total_solved_tasks: 161, pending_tasks: 0, performance mean: 353.000000
+Worker 5, ip: 2001:660:3207:400::5, total runtime: 1, total execution time: 73350, idle time: -7.3349e+06%, sent_messages: 154, total_solved_tasks: 152, pending_tasks: 0, performance mean: 319.000000
+Worker 6, ip: 2001:660:3207:400::6, total runtime: 1, total execution time: 75202, idle time: -7.5201e+06%, sent_messages: 156, total_solved_tasks: 154, pending_tasks: 0, performance mean: 217.000000
+Worker 7, ip: 2001:660:3207:400::7, total runtime: 1, total execution time: 69997, idle time: -6.9996e+06%, sent_messages: 163, total_solved_tasks: 161, pending_tasks: 0, performance mean: 312.000000
+Worker 8, ip: 2001:660:3207:400::9, total runtime: 1, total execution time: 76975, idle time: -7.6974e+06%, sent_messages: 157, total_solved_tasks: 155, pending_tasks: 0, performance mean: 318.000000
+Worker 9, ip: 2001:660:3207:400::a, total runtime: 1, total execution time: 72016, idle time: -7.2015e+06%, sent_messages: 153, total_solved_tasks: 151, pending_tasks: 0, performance mean: 313.000000
+Worker 10, ip: 2001:660:3207:400::b, total runtime: 1, total execution time: 94734, idle time: -9.4733e+06%, sent_messages: 137, total_solved_tasks: 135, pending_tasks: 0, performance mean: 377.000000
+Worker 11, ip: 2001:660:3207:400::c, total runtime: 1, total execution time: 137865, idle time: -1.37864e+07%, sent_messages: 141, total_solved_tasks: 140, pending_tasks: 0, performance mean: 382.000000
+Worker 12, ip: 2001:660:3207:400::d, total runtime: 1, total execution time: 133748, idle time: -1.33747e+07%, sent_messages: 144, total_solved_tasks: 143, pending_tasks: 0, performance mean: 368.000000
+Worker 13, ip: 2001:660:3207:400::18, total runtime: 1, total execution time: 130467, idle time: -1.30466e+07%, sent_messages: 147, total_solved_tasks: 146, pending_tasks: 0, performance mean: 377.000000
+Worker 14, ip: 2001:660:3207:400::10, total runtime: 1, total execution time: 123712, idle time: -1.23711e+07%, sent_messages: 816, total_solved_tasks: 155, pending_tasks: 0, performance mean: 390.000000
+Worker 15, ip: 2001:660:3207:400::11, total runtime: 1, total execution time: 128637, idle time: -1.28636e+07%, sent_messages: 146, total_solved_tasks: 145, pending_tasks: 0, performance mean: 369.000000
+Worker 16, ip: 2001:660:3207:400::12, total runtime: 1, total execution time: 134727, idle time: -1.34726e+07%, sent_messages: 154, total_solved_tasks: 153, pending_tasks: 0, performance mean: 381.000000
+Worker 17, ip: 2001:660:3207:400::13, total runtime: 1, total execution time: 144435, idle time: -1.44434e+07%, sent_messages: 147, total_solved_tasks: 146, pending_tasks: 0, performance mean: 383.000000
+Worker 18, ip: 2001:660:3207:400::14, total runtime: 1, total execution time: 130742, idle time: -1.30741e+07%, sent_messages: 145, total_solved_tasks: 144, pending_tasks: 0, performance mean: 383.000000
+Worker 19, ip: 2001:660:3207:400::15, total runtime: 1, total execution time: 130947, idle time: -1.30946e+07%, sent_messages: 143, total_solved_tasks: 142, pending_tasks: 0, performance mean: 383.000000
+Worker 20, ip: 2001:660:3207:400::17, total runtime: 1, total execution time: 120173, idle time: -1.20172e+07%, sent_messages: 144, total_solved_tasks: 143, pending_tasks: 0, performance mean: 382.000000
+Worker 21, ip: 2001:660:4701:f080::1, total runtime: 1, total execution time: 133509, idle time: -1.33508e+07%, sent_messages: 149, total_solved_tasks: 148, pending_tasks: 0, performance mean: 397.000000
+Worker 22, ip: 2001:660:4701:f080::2, total runtime: 1, total execution time: 1, idle time: 0%, sent_messages: 1, total_solved_tasks: 0, pending_tasks: 5, performance mean: 121.000000
+Worker 23, ip: 2001:660:4701:f080::3, total runtime: 1, total execution time: 1, idle time: 0%, sent_messages: 1, total_solved_tasks: 0, pending_tasks: 7, performance mean: 18.000000
+Worker 24, ip: 2001:660:4701:f080::4, total runtime: 1, total execution time: 1, idle time: 0%, sent_messages: 1, total_solved_tasks: 0, pending_tasks: 7, performance mean: 21.000000
+Worker 25, ip: 2001:660:4701:f080::7, total runtime: 1, total execution time: 1, idle time: 0%, sent_messages: 1, total_solved_tasks: 0, pending_tasks: 6, performance mean: 27.000000
+Worker 26, ip: 2001:660:4701:f080::8, total runtime: 1, total execution time: 1, idle time: 0%, sent_messages: 1, total_solved_tasks: 0, pending_tasks: 9, performance mean: 29.000000
+Worker 27, ip: 2001:660:4701:f080::9, total runtime: 1, total execution time: 1, idle time: 0%, sent_messages: 1, total_solved_tasks: 0, pending_tasks: 7, performance mean: 33.000000
+Worker 28, ip: 2001:660:4701:f080::b, total runtime: 1, total execution time: 1, idle time: 0%, sent_messages: 1, total_solved_tasks: 0, pending_tasks: 4, performance mean: 38.000000
+Worker 29, ip: 2001:660:4701:f080::c, total runtime: 1, total execution time: 1, idle time: 0%, sent_messages: 1, total_solved_tasks: 0, pending_tasks: 4, performance mean: 43.000000
