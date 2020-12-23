@@ -6,7 +6,7 @@
 #define VERBOSE "verbose"
 #define SILENT "silent"
 
-int run_operation(const long iterations, NodeTimer *node_timer, std::string verbosity) {
+int run_operation(const long performance_multiplier, const long iterations, NodeTimer *node_timer, std::string verbosity) {
 	if (verbosity == VERBOSE) {
 		std::cout << node_timer -> time_log() << "----------------------------RUNNING OPERATION----------------------------" << std::endl;
 	}
@@ -14,9 +14,14 @@ int run_operation(const long iterations, NodeTimer *node_timer, std::string verb
 	double start_time = node_timer -> current_time_in_ms();
 	int a;
 
-	for (int j = 0; j < 1000000; j++) {
-		for (int i = 0; i < iterations; i++) {
-			a = i * 20 + 100;
+	float number = 1.5;
+
+	for (int z = 0; z < performance_multiplier; z++) {
+		for (int j = 0; j < 10000; j++) {
+			for (long i = 0; i < iterations; i++) {
+				number*=number;
+			}
+			number = 0;
 		}
 	}
 
@@ -37,12 +42,13 @@ int run_operation(const long iterations, NodeTimer *node_timer, std::string verb
 
 int main(int argc, char *argv[]) {
 	long iterations = std::stol(argv[1]);
-	std::string verbosity = argv[2];
+	long performance_multiplier = std::stol(argv[2]);
+	std::string verbosity = argv[3];
 
 	NodeTimer *node_timer = new NodeTimer();
 	node_timer -> start();
 
-	int result = run_operation(iterations, node_timer, verbosity);
+	int result = run_operation(iterations, performance_multiplier, node_timer, verbosity);
 
 	return 0;
 }

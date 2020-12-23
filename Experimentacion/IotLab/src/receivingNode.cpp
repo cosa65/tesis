@@ -57,9 +57,33 @@ std::string begin_handler_for_role_receipt(
 			600,200,300,400,500,600,700,800,900,100
 		};
 
-		std::list<long> map_tasks_in_flops_1 = { 600,200,300,400,500,600,700,800,900,100 };
-		std::list<long> map_tasks_in_flops_2 = { 600,200,300,400,500,600,700,800,900,100 };
-		std::list<long> map_tasks_in_flops_3 = { 600,200,300,400,500,600,700,800,900,100 };
+		// std::list<long> map_tasks_in_flops_1 = { 600,200,300,400,500,600,700,800,900,100 };
+		// std::list<long> map_tasks_in_flops_2 = { 600,200,300,400,500,600,700,800,900,100 };
+		// std::list<long> map_tasks_in_flops_3 = { 600,200,300,400,500,600,700,800,900,100 };
+
+		std::list<long> map_tasks_in_flops_1 = { 
+			600,200,300,400,500,600,700,800,900,100
+		};
+
+		std::list<long> map_tasks_in_flops_2 = { 
+		600,200,300,400,500,600,700,800,900,100,
+			150,100,110,120,130,140,150,100,110,120,
+			600,200,300,400,500,600,700,800,900,100,
+			110,120,130,140,150,100,110,120,130,140,
+			150,100,110,120,130,140,150,100,110,120,
+			600,200,300,400,500,600,700,800,900,100,
+			600,200,300,400,500,600,700,800,900,100,
+		};
+		std::list<long> map_tasks_in_flops_3 = { 
+		600,200,300,400,500,600,700,800,900,100,
+			150,100,110,120,130,140,150,100,110,120,
+			600,200,300,400,500,600,700,800,900,100,
+			110,120,130,140,150,100,110,120,130,140,
+			150,100,110,120,130,140,150,100,110,120,
+			600,200,300,400,500,600,700,800,900,100,
+			600,200,300,400,500,600,700,800,900,100,
+		};
+
 		std::list<long> map_tasks_in_flops_4 = { 600,200,300,400,500,600,700,800,900,100 };
 		std::list<long> map_tasks_in_flops_5 = { 
 		600,200,300,400,500,600,700,800,900,100,
@@ -91,47 +115,49 @@ std::string begin_handler_for_role_receipt(
 		
 		auto distribute_0 = std::thread([&](){ coordinator.distribute_and_send_maps(initial_threshold, 1, map_tasks_in_flops); });
 		auto distribute_1 = std::thread([&](){ coordinator.distribute_and_send_maps(initial_threshold, 1, map_tasks_in_flops_1); });
-		auto distribute_2 = std::thread([&](){ coordinator.distribute_and_send_maps(initial_threshold, 1, map_tasks_in_flops_2); });
-		auto distribute_3 = std::thread([&](){ coordinator.distribute_and_send_maps(initial_threshold, 1, map_tasks_in_flops_3); });
 
 		int period_in_seconds = 30;
 		auto period = std::chrono::seconds(period_in_seconds);
 		std::this_thread::sleep_for(period);
 
-		auto distribute_4 = std::thread([&](){ coordinator.distribute_and_send_maps(initial_threshold, 1, map_tasks_in_flops_4); });
-		auto distribute_5 = std::thread([&](){ coordinator.distribute_and_send_maps(initial_threshold, 1, map_tasks_in_flops_5); });
+		auto distribute_2 = std::thread([&](){ coordinator.distribute_and_send_maps(initial_threshold, 1, map_tasks_in_flops_2); });
+		auto distribute_3 = std::thread([&](){ coordinator.distribute_and_send_maps(initial_threshold, 1, map_tasks_in_flops_3); });
 
-		period_in_seconds = 5;
-		period = std::chrono::seconds(period_in_seconds);
-		std::this_thread::sleep_for(period);
 
-		auto distribute_6 = std::thread([&](){ coordinator.distribute_and_send_maps(initial_threshold, 1, map_tasks_in_flops_6); });
+		// auto distribute_4 = std::thread([&](){ coordinator.distribute_and_send_maps(initial_threshold, 1, map_tasks_in_flops_4); });
+		// auto distribute_5 = std::thread([&](){ coordinator.distribute_and_send_maps(initial_threshold, 1, map_tasks_in_flops_5); });
 
-		period_in_seconds = 5;
-		period = std::chrono::seconds(period_in_seconds);
-		std::this_thread::sleep_for(period);
+		// period_in_seconds = 5;
+		// period = std::chrono::seconds(period_in_seconds);
+		// std::this_thread::sleep_for(period);
 
-		auto distribute_7 = std::thread([&](){ coordinator.distribute_and_send_maps(initial_threshold, 1, map_tasks_in_flops_7); });
-		auto distribute_8 = std::thread([&](){ coordinator.distribute_and_send_maps(initial_threshold, 1, map_tasks_in_flops_8); });
+		// auto distribute_6 = std::thread([&](){ coordinator.distribute_and_send_maps(initial_threshold, 1, map_tasks_in_flops_6); });
 
-		period_in_seconds = 10;
-		period = std::chrono::seconds(period_in_seconds);
-		std::this_thread::sleep_for(period);
+		// period_in_seconds = 5;
+		// period = std::chrono::seconds(period_in_seconds);
+		// std::this_thread::sleep_for(period);
 
-		auto distribute_9 = std::thread([&](){ coordinator.distribute_and_send_maps(initial_threshold, 1, map_tasks_in_flops_9); });
-		auto distribute_10 = std::thread([&](){ coordinator.distribute_and_send_maps(initial_threshold, 1, map_tasks_in_flops_10); });
+		// auto distribute_7 = std::thread([&](){ coordinator.distribute_and_send_maps(initial_threshold, 1, map_tasks_in_flops_7); });
+		// auto distribute_8 = std::thread([&](){ coordinator.distribute_and_send_maps(initial_threshold, 1, map_tasks_in_flops_8); });
+
+		// period_in_seconds = 10;
+		// period = std::chrono::seconds(period_in_seconds);
+		// std::this_thread::sleep_for(period);
+
+		// auto distribute_9 = std::thread([&](){ coordinator.distribute_and_send_maps(initial_threshold, 1, map_tasks_in_flops_9); });
+		// auto distribute_10 = std::thread([&](){ coordinator.distribute_and_send_maps(initial_threshold, 1, map_tasks_in_flops_10); });
 
 		distribute_0.join();
 		distribute_1.join();
 		distribute_2.join();
 		distribute_3.join();
-		distribute_4.join();
-		distribute_5.join();
-		distribute_6.join();
-		distribute_7.join();
-		distribute_8.join();
-		distribute_9.join();
-		distribute_10.join();
+		// distribute_4.join();
+		// distribute_5.join();
+		// distribute_6.join();
+		// distribute_7.join();
+		// distribute_8.join();
+		// distribute_9.join();
+		// distribute_10.join();
 
 		coordinator_thread.join();
 	} else {
@@ -170,12 +196,14 @@ int main(int argc, char *argv[]) {
 
 	std::string network_coordinator_ipv6 = "2001:660:3207:400::1";
 	std::string network_coordinator_interface = "eth0";
+	
 	int socket_file_descriptor = MessageHelper::bind_listen(network_coordinator_ipv6, network_coordinator_interface, 8080);
 	int node_setup_file_descriptor = MessageHelper::bind_listen(network_coordinator_ipv6, network_coordinator_interface, 8085);
+	int node_installer_file_descriptor = MessageHelper::bind_listen(network_coordinator_ipv6, network_coordinator_interface, 8086);
 
 	NetworkInstaller network_installer = NetworkInstaller(network_coordinator_ipv6, network_coordinator_interface);
 
-	std::map<int, std::string> index_to_ip_map = network_installer.listen_for_worker_ips(amount_of_worker_nodes, node_setup_file_descriptor);
+	std::map<int, std::string> index_to_ip_map = network_installer.listen_for_worker_ips(amount_of_worker_nodes, node_installer_file_descriptor);
 	
 	NodesDestinationTranslator *translator = new NodesDestinationTranslator();
 	std::vector<std::string> nodes_connections = translator -> load_network_topology_from_file(1, index_to_ip_map, network_coordinator_ipv6);

@@ -32,9 +32,10 @@ ssh fosco@strasbourg.iot-lab.info "rsync -avzhe ssh sequentialMapReduce root@nod
 ssh fosco@strasbourg.iot-lab.info "rsync -avzhe ssh sequentialMapReduce root@node-a8-5.strasbourg.iot-lab.info:/home/root" & 
 wait
 
+iterations=100
+multiplier=100
 function execute_sequential_map_reduce {
-	# gnome-terminal --tab -- bash -c "ssh -t -oStrictHostKeyChecking=no fosco@${1}.iot-lab.info 'ssh -t root@node-a8-${2}.${1}.iot-lab.info ./sequentialMapReduce 11000 verbose; bash '"
-	gnome-terminal --tab -- bash -c "ssh -t -oStrictHostKeyChecking=no fosco@${1}.iot-lab.info 'ssh -t root@node-a8-${2}.${1}.iot-lab.info ./sequentialMapReduce; bash '"
+	gnome-terminal --tab -- bash -c "ssh -t -oStrictHostKeyChecking=no fosco@${1}.iot-lab.info 'ssh -t root@node-a8-${2}.${1}.iot-lab.info ./sequentialMapReduce ${iterations} ${multiplier} verbose; bash '"
 }
 
 execute_sequential_map_reduce saclay 1

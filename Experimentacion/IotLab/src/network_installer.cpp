@@ -9,7 +9,9 @@ NetworkInstaller::NetworkInstaller(std::string network_organizer_ipv6, std::stri
 std::map<int, std::string> NetworkInstaller::listen_for_worker_ips(int workers_size, int socket_file_descriptor) {
 	std::map<int, std::string> workers_index_to_ip_map;
 
-	for (int i = 0; i < workers_size; i++) {
+	int workers_left = workers_size;
+
+	while (workers_left) {
 		MessageHelper::MessageData *message_data_ptr = MessageHelper::listen_for_message(socket_file_descriptor);
 
 		MessageHelper::MessageData message_data = *message_data_ptr;
@@ -22,8 +24,13 @@ std::map<int, std::string> NetworkInstaller::listen_for_worker_ips(int workers_s
 
 		int node_line_number = stoi(node_line_number_str);
 
-		// Add 1 because the node with index 1 is the coordinator
-		workers_index_to_ip_map[node_line_number] = ip;
+		// -2 because the workers are indexed from 2 
+		if (node_line_number - 2 < workers_size) {
+			workers_index_to_ip_map[node_line_number] = ip;
+			workers_left--;
+		} else {
+			std::cout << "Rejected node of index: " << node_line_number << std::endl;
+		}
 	}
 
 	std::cout << "Received all workers! I have now " << workers_index_to_ip_map.size() << " workers available" << std::endl;
@@ -62,7 +69,6 @@ void NetworkInstaller::create_network_and_send_links(std::vector<std::string> co
 
 	std::string worker_ips_split_by_space = MessageHelper::concatenate_with_separator(worker_ips, " ");
 
-// std::copy(strings_list.begin(), strings_list.end(), std::ostream_iterator<std::string>(std::cout, "\n"));
 	MessageHelper::send_message("role:coordinator,ip:" + worker_ips_split_by_space + ",ip_translations:" + connections_as_index[0], this -> network_organizer_ipv6, this -> network_organizer_interface, 8085);
 }
 

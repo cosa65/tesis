@@ -131,24 +131,6 @@ void CoordinatorNode::distribute_and_send_maps(int initial_threshold, int critic
 	this -> pending_map_reduces_by_index[new_pending_map_reduce_ptr -> get_index()] = new_pending_map_reduce_ptr;
 	this -> pending_map_reduces.insert(new_pending_map_reduce_ptr);	
 
- 	// if (this -> idle_workers.size() > 0) {
-		// std::list<std::shared_ptr<std::list<std::shared_ptr<PendingMapTask>>>> tasks_by_bucket = new_pending_map_reduce_ptr -> get_distributed_tasks_by_bucket(this -> idle_workers.size());
-
-		// std::cout << node_timer -> time_log() << "tasks_by_bucket" << std::endl;
-		// for (auto tasks_by_bucket : tasks_by_bucket) {
-		// 	for (auto task : *tasks_by_bucket) {
-		// 		std::cout << task << ", ";
-		// 	}
-		// 	std::cout << std::endl;
-		// }
-
-		// std::string binary_buffer = get_map_binary();
-
-		// send_bucketed_tasks_to_available_workers(tasks_by_bucket);
- 	// } else {
- 	// 	// store_map_reduce_as_pending(new_pending_map_reduce_ptr);
- 	// }
-
  	std::cout << "pending map reduce added: " << new_pending_map_reduce_ptr -> get_index() << std::endl;
 
  	std::cout << "pending_map_reduces post add: [ ";
@@ -196,9 +178,9 @@ void CoordinatorNode::handle_map_result_received(MessageHelper::MessageData mess
 	int pending_maps_size;
 	std::list<std::string> workers_to_cancel_task_on;
 
-	std::cout << "pending_map_reduces before update: [ ";
+	std::cout << "pending_map_reduces before update: [ " << std::endl;
 	for (auto mr : this -> pending_map_reduces) { 
-		std::cout << mr << " index: [" << mr -> get_index() << "] size: " << mr -> get_pending_maps_size() << ", ";
+		std::cout << "    " << mr << "| index: " << mr -> get_index() << "| size: " << mr -> get_pending_maps_size() << "| priority: " << mr -> get_priority() << ", " << std::endl;
 	}
 	std::cout << "]" << std::endl;
 

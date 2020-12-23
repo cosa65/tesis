@@ -85,8 +85,10 @@ void WorkerNode::start(int socket_file_descriptor, int tasks_resend_socket_file_
 
 		if (op_result == SHUTDOWN_DURING_EXECUTION) {
 			this -> pending_tasks.erase(this -> pending_tasks.begin(), this -> pending_tasks.end());
+			this -> pending_tasks_indexes_set.clear();
 		}
 
+		this -> pending_tasks_indexes_set.erase(current_task->task_index);
 		delete current_task;
 	}
 }
@@ -185,7 +187,6 @@ void WorkerNode::tasks_for_host_listener(int socket_file_descriptor) {
 
 		pending_tasks_access_mutex.lock();
 		{
-
 			// If the main thread is asleep (waiting on waiting_for_pending_tasks_mutex_signal), then unlock the mutex to wake it up, otherwise don't do anything
 			if (this -> main_thread_waiting_on_new_tasks.load()) {
 				std::cout << node_timer -> time_log() << "\033[1;32m[TASKS_FOR_HOST_THREAD]\033[0m" << "Waking main thread up" << std::endl;
@@ -195,7 +196,6 @@ void WorkerNode::tasks_for_host_listener(int socket_file_descriptor) {
 			std::list<WorkerTask *> new_worker_tasks = WorkerTask::string_to_worker_tasks(tasks_str, "map_task"/*binary_name*/);
 
 			std::cout << node_timer -> time_log() << "\033[1;32m[TASKS_FOR_HOST_THREAD]\033[0m" << "Adding new tasks" << std::endl;
-
 
 			bool is_benchmark_task = new_worker_tasks.front() -> task_index == "-1";
 
@@ -210,10 +210,14 @@ void WorkerNode::tasks_for_host_listener(int socket_file_descriptor) {
 				this -> pending_benchmark = true;
 			}
 
-			this -> pending_tasks.splice(this -> pending_tasks.end(), new_worker_tasks);
+			for (auto new_worker_task : new_worker_tasks) {
+				int task_already_queued = this -> pending_tasks_indexes_set.count(new_worker_task->task_index);
 
-			// Once we use this instead of splice, we need to make sure new_worker_tasks is already ordered by criticality
-			// this -> pending_tasks.merge(new_worker_tasks, criticality_comparator);
+				if (!task_already_queued) {
+					this -> pending_tasks.push_back(new_worker_task);
+					this -> pending_tasks_indexes_set.insert(new_worker_task->task_index);
+				}
+			}
 		}
 
 		std::cout << "\033[1;32m[TASKS_FOR_HOST_THREAD]\033[0m" << "pending_tasks_access_mutex.unlock()" << std::endl;

@@ -80,8 +80,8 @@ ssh fosco@strasbourg.iot-lab.info "rsync -avzhe ssh sendingNodeArm root@node-a8-
 ssh fosco@strasbourg.iot-lab.info "rsync -avzhe ssh sendingNodeArm root@node-a8-8.strasbourg.iot-lab.info:/home/root" & 
 wait
 ssh fosco@strasbourg.iot-lab.info "rsync -avzhe ssh sendingNodeArm root@node-a8-9.strasbourg.iot-lab.info:/home/root" & 
-ssh fosco@strasbourg.iot-lab.info "rsync -avzhe ssh sendingNodeArm root@node-a8-10.strasbourg.iot-lab.info:/home/root" & 
-ssh fosco@strasbourg.iot-lab.info "rsync -avzhe ssh sendingNodeArm root@node-a8-11.strasbourg.iot-lab.info:/home/root" & 
+# ssh fosco@strasbourg.iot-lab.info "rsync -avzhe ssh sendingNodeArm root@node-a8-10.strasbourg.iot-lab.info:/home/root" & 
+# ssh fosco@strasbourg.iot-lab.info "rsync -avzhe ssh sendingNodeArm root@node-a8-11.strasbourg.iot-lab.info:/home/root" & 
 wait
 ssh fosco@strasbourg.iot-lab.info "rsync -avzhe ssh sendingNodeArm root@node-a8-12.strasbourg.iot-lab.info:/home/root" & 
 ssh fosco@strasbourg.iot-lab.info "rsync -avzhe ssh sendingNodeArm root@node-a8-13.strasbourg.iot-lab.info:/home/root" & 
@@ -96,9 +96,9 @@ shutdown_intervals_content=$(cat ${experiment_directory_pathto}/shutdown_interva
 
 if [[ $1 == "normal" ]];
 then 
-	gnome-terminal --tab -- bash -c "ssh -t fosco@saclay.iot-lab.info 'ssh -t root@node-a8-1.saclay.iot-lab.info \"echo '\"'${shutdown_intervals_content}'\"' > shutdown_intervals_for_all_nodes.txt; echo '\"'${network_topology_content}'\"' > network_topology.txt; echo '\"'${network_performance_content}'\"' > network_performance.txt; ./receivingNodeArm 28 1; bash\" '";
+	gnome-terminal --tab -- bash -c "ssh -t fosco@saclay.iot-lab.info 'ssh -t root@node-a8-1.saclay.iot-lab.info \"echo '\"'${shutdown_intervals_content}'\"' > shutdown_intervals_for_all_nodes.txt; echo '\"'${network_topology_content}'\"' > network_topology.txt; echo '\"'${network_performance_content}'\"' > network_performance.txt; ./receivingNodeArm 18 1; bash\" '";
 else
-	gnome-terminal --tab -- bash -c "ssh -t fosco@saclay.iot-lab.info 'ssh -t root@node-a8-1.saclay.iot-lab.info \"echo '\"'${shutdown_intervals_content}'\"' > shutdown_intervals_for_all_nodes.txt; echo '\"'${network_topology_content}'\"' > network_topology.txt; echo '\"'${network_performance_content}'\"' > network_performance.txt; gdb --args receivingNodeArm 28 1; bash\" '";
+	gnome-terminal --tab -- bash -c "ssh -t fosco@saclay.iot-lab.info 'ssh -t root@node-a8-1.saclay.iot-lab.info \"echo '\"'${shutdown_intervals_content}'\"' > shutdown_intervals_for_all_nodes.txt; echo '\"'${network_topology_content}'\"' > network_topology.txt; echo '\"'${network_performance_content}'\"' > network_performance.txt; gdb --args receivingNodeArm 18 1; bash\" '";
 fi
 
 
@@ -177,7 +177,7 @@ execute_sender_number_with_disconnection_line strasbourg a8-8.strasbourg.iot-lab
 sleep 5
 execute_sender_number_with_disconnection_line strasbourg a8-9.strasbourg.iot-lab.info 27
 # execute_sender_number_with_disconnection_line strasbourg a8-10.strasbourg.iot-lab.info 27
-execute_sender_number_with_disconnection_line strasbourg a8-11.strasbourg.iot-lab.info 28
+# execute_sender_number_with_disconnection_line strasbourg a8-11.strasbourg.iot-lab.info 28
 execute_sender_number_with_disconnection_line strasbourg a8-12.strasbourg.iot-lab.info 29
 # execute_sender_number_with_disconnection_line strasbourg a8-13.strasbourg.iot-lab.info 28
 # execute_sender_number_with_disconnection_line strasbourg a8-14.strasbourg.iot-lab.info 28

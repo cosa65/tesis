@@ -2,15 +2,12 @@
 #include <iostream>
 
 int main(int argc, char *argv[]) {
-	std::cout << "Line 1" << std::endl;
+	std::cout << "Task started" << std::endl;
 	
 	int iterations = std::stoi(argv[1]);
-	std::cout << "Line 2" << std::endl;
-	
 	int performance_multiplier = std::stoi(argv[2]);
-	std::cout << "Line 3" << std::endl;
-	
-	std::cout << "Line 4" << std::endl;
+
+	std::cout << "Iterations: " << iterations << ", performance_multiplier: " << performance_multiplier << std::endl;
 
 	float number = 1.5;
 

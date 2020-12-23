@@ -1,5 +1,7 @@
 #include <unistd.h>
 #include <string>
+#include <thread>
+#include <chrono>
 
 #include "node_timer.h"
 #include "log_keeper.h"
@@ -7,7 +9,6 @@
 #include "node_shutdown_manager.h"
 #include "emulated_nodes/coordinator_node.h"
 #include "emulated_nodes/worker_node.h"
-
 
 const char *network_organizer_ipv6 = "2001:660:3207:400::1";
 const char *network_organizer_interface = "eth0";
@@ -34,7 +35,7 @@ int main(int argc, char *argv[]) {
 
 	sleep(10);
 
-	MessageHelper::send_message(content, network_organizer_ipv6, network_organizer_interface, 8085);
+	MessageHelper::send_message(content, network_organizer_ipv6, network_organizer_interface, 8086);
 
 	int socket_file_descriptor = MessageHelper::bind_listen(host_ip, "eth0", 8080);
 	int node_setup_file_descriptor = MessageHelper::bind_listen(host_ip, "eth0", 8085);
@@ -53,6 +54,10 @@ int main(int argc, char *argv[]) {
 	int performance = std::stoi(performance_str);
 
 	if (role == "worker") {
+		int period_in_seconds = 30;
+		auto period = std::chrono::seconds(period_in_seconds);
+		std::this_thread::sleep_for(period);
+
 		// ip is the address to which to send the responses to coordinator
 		WorkerNode worker(ip, host_ip, performance, node_shutdown_manager, translator, log_keeper, node_timer);
 

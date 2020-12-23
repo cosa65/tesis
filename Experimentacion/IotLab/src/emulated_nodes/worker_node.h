@@ -4,6 +4,7 @@
 #include <iostream>
 #include <fstream>
 
+#include <set>
 #include <list>
 #include <vector>
 
@@ -78,7 +79,10 @@ private:
 	PrioritiesMutex pending_tasks_access_mutex;
 	
 	bool pending_benchmark = false;
+
 	std::list<WorkerTask *> pending_tasks;
+	// Set is used to check whether avoid adding repeated tasks to work queue
+	std::set<std::string> pending_tasks_indexes_set;
 
 	int total_solved_tasks = 0;
 };
